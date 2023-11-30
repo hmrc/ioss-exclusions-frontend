@@ -19,3 +19,8 @@ GET         /account/sign-out                            controllers.auth.AuthCo
 GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad
 
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad
+
+GET        /movedToADifferentCountry                        controllers.MovedToADifferentCountryController.onPageLoad(mode: Mode = NormalMode)
+POST       /movedToADifferentCountry                        controllers.MovedToADifferentCountryController.onSubmit(mode: Mode = NormalMode)
+GET        /changeMovedToADifferentCountry                  controllers.MovedToADifferentCountryController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeMovedToADifferentCountry                  controllers.MovedToADifferentCountryController.onSubmit(mode: Mode = CheckMode)
