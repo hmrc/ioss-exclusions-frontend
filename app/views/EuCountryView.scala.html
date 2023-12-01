@@ -14,6 +14,9 @@
  * limitations under the License.
  *@
 
+@import controllers.routes
+@import pages.EuCountryPage
+@import viewmodels.InputWidth
 @import views.html.components.ButtonGroup
 
 @this(
@@ -44,6 +47,6 @@
             .withCssClass("autocomplete")
         )
 
-        @button("site.continue", EuCountryPage().route(waypoints).url, waypoints)
+        @button("site.continue", EuCountryPage.route(waypoints).url, waypoints)
     }
 }

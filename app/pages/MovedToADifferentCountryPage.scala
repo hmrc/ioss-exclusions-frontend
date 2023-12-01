@@ -16,11 +16,19 @@
 
 package pages
 
+import controllers.routes
+import models.UserAnswers
 import play.api.libs.json.JsPath
+import play.api.mvc.Call
 
 case object MovedToADifferentCountryPage extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "movedToADifferentCountry"
+
+  override def route(waypoints: Waypoints): Call =
+    routes.MovedToADifferentCountryController.onPageLoad(waypoints)
+
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = ???
 }

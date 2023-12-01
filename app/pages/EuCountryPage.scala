@@ -21,7 +21,7 @@ import models.{Country, UserAnswers}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
-case class EuCountryPage() extends QuestionPage[Country] {
+case object EuCountryPage extends QuestionPage[Country] {
 
   override def path: JsPath = JsPath \ "euCountryDetails" \ toString
 

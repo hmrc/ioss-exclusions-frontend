@@ -67,7 +67,7 @@ trait Page {
     nextPageNormalMode(waypoints, updatedAnswers)
 
   protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    JourneyRecoveryPage
+    this //JourneyRecoveryPage
 
   def route(waypoints: Waypoints): Call
 

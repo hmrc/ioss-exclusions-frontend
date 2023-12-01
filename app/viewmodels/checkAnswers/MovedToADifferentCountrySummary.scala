@@ -17,8 +17,8 @@
 package viewmodels.checkAnswers
 
 import controllers.routes
-import models.{CheckMode, UserAnswers}
-import pages.MovedToADifferentCountryPage
+import models.UserAnswers
+import pages.{EmptyWaypoints, MovedToADifferentCountryPage}
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
@@ -36,7 +36,7 @@ object MovedToADifferentCountrySummary  {
           key     = "movedToADifferentCountry.checkYourAnswersLabel",
           value   = ValueViewModel(value),
           actions = Seq(
-            ActionItemViewModel("site.change", routes.MovedToADifferentCountryController.onPageLoad(CheckMode).url)
+            ActionItemViewModel("site.change", routes.MovedToADifferentCountryController.onPageLoad(EmptyWaypoints).url)
               .withVisuallyHiddenText(messages("movedToADifferentCountry.change.hidden"))
           )
         )

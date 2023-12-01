@@ -18,17 +18,15 @@ package controllers
 
 import controllers.actions._
 import forms.EuCountryFormProvider
-
-import javax.inject.Inject
-import models.{Index, Mode}
 import navigation.Navigator
-import pages.{EmptyWaypoints, EuCountryPage, Waypoints}
+import pages.{EuCountryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.EuCountryView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class EuCountryController @Inject()(
@@ -53,7 +51,7 @@ class EuCountryController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, waypoints, Index(0)))
+      Ok(view(preparedForm, waypoints))
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
