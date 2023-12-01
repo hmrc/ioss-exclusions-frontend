@@ -70,3 +70,10 @@ euCountry.heading = euCountry
 euCountry.checkYourAnswersLabel = euCountry
 euCountry.error.required = Select yes if euCountry
 euCountry.change.hidden = EuCountry
+
+taxNumber.title = What is your tax number in?
+taxNumber.heading = What is your tax number in?
+taxNumber.checkYourAnswersLabel = taxNumber
+taxNumber.error.required = Enter tax number
+taxNumber.error.length = Tax Number must be 100 characters or less
+taxNumber.change.hidden = Tax Number

@@ -25,3 +25,7 @@ POST       /moved-to-a-different-country                 controllers.MovedToADif
 
 GET        /eu-country                                   controllers.EuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST       /eu-country                                   controllers.EuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET        /tax-number                                   controllers.TaxNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST       /tax-number                                   controllers.TaxNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
