@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package queries
+package utils
 
-import models.UserAnswers
-import play.api.libs.json.JsPath
+import pages.{CheckAnswersPage, NonEmptyWaypoints, Waypoints}
 
-import scala.util.{Success, Try}
+object AmendWaypoints {
 
-sealed trait Query {
+  implicit class AmendWaypointsOps(waypoints: Waypoints) {
+    def inAmend: Boolean = false
 
-  def path: JsPath
-}
+    private def isInMode(page: CheckAnswersPage) = {
+      waypoints match {
+        case nonEmptyWaypoints: NonEmptyWaypoints =>
+          nonEmptyWaypoints.waypoints.toList.map(_.urlFragment).contains(page.urlFragment)
+        case _ =>
+          false
+      }
+    }
 
-trait Gettable[A] extends Query
-
-trait Settable[A] extends Query {
-
-  def cleanup(value: Option[A], userAnswers: UserAnswers): Try[UserAnswers] =
-    Success(userAnswers)
-}
-
-trait Derivable[A, B] extends Query {
-  val derive: A => B
+    def inCheck: Boolean = false
+  }
 }

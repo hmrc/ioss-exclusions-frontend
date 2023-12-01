@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-package queries
+package pages
 
-import models.UserAnswers
+import controllers.routes
+import models.{Country, UserAnswers}
 import play.api.libs.json.JsPath
+import play.api.mvc.Call
 
-import scala.util.{Success, Try}
+case class EuCountryPage() extends QuestionPage[Country] {
 
-sealed trait Query {
+  override def path: JsPath = JsPath \ "euCountryDetails" \ toString
 
-  def path: JsPath
-}
+  override def toString: String = "euCountry"
 
-trait Gettable[A] extends Query
+  override def route(waypoints: Waypoints): Call =
+    routes.EuCountryController.onPageLoad(waypoints)
 
-trait Settable[A] extends Query {
-
-  def cleanup(value: Option[A], userAnswers: UserAnswers): Try[UserAnswers] =
-    Success(userAnswers)
-}
-
-trait Derivable[A, B] extends Query {
-  val derive: A => B
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = ???
 }

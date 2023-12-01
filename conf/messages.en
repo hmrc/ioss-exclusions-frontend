@@ -64,3 +64,9 @@ movedToADifferentCountry.heading = Are you moving your business to a different E
 movedToADifferentCountry.checkYourAnswersLabel = Moved to a different country
 movedToADifferentCountry.error.required = Select yes if moved to a different country
 movedToADifferentCountry.change.hidden = Moved to a different country
+
+euCountry.title = euCountry
+euCountry.heading = euCountry
+euCountry.checkYourAnswersLabel = euCountry
+euCountry.error.required = Select yes if euCountry
+euCountry.change.hidden = EuCountry

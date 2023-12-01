@@ -14,26 +14,12 @@
  * limitations under the License.
  */
 
-package queries
+package logging
 
-import models.UserAnswers
-import play.api.libs.json.JsPath
+import org.slf4j.{Logger, LoggerFactory}
 
-import scala.util.{Success, Try}
+trait Logging {
 
-sealed trait Query {
-
-  def path: JsPath
-}
-
-trait Gettable[A] extends Query
-
-trait Settable[A] extends Query {
-
-  def cleanup(value: Option[A], userAnswers: UserAnswers): Try[UserAnswers] =
-    Success(userAnswers)
-}
-
-trait Derivable[A, B] extends Query {
-  val derive: A => B
+  protected val logger: Logger =
+    LoggerFactory.getLogger("application." + getClass.getCanonicalName)
 }

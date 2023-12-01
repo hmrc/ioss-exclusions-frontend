@@ -20,7 +20,8 @@ GET         /account/signed-out                          controllers.auth.Signed
 
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad
 
-GET        /movedToADifferentCountry                        controllers.MovedToADifferentCountryController.onPageLoad(mode: Mode = NormalMode)
-POST       /movedToADifferentCountry                        controllers.MovedToADifferentCountryController.onSubmit(mode: Mode = NormalMode)
-GET        /changeMovedToADifferentCountry                  controllers.MovedToADifferentCountryController.onPageLoad(mode: Mode = CheckMode)
-POST       /changeMovedToADifferentCountry                  controllers.MovedToADifferentCountryController.onSubmit(mode: Mode = CheckMode)
+GET        /moved-to-a-different-country                 controllers.MovedToADifferentCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST       /moved-to-a-different-country                 controllers.MovedToADifferentCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET        /eu-country                                   controllers.EuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST       /eu-country                                   controllers.EuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

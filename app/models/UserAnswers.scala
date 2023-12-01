@@ -17,7 +17,7 @@
 package models
 
 import play.api.libs.json._
-import queries.{Gettable, Settable}
+import queries.{Derivable, Gettable, Settable}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
@@ -31,6 +31,13 @@ final case class UserAnswers(
 
   def get[A](page: Gettable[A])(implicit rds: Reads[A]): Option[A] =
     Reads.optionNoError(Reads.at(page.path)).reads(data).getOrElse(None)
+
+  def get[A, B](derivable: Derivable[A, B])(implicit rds: Reads[A]): Option[B] = {
+    Reads.optionNoError(Reads.at(derivable.path))
+      .reads(data)
+      .getOrElse(None)
+      .map(derivable.derive)
+  }
 
   def set[A](page: Settable[A], value: A)(implicit writes: Writes[A]): Try[UserAnswers] = {
 
@@ -47,6 +54,11 @@ final case class UserAnswers(
         page.cleanup(Some(value), updatedAnswers)
     }
   }
+
+  def isDefined(gettable: Gettable[_]): Boolean =
+    Reads.optionNoError(Reads.at[JsValue](gettable.path)).reads(data)
+      .map(_.isDefined)
+      .getOrElse(false)
 
   def remove[A](page: Settable[A]): Try[UserAnswers] = {
 
