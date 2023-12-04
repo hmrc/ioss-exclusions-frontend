@@ -18,6 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.MovedToADifferentCountryFormProvider
+import models.UserAnswers
 import navigation.Navigator
 import pages.{MovedToADifferentCountryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -43,9 +44,10 @@ class MovedToADifferentCountryController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-      val preparedForm = request.userAnswers.get(MovedToADifferentCountryPage) match {
+
+      val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(MovedToADifferentCountryPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -53,18 +55,20 @@ class MovedToADifferentCountryController @Inject()(
       Ok(view(preparedForm, waypoints))
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, waypoints))),
 
-        value =>
+        value => {
+          val originalAnswers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(MovedToADifferentCountryPage, value))
+            updatedAnswers <- Future.fromTry(originalAnswers.set(MovedToADifferentCountryPage, value))
             _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(MovedToADifferentCountryPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+          } yield Redirect(MovedToADifferentCountryPage.navigate(waypoints, originalAnswers, updatedAnswers).route)
+        }
       )
   }
 }

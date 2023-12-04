@@ -24,9 +24,9 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], country: Country, waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("taxNumber.title"))) {
+@layout(pageTitle = title(form, messages("taxNumber.title", country.name))) {
 
     @formHelper(action = routes.TaxNumberController.onSubmit(waypoints)) {
 
@@ -37,7 +37,7 @@
         @govukInput(
             InputViewModel(
                 field = form("value"),
-                label = LabelViewModel(messages("taxNumber.heading")).asPageHeading()
+                label = LabelViewModel(messages("taxNumber.heading", country.name)).asPageHeading()
             )
             .withWidth(Full)
         )

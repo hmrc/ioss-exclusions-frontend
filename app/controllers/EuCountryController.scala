@@ -30,16 +30,16 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class EuCountryController @Inject()(
-                                         override val messagesApi: MessagesApi,
-                                         sessionRepository: SessionRepository,
-                                         navigator: Navigator,
-                                         identify: IdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: EuCountryFormProvider,
-                                         val controllerComponents: MessagesControllerComponents,
-                                         view: EuCountryView
-                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                     override val messagesApi: MessagesApi,
+                                     sessionRepository: SessionRepository,
+                                     navigator: Navigator,
+                                     identify: IdentifierAction,
+                                     getData: DataRetrievalAction,
+                                     requireData: DataRequiredAction,
+                                     formProvider: EuCountryFormProvider,
+                                     val controllerComponents: MessagesControllerComponents,
+                                     view: EuCountryView
+                                   )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
@@ -64,7 +64,7 @@ class EuCountryController @Inject()(
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(EuCountryPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
+            _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(EuCountryPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
       )
   }

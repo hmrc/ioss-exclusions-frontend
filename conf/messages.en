@@ -65,14 +65,14 @@ movedToADifferentCountry.checkYourAnswersLabel = Moved to a different country
 movedToADifferentCountry.error.required = Select yes if moved to a different country
 movedToADifferentCountry.change.hidden = Moved to a different country
 
-euCountry.title = euCountry
-euCountry.heading = euCountry
-euCountry.checkYourAnswersLabel = euCountry
+euCountry.title = Which country is your business moving to?
+euCountry.heading = Which country is your business moving to?
+euCountry.checkYourAnswersLabel = Eu Country
 euCountry.error.required = Select yes if euCountry
-euCountry.change.hidden = EuCountry
+euCountry.change.hidden = Eu Country
 
-taxNumber.title = What is your tax number in?
-taxNumber.heading = What is your tax number in?
+taxNumber.title = What is your tax number in {0}?
+taxNumber.heading = What is your tax number in {0}?
 taxNumber.checkYourAnswersLabel = taxNumber
 taxNumber.error.required = Enter tax number
 taxNumber.error.length = Tax Number must be 100 characters or less

@@ -19,7 +19,7 @@ package controllers
 import controllers.actions._
 import forms.TaxNumberFormProvider
 import navigation.Navigator
-import pages.{TaxNumberPage, Waypoints}
+import pages.{EuCountryPage, TaxNumberPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -51,7 +51,9 @@ class TaxNumberController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, waypoints))
+      request.userAnswers.get(EuCountryPage).map { country =>
+        Ok(view(preparedForm, country, waypoints))
+      }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()))
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -59,8 +61,9 @@ class TaxNumberController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints))),
-
+          request.userAnswers.get(EuCountryPage).map { country =>
+            Future.successful(BadRequest(view(formWithErrors, country, waypoints)))
+          }.getOrElse(Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(TaxNumberPage, value))

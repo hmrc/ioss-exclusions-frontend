@@ -30,5 +30,5 @@ case object MovedToADifferentCountryPage extends QuestionPage[Boolean] {
   override def route(waypoints: Waypoints): Call =
     routes.MovedToADifferentCountryController.onPageLoad(waypoints)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = ???
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = EuCountryPage
 }
