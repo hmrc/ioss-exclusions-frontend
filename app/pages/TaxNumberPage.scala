@@ -30,5 +30,6 @@ case object TaxNumberPage extends QuestionPage[String] {
   override def route(waypoints: Waypoints): Call =
     routes.TaxNumberController.onPageLoad(waypoints)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = ???
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+    CheckYourAnswersPage
 }

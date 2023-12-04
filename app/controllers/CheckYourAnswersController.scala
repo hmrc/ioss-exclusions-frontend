@@ -18,11 +18,14 @@ package controllers
 
 import com.google.inject.Inject
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import pages.{CheckYourAnswersPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
+
+import scala.concurrent.Future
 
 class CheckYourAnswersController @Inject()(
                                             override val messagesApi: MessagesApi,
@@ -41,5 +44,10 @@ class CheckYourAnswersController @Inject()(
       )
 
       Ok(view(list))
+  }
+
+  def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+    implicit request =>
+      Future.successful(Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, request.userAnswers).route))
   }
 }

@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.MoveDateFormProvider
-import pages.{MoveDatePage, Waypoints}
+import pages.{CheckYourAnswersPage, MoveDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -42,10 +42,10 @@ class MoveDateController @Inject()(
   def onPageLoad(mode: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val form = formProvider()
+
       val preparedForm = request.userAnswers.get(MoveDatePage) match {
         case None => form
-        case Some(value) =>
-          form.fill(value)
+        case Some(value) => form.fill(value)
       }
 
       Ok(view(preparedForm, mode))
@@ -54,6 +54,7 @@ class MoveDateController @Inject()(
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val form = formProvider()
+
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, waypoints))),

@@ -23,7 +23,8 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, MoveDatePage}
+import pages.{EmptyWaypoints, MoveDatePage, TaxNumberPage, Waypoints}
+import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
@@ -41,9 +42,9 @@ class MoveDateControllerSpec extends SpecBase with MockitoSugar {
 
   private val formProvider = new MoveDateFormProvider()
 
-  private def form = formProvider()
+  private val form: Form[LocalDate] = formProvider()
 
-  private def onwardRoute = Call("GET", "/foo")
+  private val emptyWaypoints: Waypoints = EmptyWaypoints
 
   private val validAnswer = LocalDate.now(ZoneOffset.UTC)
 
@@ -100,7 +101,6 @@ class MoveDateControllerSpec extends SpecBase with MockitoSugar {
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
@@ -108,8 +108,10 @@ class MoveDateControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val result = route(application, postRequest()).value
 
+        val userAnswers = UserAnswers(userAnswersId).set(MoveDatePage, validAnswer).success.value
+
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
+        redirectLocation(result).value mustEqual MoveDatePage.navigate(emptyWaypoints, emptyUserAnswers, userAnswers).url
       }
     }
 

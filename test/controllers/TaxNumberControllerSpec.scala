@@ -35,10 +35,10 @@ import scala.concurrent.Future
 
 class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
 
-  def onwardRoute = Call("GET", "/foo")
+  private val onwardRoute: Call = routes.CheckYourAnswersController.onPageLoad()
 
-  val formProvider = new TaxNumberFormProvider()
-  val form = formProvider()
+  private val formProvider = new TaxNumberFormProvider()
+  private val form = formProvider()
 
   private val emptyWaypoints: EmptyWaypoints.type = EmptyWaypoints
   private val country = Country("IT", "Italy")
@@ -46,7 +46,6 @@ class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
   lazy val taxNumberRoute = routes.TaxNumberController.onPageLoad(emptyWaypoints).url
 
   private val userAnswersWithCountry = emptyUserAnswers.set(EuCountryPage, country).success.value
-
 
   "TaxNumber Controller" - {
 
@@ -68,7 +67,7 @@ class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(TaxNumberPage, "answer").success.value
+      val userAnswers = userAnswersWithCountry.set(TaxNumberPage, "answer").success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -91,7 +90,7 @@ class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder(userAnswers = Some(userAnswersWithCountry))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
@@ -112,7 +111,7 @@ class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithCountry)).build()
 
       running(application) {
         val request =
@@ -161,3 +160,4 @@ class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
     }
   }
 }
+

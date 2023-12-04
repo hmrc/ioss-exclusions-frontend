@@ -16,6 +16,9 @@
 
 package pages
 
+import controllers.routes
+import models.UserAnswers
+
 import java.time.LocalDate
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
@@ -24,8 +27,11 @@ case object MoveDatePage extends QuestionPage[LocalDate] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "leaveDate"
+  override def toString: String = "moveDate"
 
+  override def route(waypoints: Waypoints): Call =
+    routes.MoveDateController.onPageLoad(waypoints)
 
-  override def route(waypoints: Waypoints): Call = ???
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+    TaxNumberPage
 }

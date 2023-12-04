@@ -23,12 +23,13 @@ import play.api.mvc.Call
 
 case object EuCountryPage extends QuestionPage[Country] {
 
-  override def path: JsPath = JsPath \ "euCountryDetails" \ toString
+  override def path: JsPath = JsPath \ toString
 
   override def toString: String = "euCountry"
 
   override def route(waypoints: Waypoints): Call =
     routes.EuCountryController.onPageLoad(waypoints)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = TaxNumberPage
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+    MoveDatePage
 }

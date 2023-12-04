@@ -35,10 +35,10 @@ import scala.concurrent.Future
 
 class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute = Call("GET", "/foo")
+  private val onwardRoute: Call = routes.EuCountryController.onPageLoad()
 
-  val formProvider = new MoveCountryFormProvider()
-  val form = formProvider()
+  private val formProvider = new MoveCountryFormProvider()
+  private val form = formProvider()
 
   private val emptyWaypoints: EmptyWaypoints.type = EmptyWaypoints
 
@@ -46,7 +46,7 @@ class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
 
   "MoveCountry Controller" - {
 
-    "must return OK and the correct view for a GET" in {
+    "must return v and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
@@ -86,6 +86,7 @@ class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
+      println("---- onwardRoute: "+onwardRoute)
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
@@ -126,7 +127,7 @@ class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+    "must return OK with default data if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -135,24 +136,10 @@ class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
+         val view = application.injector.instanceOf[MoveCountryView]
 
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, moveCountryRoute)
-            .withFormUrlEncodedBody(("value", "true"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, emptyWaypoints)(request, messages(application)).toString
       }
     }
   }

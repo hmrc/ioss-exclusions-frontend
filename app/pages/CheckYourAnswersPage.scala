@@ -15,21 +15,22 @@
  */
 
 package pages
-
 import controllers.routes
 import models.UserAnswers
-import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
-case object MoveCountryPage extends QuestionPage[Boolean] {
+object CheckYourAnswersPage extends CheckAnswersPage {
 
-  override def path: JsPath = JsPath \ toString
+  override def isTheSamePage(other: Page): Boolean = other match {
+    case CheckYourAnswersPage  => true
+    case _ => false
+  }
 
-  override def toString: String = "moveCountry"
+  override val urlFragment: String = "check-your-answers"
 
   override def route(waypoints: Waypoints): Call =
-    routes.MoveCountryController.onPageLoad(waypoints)
+    routes.CheckYourAnswersController.onPageLoad()
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    EuCountryPage
+    ApplicationCompletePage
 }
