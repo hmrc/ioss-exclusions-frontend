@@ -37,7 +37,7 @@
         @govukInput(
             InputViewModel(
                 field = form("value"),
-                label = LabelViewModel(messages("taxNumber.heading", country.name)).asPageHeading()
+                label = LabelViewModel(messages("taxNumber.heading", country.name)).withCssClass("govuk-label--l").asPageHeading()
             )
             .withWidth(Full)
         )

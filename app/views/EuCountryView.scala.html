@@ -41,7 +41,7 @@
             SelectViewModel(
                 field = form("value"),
                 items = Country.euCountrySelectItems,
-                label = LabelViewModel(messages("euCountry.heading")).asPageHeading()
+                label = LabelViewModel(messages("euCountry.heading")).withCssClass("govuk-label--l").asPageHeading()
             )
             .withCssClass(InputWidth.Fixed20.toString)
             .withCssClass("autocomplete")

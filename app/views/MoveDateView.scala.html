@@ -35,7 +35,7 @@
         @govukDateInput(
             DateViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("moveDate.heading")).asPageHeading()
+                legend = LegendViewModel(messages("moveDate.heading")).withCssClass("govuk-label--l").asPageHeading()
             )
             .withHint(HintViewModel(messages("moveDate.hint")))
         )
