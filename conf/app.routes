@@ -29,3 +29,5 @@ POST       /eu-country                                   controllers.EuCountryCo
 GET        /tax-number                                   controllers.TaxNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST       /tax-number                                   controllers.TaxNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
+GET        /move-date                                   controllers.MoveDateController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
+POST       /move-date                                   controllers.MoveDateController.onSubmit(mode: Waypoints ?= EmptyWaypoints)

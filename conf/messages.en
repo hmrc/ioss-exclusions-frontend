@@ -77,3 +77,13 @@ taxNumber.checkYourAnswersLabel = taxNumber
 taxNumber.error.required = Enter tax number
 taxNumber.error.length = Tax Number must be 100 characters or less
 taxNumber.change.hidden = Tax Number
+
+moveDate.title = MoveDate
+moveDate.heading = When did or when will your business move to?
+moveDate.hint = You can enter a date up to the last day of this month. For example, 01/12/2023.
+moveDate.checkYourAnswersLabel = Move date
+moveDate.error.required.all = Enter the move date
+moveDate.error.required.two = The move date must include {0} and {1}
+moveDate.error.required = The move date must include {0}
+moveDate.error.invalid = Enter a real move date
+moveDate.change.hidden = move date
