@@ -18,11 +18,10 @@ package controllers
 
 import base.SpecBase
 import forms.TaxNumberFormProvider
-import models.{Country, NormalMode, UserAnswers}
+import models.{Country, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatest.TryValues
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{EmptyWaypoints, EuCountryPage, TaxNumberPage}
 import play.api.inject.bind
