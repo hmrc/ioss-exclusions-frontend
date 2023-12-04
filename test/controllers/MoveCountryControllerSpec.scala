@@ -19,13 +19,11 @@ package controllers
 import base.SpecBase
 import forms.MoveCountryFormProvider
 import models.UserAnswers
-import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{EmptyWaypoints, MoveCountryPage}
 import play.api.inject.bind
-import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
@@ -34,8 +32,6 @@ import views.html.MoveCountryView
 import scala.concurrent.Future
 
 class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
-
-  private val onwardRoute: Call = routes.EuCountryController.onPageLoad()
 
   private val formProvider = new MoveCountryFormProvider()
   private val form = formProvider()
@@ -46,7 +42,7 @@ class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
 
   "MoveCountry Controller" - {
 
-    "must return v and the correct view for a GET" in {
+    "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
@@ -86,11 +82,9 @@ class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-      println("---- onwardRoute: "+onwardRoute)
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
@@ -102,8 +96,10 @@ class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
+        val userAnswers = UserAnswers(userAnswersId).set(MoveCountryPage, true).success.value
+
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
+        redirectLocation(result).value mustEqual MoveCountryPage.navigate(emptyWaypoints, emptyUserAnswers, userAnswers).url
       }
     }
 

@@ -18,14 +18,12 @@ package controllers
 
 import base.SpecBase
 import forms.TaxNumberFormProvider
-import models.{Country, UserAnswers}
-import navigation.{FakeNavigator, Navigator}
+import models.Country
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, EuCountryPage, TaxNumberPage}
+import pages.{EmptyWaypoints, EuCountryPage, TaxNumberPage, Waypoints}
 import play.api.inject.bind
-import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
@@ -35,12 +33,10 @@ import scala.concurrent.Future
 
 class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
 
-  private val onwardRoute: Call = routes.CheckYourAnswersController.onPageLoad()
-
   private val formProvider = new TaxNumberFormProvider()
   private val form = formProvider()
 
-  private val emptyWaypoints: EmptyWaypoints.type = EmptyWaypoints
+  private val emptyWaypoints: Waypoints = EmptyWaypoints
   private val country = Country("IT", "Italy")
 
   lazy val taxNumberRoute = routes.TaxNumberController.onPageLoad(emptyWaypoints).url
@@ -92,7 +88,6 @@ class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
       val application =
         applicationBuilder(userAnswers = Some(userAnswersWithCountry))
           .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
@@ -105,7 +100,7 @@ class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
+        redirectLocation(result).value mustEqual TaxNumberPage.navigate(emptyWaypoints, userAnswersWithCountry, userAnswersWithCountry).url
       }
     }
 

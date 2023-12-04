@@ -19,15 +19,14 @@ package controllers
 import base.SpecBase
 import forms.MoveDateFormProvider
 import models.UserAnswers
-import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, MoveDatePage, TaxNumberPage, Waypoints}
+import pages.{EmptyWaypoints, MoveDatePage, Waypoints}
 import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.inject.bind
-import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
