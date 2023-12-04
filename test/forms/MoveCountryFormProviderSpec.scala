@@ -14,21 +14,32 @@
  * limitations under the License.
  */
 
-package pages
+package forms
 
-import controllers.routes
-import models.UserAnswers
-import play.api.libs.json.JsPath
-import play.api.mvc.Call
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-case object MovedToADifferentCountryPage extends QuestionPage[Boolean] {
+class MoveCountryFormProviderSpec extends BooleanFieldBehaviours {
 
-  override def path: JsPath = JsPath \ toString
+  val requiredKey = "moveCountry.error.required"
+  val invalidKey = "error.boolean"
 
-  override def toString: String = "movedToADifferentCountry"
+  val form = new MoveCountryFormProvider()()
 
-  override def route(waypoints: Waypoints): Call =
-    routes.MovedToADifferentCountryController.onPageLoad(waypoints)
+  ".value" - {
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = EuCountryPage
+    val fieldName = "value"
+
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
 }

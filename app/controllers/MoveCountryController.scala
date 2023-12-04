@@ -17,27 +17,27 @@
 package controllers
 
 import controllers.actions._
-import forms.MovedToADifferentCountryFormProvider
+import forms.MoveCountryFormProvider
 import models.UserAnswers
-import pages.{MovedToADifferentCountryPage, Waypoints}
+import pages.{MoveCountryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.MovedToADifferentCountryView
+import views.html.MoveCountryView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class MovedToADifferentCountryController @Inject()(
+class MoveCountryController @Inject()(
                                                     override val messagesApi: MessagesApi,
                                                     sessionRepository: SessionRepository,
                                                     identify: IdentifierAction,
                                                     getData: DataRetrievalAction,
                                                     requireData: DataRequiredAction,
-                                                    formProvider: MovedToADifferentCountryFormProvider,
+                                                    formProvider: MoveCountryFormProvider,
                                                     val controllerComponents: MessagesControllerComponents,
-                                                    view: MovedToADifferentCountryView
+                                                    view: MoveCountryView
                                                   )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
@@ -45,7 +45,7 @@ class MovedToADifferentCountryController @Inject()(
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
 
-      val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(MovedToADifferentCountryPage) match {
+      val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(MoveCountryPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -63,9 +63,9 @@ class MovedToADifferentCountryController @Inject()(
         value => {
           val originalAnswers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
           for {
-            updatedAnswers <- Future.fromTry(originalAnswers.set(MovedToADifferentCountryPage, value))
+            updatedAnswers <- Future.fromTry(originalAnswers.set(MoveCountryPage, value))
             _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(MovedToADifferentCountryPage.navigate(waypoints, originalAnswers, updatedAnswers).route)
+          } yield Redirect(MoveCountryPage.navigate(waypoints, originalAnswers, updatedAnswers).route)
         }
       )
   }

@@ -18,26 +18,26 @@ package viewmodels.checkAnswers
 
 import controllers.routes
 import models.UserAnswers
-import pages.{EmptyWaypoints, MovedToADifferentCountryPage}
+import pages.{EmptyWaypoints, MoveCountryPage}
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object MovedToADifferentCountrySummary  {
+object MoveCountrySummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(MovedToADifferentCountryPage).map {
+    answers.get(MoveCountryPage).map {
       answer =>
 
         val value = if (answer) "site.yes" else "site.no"
 
         SummaryListRowViewModel(
-          key     = "movedToADifferentCountry.checkYourAnswersLabel",
+          key     = "moveCountry.checkYourAnswersLabel",
           value   = ValueViewModel(value),
           actions = Seq(
-            ActionItemViewModel("site.change", routes.MovedToADifferentCountryController.onPageLoad(EmptyWaypoints).url)
-              .withVisuallyHiddenText(messages("movedToADifferentCountry.change.hidden"))
+            ActionItemViewModel("site.change", routes.MoveCountryController.onPageLoad(EmptyWaypoints).url)
+              .withVisuallyHiddenText(messages("moveCountry.change.hidden"))
           )
         )
     }

@@ -59,11 +59,11 @@ signedOut.guidance = We did not save your answers.
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
 
-movedToADifferentCountry.title = Are you moving your business to a different EU country?
-movedToADifferentCountry.heading = Are you moving your business to a different EU country?
-movedToADifferentCountry.checkYourAnswersLabel = Moved to a different country
-movedToADifferentCountry.error.required = Select yes if moved to a different country
-movedToADifferentCountry.change.hidden = Moved to a different country
+moveCountry.title = Are you moving your business to a different EU country?
+moveCountry.heading = Are you moving your business to a different EU country?
+moveCountry.checkYourAnswersLabel = Moved to a different country
+moveCountry.error.required = Select yes if moved to a different country
+moveCountry.change.hidden = Moved to a different country
 
 euCountry.title = Which country is your business moving to?
 euCountry.heading = Which country is your business moving to?

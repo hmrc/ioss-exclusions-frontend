@@ -16,30 +16,15 @@
 
 package forms
 
-import forms.behaviours.BooleanFieldBehaviours
-import play.api.data.FormError
+import javax.inject.Inject
 
-class MovedToADifferentCountryFormProviderSpec extends BooleanFieldBehaviours {
+import forms.mappings.Mappings
+import play.api.data.Form
 
-  val requiredKey = "movedToADifferentCountry.error.required"
-  val invalidKey = "error.boolean"
+class MoveCountryFormProvider @Inject() extends Mappings {
 
-  val form = new MovedToADifferentCountryFormProvider()()
-
-  ".value" - {
-
-    val fieldName = "value"
-
-    behave like booleanField(
-      form,
-      fieldName,
-      invalidError = FormError(fieldName, invalidKey)
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("moveCountry.error.required")
     )
-
-    behave like mandatoryField(
-      form,
-      fieldName,
-      requiredError = FormError(fieldName, requiredKey)
-    )
-  }
 }
