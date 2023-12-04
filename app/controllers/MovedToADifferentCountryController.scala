@@ -19,7 +19,6 @@ package controllers
 import controllers.actions._
 import forms.MovedToADifferentCountryFormProvider
 import models.UserAnswers
-import navigation.Navigator
 import pages.{MovedToADifferentCountryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -33,7 +32,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class MovedToADifferentCountryController @Inject()(
                                                     override val messagesApi: MessagesApi,
                                                     sessionRepository: SessionRepository,
-                                                    navigator: Navigator,
                                                     identify: IdentifierAction,
                                                     getData: DataRetrievalAction,
                                                     requireData: DataRequiredAction,

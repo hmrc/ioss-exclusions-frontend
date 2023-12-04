@@ -18,7 +18,6 @@ package controllers
 
 import controllers.actions._
 import forms.TaxNumberFormProvider
-import navigation.Navigator
 import pages.{EuCountryPage, TaxNumberPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -32,7 +31,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class TaxNumberController @Inject()(
                                         override val messagesApi: MessagesApi,
                                         sessionRepository: SessionRepository,
-                                        navigator: Navigator,
                                         identify: IdentifierAction,
                                         getData: DataRetrievalAction,
                                         requireData: DataRequiredAction,
@@ -45,7 +43,6 @@ class TaxNumberController @Inject()(
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-
       val preparedForm = request.userAnswers.get(TaxNumberPage) match {
         case None => form
         case Some(value) => form.fill(value)
