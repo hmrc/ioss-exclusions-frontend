@@ -25,7 +25,7 @@ class IndexControllerSpec extends SpecBase {
 
   "Index Controller" - {
 
-    "must return OK and the correct view for a GET" in {
+    "must redirect to Move Country" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -34,11 +34,9 @@ class IndexControllerSpec extends SpecBase {
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[IndexView]
+        status(result) mustBe SEE_OTHER
 
-        status(result) mustEqual OK
-
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        redirectLocation(result).value mustBe routes.MoveCountryController.onPageLoad().url
       }
     }
   }
