@@ -14,24 +14,32 @@
  * limitations under the License.
  */
 
-package pages
+package forms
 
-import controllers.routes
-import models.UserAnswers
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-import java.time.LocalDate
-import play.api.libs.json.JsPath
-import play.api.mvc.Call
+class LeaveSchemeFormProviderSpec extends BooleanFieldBehaviours {
 
-case object StoppedUsingServiceDatePage extends QuestionPage[LocalDate] {
+  val requiredKey = "leaveScheme.error.required"
+  val invalidKey = "error.boolean"
 
-  override def path: JsPath = JsPath \ toString
+  val form = new LeaveSchemeFormProvider()()
 
-  override def toString: String = "stoppedUsingServiceDate"
+  ".value" - {
 
-  override def route(waypoints: Waypoints): Call =
-    routes.StoppedUsingServiceDateController.onPageLoad(waypoints)
+    val fieldName = "value"
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    ApplicationCompletePage
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
 }

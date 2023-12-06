@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-package pages
+package forms
 
-import controllers.routes
-import models.UserAnswers
+import javax.inject.Inject
 
-import java.time.LocalDate
-import play.api.libs.json.JsPath
-import play.api.mvc.Call
+import forms.mappings.Mappings
+import play.api.data.Form
 
-case object StoppedUsingServiceDatePage extends QuestionPage[LocalDate] {
+class LeaveSchemeFormProvider @Inject() extends Mappings {
 
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "stoppedUsingServiceDate"
-
-  override def route(waypoints: Waypoints): Call =
-    routes.StoppedUsingServiceDateController.onPageLoad(waypoints)
-
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    ApplicationCompletePage
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("leaveScheme.error.required")
+    )
 }

@@ -112,3 +112,9 @@ applicationComplete.next.info.top = You must:
 applicationComplete.next.info.bullet1 = complete a VAT return for your final month
 applicationComplete.next.info.bullet2 = pay any VAT you still owe
 applicationComplete.next.info.bottom = If you change your mind, you have until {0} to cancel this request and stay on the service.
+
+leaveScheme.title = Are you sure you want to leave the Import One Stop Shop scheme?
+leaveScheme.heading = Are you sure you want to leave the Import One Stop Shop scheme?
+leaveScheme.checkYourAnswersLabel = leave scheme
+leaveScheme.error.required = Select yes if leaveScheme
+leaveScheme.change.hidden = leave scheme

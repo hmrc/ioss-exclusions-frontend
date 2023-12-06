@@ -18,20 +18,22 @@ package pages
 
 import controllers.routes
 import models.UserAnswers
-
-import java.time.LocalDate
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
-case object StoppedUsingServiceDatePage extends QuestionPage[LocalDate] {
+
+case object LeaveSchemePage extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "stoppedUsingServiceDate"
+  override def toString: String = "leaveScheme"
 
   override def route(waypoints: Waypoints): Call =
-    routes.StoppedUsingServiceDateController.onPageLoad(waypoints)
+    routes.LeaveSchemeController.onPageLoad(waypoints)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    ApplicationCompletePage
+    answers.get(this).map {
+      case true => StoppedUsingServiceDatePage
+      case false => ApplicationCompletePage
+    }.orRecover
 }
