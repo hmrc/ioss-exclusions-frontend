@@ -22,25 +22,27 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ApplicationCompleteView
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class ApplicationCompleteController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: ApplicationCompleteView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                               override val messagesApi: MessagesApi,
+                                               clock: Clock,
+                                               identify: IdentifierAction,
+                                               getData: DataRetrievalAction,
+                                               requireData: DataRequiredAction,
+                                               val controllerComponents: MessagesControllerComponents,
+                                               view: ApplicationCompleteView
+                                             ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify/* andThen getData andThen requireData*/) {
+  def onPageLoad: Action[AnyContent] = (identify /* andThen getData andThen requireData*/) {
     implicit request =>
 
       val dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
-      val leaveDate = dateTimeFormatter.format(LocalDate.now().minusDays(1))
-      val cancelDate = dateTimeFormatter.format(LocalDate.now())
+      //Change to business rules later
+      val leaveDate = dateTimeFormatter.format(LocalDate.now(clock).plusDays(1))
+      val cancelDate = dateTimeFormatter.format(LocalDate.now(clock))
 
       Ok(view(leaveDate, cancelDate))
   }
