@@ -97,3 +97,12 @@ stoppedUsingServiceDate.error.required.two = The stoppedUsingServiceDate must in
 stoppedUsingServiceDate.error.required = The stopped using service date must include {0}
 stoppedUsingServiceDate.error.invalid = Enter a real stopped using service date
 stoppedUsingServiceDate.change.hidden = Stopped using service date
+
+applicationComplete.title = We have received your request to leave
+applicationComplete.heading = We have received your request to leave
+applicationComplete.registration.text = You will leave this service on {0}.
+applicationComplete.next.heading = What happens next
+applicationComplete.next.info.top = You must:
+applicationComplete.next.info.bullet1 = complete a VAT return for your final month
+applicationComplete.next.info.bullet2 = pay any VAT you still owe
+applicationComplete.next.info.bottom = If you change your mind, you have until {0} to cancel this request and stay on the service.

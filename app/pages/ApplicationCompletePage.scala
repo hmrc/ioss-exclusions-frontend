@@ -17,7 +17,9 @@
 package pages
 
 import play.api.mvc.Call
+import controllers.routes
 
 object ApplicationCompletePage extends Page {
-  override def route(waypoints: Waypoints): Call = ???
+  override def route(waypoints: Waypoints): Call =
+    routes.ApplicationCompleteController.onPageLoad()
 }

@@ -35,3 +35,6 @@ POST        /move-date                                   controllers.MoveDateCon
 
 GET        /stopped-using-service-date                  controllers.StoppedUsingServiceDateController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
 POST       /stopped-using-service-date                  controllers.StoppedUsingServiceDateController.onSubmit(mode: Waypoints ?= EmptyWaypoints)
+
+GET        /successful                                  controllers.ApplicationCompleteController.onPageLoad()
+
