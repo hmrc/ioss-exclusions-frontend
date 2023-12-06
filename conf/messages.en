@@ -98,6 +98,16 @@ stoppedUsingServiceDate.error.required = The stopped using service date must inc
 stoppedUsingServiceDate.error.invalid = Enter a real stopped using service date
 stoppedUsingServiceDate.change.hidden = Stopped using service date
 
+stoppedSellingGoodsDate.title = When did or when will your business stop selling eligible goods?
+stoppedSellingGoodsDate.heading = When did or when will your business stop selling eligible goods?
+stoppedSellingGoodsDate.hint = You can enter a date up to the last day of this month. For example, 06/12/2023.
+stoppedSellingGoodsDate.checkYourAnswersLabel = Stopped selling goods date
+stoppedSellingGoodsDate.error.required.all = Enter the stopped selling goods date
+stoppedSellingGoodsDate.error.required.two = The stopped selling goods must include {0} and {1}
+stoppedSellingGoodsDate.error.required = The stopped selling goods must include {0}
+stoppedSellingGoodsDate.error.invalid = Enter a real stopped selling goods date
+stoppedSellingGoodsDate.change.hidden =  Stopped selling goods date
+
 stopSellingGoods.title = Has your business stopped selling eligible goods to customers in the EU or Northern Ireland?
 stopSellingGoods.heading = Has your business stopped selling eligible goods to customers in the EU or Northern Ireland?
 stopSellingGoods.checkYourAnswersLabel = stop selling goods
