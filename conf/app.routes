@@ -39,3 +39,6 @@ POST       /stopped-using-service-date                   controllers.StoppedUsin
 GET        /stop-selling-goods                           controllers.StopSellingGoodsController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
 POST       /stop-selling-goods                           controllers.StopSellingGoodsController.onSubmit(mode: Waypoints ?= EmptyWaypoints)
 
+GET        /successful                                   controllers.ApplicationCompleteController.onPageLoad()
+
+

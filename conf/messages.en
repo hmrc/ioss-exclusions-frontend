@@ -103,3 +103,12 @@ stopSellingGoods.heading = Has your business stopped selling eligible goods to c
 stopSellingGoods.checkYourAnswersLabel = stop selling goods
 stopSellingGoods.error.required = Select yes if stopSellingGoods
 stopSellingGoods.change.hidden = Stop selling goods
+
+applicationComplete.title = We have received your request to leave
+applicationComplete.heading = We have received your request to leave
+applicationComplete.registration.text = You will leave this service on {0}.
+applicationComplete.next.heading = What happens next
+applicationComplete.next.info.top = You must:
+applicationComplete.next.info.bullet1 = complete a VAT return for your final month
+applicationComplete.next.info.bullet2 = pay any VAT you still owe
+applicationComplete.next.info.bottom = If you change your mind, you have until {0} to cancel this request and stay on the service.
