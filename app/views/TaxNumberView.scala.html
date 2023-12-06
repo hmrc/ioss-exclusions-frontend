@@ -14,14 +14,16 @@
  * limitations under the License.
  *@
 
+@import pages.TaxNumberPage
 @import viewmodels.InputWidth._
+@import views.html.components.ButtonGroup
 
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukInput: GovukInput,
-    govukButton: GovukButton
+    button: ButtonGroup
 )
 
 @(form: Form[_], country: Country, waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
@@ -42,8 +44,6 @@
             .withWidth(Full)
         )
 
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-        )
+        @button("site.continue", TaxNumberPage.route(waypoints).url, waypoints)
     }
 }
