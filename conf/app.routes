@@ -32,3 +32,6 @@ POST        /tax-number                                  controllers.TaxNumberCo
 
 GET         /move-date                                   controllers.MoveDateController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
 POST        /move-date                                   controllers.MoveDateController.onSubmit(mode: Waypoints ?= EmptyWaypoints)
+
+GET        /stopped-using-service-date                  controllers.StoppedUsingServiceDateController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
+POST       /stopped-using-service-date                  controllers.StoppedUsingServiceDateController.onSubmit(mode: Waypoints ?= EmptyWaypoints)

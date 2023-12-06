@@ -18,7 +18,7 @@ date.error.day = day
 date.error.month = month
 date.error.year = year
 
-timeout.title = You’re about to be signed out
+timeout.title = Youâre about to be signed out
 timeout.message = For security reasons, you will be signed out of this service in
 timeout.keepAlive = Stay signed in
 timeout.signOut = Sign out
@@ -78,7 +78,7 @@ taxNumber.error.required = Enter tax number
 taxNumber.error.length = Tax Number must be 100 characters or less
 taxNumber.change.hidden = Tax Number
 
-moveDate.title = MoveDate
+moveDate.title = When did or when will your business move to?
 moveDate.heading = When did or when will your business move to?
 moveDate.hint = You can enter a date up to the last day of this month. For example, 01/12/2023.
 moveDate.checkYourAnswersLabel = Move date
@@ -87,3 +87,13 @@ moveDate.error.required.two = The move date must include {0} and {1}
 moveDate.error.required = The move date must include {0}
 moveDate.error.invalid = Enter a real move date
 moveDate.change.hidden = move date
+
+stoppedUsingServiceDate.title = When did you or when will you stop using this service?
+stoppedUsingServiceDate.heading = When did you or when will you stop using this service?
+stoppedUsingServiceDate.hint = You can enter a date up to the last day of this month. For example, 06/12/2023.
+stoppedUsingServiceDate.checkYourAnswersLabel = Stopped using service date
+stoppedUsingServiceDate.error.required.all = Enter the stopped using service date
+stoppedUsingServiceDate.error.required.two = The stoppedUsingServiceDate must include {0} and {1}
+stoppedUsingServiceDate.error.required = The stopped using service date must include {0}
+stoppedUsingServiceDate.error.invalid = Enter a real stopped using service date
+stoppedUsingServiceDate.change.hidden = Stopped using service date
