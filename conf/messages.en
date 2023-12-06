@@ -97,3 +97,9 @@ stoppedUsingServiceDate.error.required.two = The stoppedUsingServiceDate must in
 stoppedUsingServiceDate.error.required = The stopped using service date must include {0}
 stoppedUsingServiceDate.error.invalid = Enter a real stopped using service date
 stoppedUsingServiceDate.change.hidden = Stopped using service date
+
+stopSellingGoods.title = Has your business stopped selling eligible goods to customers in the EU or Northern Ireland?
+stopSellingGoods.heading = Has your business stopped selling eligible goods to customers in the EU or Northern Ireland?
+stopSellingGoods.checkYourAnswersLabel = stop selling goods
+stopSellingGoods.error.required = Select yes if stopSellingGoods
+stopSellingGoods.change.hidden = Stop selling goods

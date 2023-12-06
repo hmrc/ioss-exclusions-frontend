@@ -16,80 +16,63 @@
 
 package controllers
 
-import java.time.{LocalDate, ZoneOffset}
 import base.SpecBase
-import forms.StoppedUsingServiceDateFormProvider
-import models.{NormalMode, UserAnswers}
-import navigation.{FakeNavigator, Navigator}
+import forms.StopSellingGoodsFormProvider
+import models.UserAnswers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, StoppedUsingServiceDatePage}
-import play.api.i18n.Messages
+import pages.{EmptyWaypoints, StopSellingGoodsPage, Waypoints}
 import play.api.inject.bind
-import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import views.html.StoppedUsingServiceDateView
+import views.html.StopSellingGoodsView
 
 import scala.concurrent.Future
 
-class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
+class StopSellingGoodsControllerSpec extends SpecBase with MockitoSugar {
 
-  private implicit val messages: Messages = stubMessages()
+  private val emptyWaypoints: Waypoints = EmptyWaypoints
 
-  private val formProvider = new StoppedUsingServiceDateFormProvider()
-  private def form = formProvider()
+  val formProvider = new StopSellingGoodsFormProvider()
+  val form = formProvider()
 
- // def onwardRoute = Call("GET", "/foo")
+  lazy val stopSellingGoodsRoute = routes.StopSellingGoodsController.onPageLoad(emptyWaypoints).url
 
-  val validAnswer = LocalDate.now(ZoneOffset.UTC)
-
-  lazy val stoppedUsingServiceDateRoute = routes.StoppedUsingServiceDateController.onPageLoad(EmptyWaypoints).url
-
-  override val emptyUserAnswers = UserAnswers(userAnswersId)
-
-  def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest(GET, stoppedUsingServiceDateRoute)
-
-  def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
-    FakeRequest(POST, stoppedUsingServiceDateRoute)
-      .withFormUrlEncodedBody(
-        "value.day"   -> validAnswer.getDayOfMonth.toString,
-        "value.month" -> validAnswer.getMonthValue.toString,
-        "value.year"  -> validAnswer.getYear.toString
-      )
-
-  "StoppedUsingServiceDate Controller" - {
+  "StopSellingGoods Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val result = route(application, getRequest()).value
+        val request = FakeRequest(GET, stopSellingGoodsRoute)
 
-        val view = application.injector.instanceOf[StoppedUsingServiceDateView]
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[StopSellingGoodsView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, EmptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form, emptyWaypoints)(request, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(StoppedUsingServiceDatePage, validAnswer).success.value
+      val userAnswers = UserAnswers(userAnswersId).set(StopSellingGoodsPage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val view = application.injector.instanceOf[StoppedUsingServiceDateView]
+        val request = FakeRequest(GET, stopSellingGoodsRoute)
 
-        val result = route(application, getRequest()).value
+        val view = application.injector.instanceOf[StopSellingGoodsView]
+
+        val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), EmptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(true), emptyWaypoints)(request, messages(application)).toString
       }
     }
 
@@ -107,10 +90,16 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
           .build()
 
       running(application) {
-        val result = route(application, postRequest()).value
+        val request =
+          FakeRequest(POST, stopSellingGoodsRoute)
+            .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+
+        val userAnswers = UserAnswers(userAnswersId).set(StopSellingGoodsPage, true).success.value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual "add when navigation is done"
+        redirectLocation(result).value mustEqual StopSellingGoodsPage.navigate(emptyWaypoints, emptyUserAnswers, userAnswers).url
       }
     }
 
@@ -118,19 +107,19 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-      val request =
-        FakeRequest(POST, stoppedUsingServiceDateRoute)
-          .withFormUrlEncodedBody(("value", "invalid value"))
-
       running(application) {
-        val boundForm = form.bind(Map("value" -> "invalid value"))
+        val request =
+          FakeRequest(POST, stopSellingGoodsRoute)
+            .withFormUrlEncodedBody(("value", ""))
 
-        val view = application.injector.instanceOf[StoppedUsingServiceDateView]
+        val boundForm = form.bind(Map("value" -> ""))
+
+        val view = application.injector.instanceOf[StopSellingGoodsView]
 
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, EmptyWaypoints)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, emptyWaypoints)(request, messages(application)).toString
       }
     }
 
@@ -139,7 +128,9 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val result = route(application, getRequest).value
+        val request = FakeRequest(GET, stopSellingGoodsRoute)
+
+        val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
@@ -151,7 +142,11 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val result = route(application, postRequest()).value
+        val request =
+          FakeRequest(POST, stopSellingGoodsRoute)
+            .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
