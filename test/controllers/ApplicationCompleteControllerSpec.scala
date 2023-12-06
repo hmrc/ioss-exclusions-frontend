@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.ExclusionsRequestReceivedConfirmationView
+import views.html.ApplicationCompleteView
 
 class ApplicationCompleteControllerSpec extends SpecBase {
 
@@ -30,14 +30,14 @@ class ApplicationCompleteControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.ExclusionsRequestReceivedConfirmationController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[ExclusionsRequestReceivedConfirmationView]
+        val view = application.injector.instanceOf[ApplicationCompleteView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view("", "")(request, messages(application)).toString
       }
     }
   }
