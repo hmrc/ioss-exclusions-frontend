@@ -36,7 +36,7 @@ class ApplicationCompleteController @Inject()(
                                                view: ApplicationCompleteView
                                              ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify /* andThen getData andThen requireData*/) {
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
       val dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")

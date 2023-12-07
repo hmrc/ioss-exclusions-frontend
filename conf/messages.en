@@ -116,7 +116,7 @@ stopSellingGoods.change.hidden = Stop selling goods
 
 applicationComplete.title = We have received your request to leave
 applicationComplete.heading = We have received your request to leave
-applicationComplete.registration.text = You will leave this service on {0}.
+applicationComplete.registration.text = Your business no longer sells eligible goods to customers in the EU or Northern Ireland.<br/></br/>You will leave this service on {0}.
 applicationComplete.next.heading = What happens next
 applicationComplete.next.info.top = You must:
 applicationComplete.next.info.bullet1 = complete a VAT return for your final month
