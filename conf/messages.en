@@ -80,7 +80,7 @@ taxNumber.change.hidden = Tax Number
 
 moveDate.title = When did or when will your business move to?
 moveDate.heading = When did or when will your business move to?
-moveDate.hint = You can enter a date up to the last day of this month. For example, 01/12/2023.
+moveDate.hint = You can enter a date up to the last day of this month.<br/> For example, 01/12/2023.
 moveDate.checkYourAnswersLabel = Move date
 moveDate.error.required.all = Enter the move date
 moveDate.error.required.two = The move date must include {0} and {1}
@@ -90,7 +90,7 @@ moveDate.change.hidden = move date
 
 stoppedUsingServiceDate.title = When did you or when will you stop using this service?
 stoppedUsingServiceDate.heading = When did you or when will you stop using this service?
-stoppedUsingServiceDate.hint = You can enter a date up to the last day of this month. For example, 06/12/2023.
+stoppedUsingServiceDate.hint = You can enter a date up to the last day of this month.<br/> For example, 06/12/2023.
 stoppedUsingServiceDate.checkYourAnswersLabel = Stopped using service date
 stoppedUsingServiceDate.error.required.all = Enter the stopped using service date
 stoppedUsingServiceDate.error.required.two = The stoppedUsingServiceDate must include {0} and {1}
@@ -100,7 +100,7 @@ stoppedUsingServiceDate.change.hidden = Stopped using service date
 
 stoppedSellingGoodsDate.title = When did or when will your business stop selling eligible goods?
 stoppedSellingGoodsDate.heading = When did or when will your business stop selling eligible goods?
-stoppedSellingGoodsDate.hint = You can enter a date up to the last day of this month. For example, 06/12/2023.
+stoppedSellingGoodsDate.hint = You can enter a date up to the last day of this month.<br/> For example, 06/12/2023.
 stoppedSellingGoodsDate.checkYourAnswersLabel = Stopped selling goods date
 stoppedSellingGoodsDate.error.required.all = Enter the stopped selling goods date
 stoppedSellingGoodsDate.error.required.two = The stopped selling goods must include {0} and {1}

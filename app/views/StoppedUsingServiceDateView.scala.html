@@ -37,7 +37,7 @@
                 field  = form("value"),
                 legend = LegendViewModel(messages("stoppedUsingServiceDate.heading")).withCssClass("govuk-label--l").asPageHeading()
             )
-            .withHint(HintViewModel(messages("stoppedUsingServiceDate.hint")))
+            .withHint(HintViewModel(HtmlContent(messages("stoppedUsingServiceDate.hint"))))
         )
 
         @govukButton(

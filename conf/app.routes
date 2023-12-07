@@ -42,8 +42,8 @@ POST        /stop-selling-goods                          controllers.StopSelling
 GET         /leave-scheme                                controllers.LeaveSchemeController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
 POST        /leave-scheme                                controllers.LeaveSchemeController.onSubmit(mode: Waypoints ?= EmptyWaypoints)
 
-GET        /stopped-selling-goods-date                  controllers.StoppedSellingGoodsDateController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
-POST       /stopped-selling-goods-date                  controllers.StoppedSellingGoodsDateController.onSubmit(mode: Waypoints ?= EmptyWaypoints)
+GET         /stopped-selling-goods-date                  controllers.StoppedSellingGoodsDateController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
+POST        /stopped-selling-goods-date                  controllers.StoppedSellingGoodsDateController.onSubmit(mode: Waypoints ?= EmptyWaypoints)
 
 GET         /successful                                  controllers.ApplicationCompleteController.onPageLoad()
 
