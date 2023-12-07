@@ -14,12 +14,15 @@
  * limitations under the License.
  *@
 
+@import views.html.components.ButtonGroup
+@import pages.StoppedUsingServiceDatePage
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukDateInput: GovukDateInput,
-    govukButton: GovukButton
+    button: ButtonGroup
 )
 
 @(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
@@ -40,8 +43,6 @@
             .withHint(HintViewModel(HtmlContent(messages("stoppedUsingServiceDate.hint"))))
         )
 
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-        )
+        @button("site.continue", StoppedUsingServiceDatePage.route(waypoints).url, waypoints)
     }
 }

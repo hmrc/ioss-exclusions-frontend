@@ -14,12 +14,15 @@
  * limitations under the License.
  *@
 
+@import views.html.components.ButtonGroup
+@import pages.StoppedSellingGoodsDatePage
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukDateInput: GovukDateInput,
-    govukButton: GovukButton
+    button: ButtonGroup
 )
 
 @(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
@@ -40,8 +43,6 @@
             .withHint(HintViewModel(HtmlContent(messages("stoppedSellingGoodsDate.hint"))))
         )
 
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-        )
+        @button("site.continue", StoppedSellingGoodsDatePage.route(waypoints).url, waypoints)
     }
 }

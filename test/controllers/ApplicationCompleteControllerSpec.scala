@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.ApplicationCompleteView
@@ -30,9 +31,13 @@ class ApplicationCompleteControllerSpec extends SpecBase {
 
     "must return OK and the correct view for a GET" in {
 
+
       val clock = Clock.fixed(Instant.EPOCH, ZoneId.of("UTC"))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).overrides(bind[Clock].toInstance(clock)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[Clock].toInstance(clock)
+        ).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
@@ -41,10 +46,12 @@ class ApplicationCompleteControllerSpec extends SpecBase {
 
         val view = application.injector.instanceOf[ApplicationCompleteView]
 
+        val config = application.injector.instanceOf[FrontendAppConfig]
+
         status(result) mustEqual OK
         val dummyLeaveDate = "2 January 1970"
         val dummyCancelDate = "1 January 1970"
-        contentAsString(result) mustEqual view(dummyLeaveDate, dummyCancelDate)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(config.iossYourAccountUrl, dummyLeaveDate, dummyCancelDate)(request, messages(application)).toString
       }
     }
   }
