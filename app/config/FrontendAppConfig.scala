@@ -25,6 +25,8 @@ import uk.gov.hmrc.http.StringContextOps
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration) {
 
+
+
   val host: String    = configuration.get[String]("host")
   val appName: String = configuration.get[String]("appName")
 
@@ -37,6 +39,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val loginUrl: String         = configuration.get[String]("urls.login")
   val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
   val signOutUrl: String       = configuration.get[String]("urls.signOut")
+  val iossYourAccountUrl: String = configuration.get[String]("urls.yourAccountUrl")
 
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
   val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/ioss-exclusions-frontend"

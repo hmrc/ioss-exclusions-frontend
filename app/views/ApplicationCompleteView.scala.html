@@ -19,27 +19,34 @@
         govukButton: GovukButton
 )
 
-@(leaveDate: String, cancelDate: String)(implicit request: Request[_], messages: Messages)
+@(yourAccountUrl: String, leaveDate: String, cancelDate: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("applicationComplete.title"))) {
+    @layout(pageTitle = titleNoForm(messages("applicationComplete.title"))) {
 
-    <div class="govuk-panel govuk-panel--confirmation">
-        <h1 class="govuk-panel__title">@messages("applicationComplete.heading")</h1>
-    </div>
+        <div class="govuk-panel govuk-panel--confirmation">
+            <h1 class="govuk-panel__title">@messages("applicationComplete.heading")</h1>
+        </div>
 
-    <p class="govuk-body">@Html(messages("applicationComplete.registration.text", leaveDate))</p>
+        <p class="govuk-body">@Html(messages("applicationComplete.registration.text", leaveDate))</p>
 
-    <h2 class="govuk-heading-m">@messages("applicationComplete.next.heading")</h2>
-    <p class="govuk-body">
-    @messages("applicationComplete.next.info.top")
-    </p>
+        <h2 class="govuk-heading-m">@messages("applicationComplete.next.heading")</h2>
+        <p class="govuk-body">
+        @messages("applicationComplete.next.info.top")
+        </p>
 
-    <ul class="govuk-list govuk-list--bullet">
-        <li>@messages("applicationComplete.next.info.bullet1")</li>
-        <li>@messages("applicationComplete.next.info.bullet2")</li>
-    </ul>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>@messages("applicationComplete.next.info.bullet1")</li>
+            <li>@messages("applicationComplete.next.info.bullet2")</li>
+        </ul>
 
-    <p class="govuk-body">
+        <p class="govuk-body">
         @messages("applicationComplete.next.info.bottom", cancelDate)
-    </p>
-}
+        </p>
+
+        <p class="govuk-body">
+            <a href="@yourAccountUrl" class="govuk-link govuk-link--no-visited-state">
+            @messages("applicationComplete.next.info.returnToAccount")
+            </a>
+        </p>
+
+    }

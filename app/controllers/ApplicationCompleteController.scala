@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -29,11 +30,12 @@ import javax.inject.Inject
 class ApplicationCompleteController @Inject()(
                                                override val messagesApi: MessagesApi,
                                                clock: Clock,
+                                               config: FrontendAppConfig,
+                                               view: ApplicationCompleteView,
                                                identify: IdentifierAction,
                                                getData: DataRetrievalAction,
                                                requireData: DataRequiredAction,
-                                               val controllerComponents: MessagesControllerComponents,
-                                               view: ApplicationCompleteView
+                                               val controllerComponents: MessagesControllerComponents
                                              ) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
@@ -44,6 +46,6 @@ class ApplicationCompleteController @Inject()(
       val leaveDate = dateTimeFormatter.format(LocalDate.now(clock).plusDays(1))
       val cancelDate = dateTimeFormatter.format(LocalDate.now(clock))
 
-      Ok(view(leaveDate, cancelDate))
+      Ok(view(config.iossYourAccountUrl, leaveDate, cancelDate))
   }
 }
