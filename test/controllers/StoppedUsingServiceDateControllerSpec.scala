@@ -24,7 +24,7 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, StoppedUsingServiceDatePage}
+import pages.{EmptyWaypoints, StoppedUsingServiceDatePage, Waypoints}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
@@ -40,13 +40,14 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
   private implicit val messages: Messages = stubMessages()
 
   private val formProvider = new StoppedUsingServiceDateFormProvider()
-  private def form = formProvider()
 
- // def onwardRoute = Call("GET", "/foo")
+  private val form = formProvider()
 
-  val validAnswer = LocalDate.now(ZoneOffset.UTC)
+  private val emptyWaypoints: Waypoints = EmptyWaypoints
 
-  lazy val stoppedUsingServiceDateRoute = routes.StoppedUsingServiceDateController.onPageLoad(EmptyWaypoints).url
+  private val validAnswer = LocalDate.now(ZoneOffset.UTC)
+
+  private lazy val stoppedUsingServiceDateRoute = routes.StoppedUsingServiceDateController.onPageLoad(EmptyWaypoints).url
 
   override val emptyUserAnswers = UserAnswers(userAnswersId)
 
@@ -109,8 +110,10 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val result = route(application, postRequest()).value
 
+        val userAnswers = UserAnswers(userAnswersId).set(StoppedUsingServiceDatePage, validAnswer).success.value
+
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual "add when navigation is done"
+        redirectLocation(result).value mustEqual StoppedUsingServiceDatePage.navigate(emptyWaypoints, emptyUserAnswers, userAnswers).url
       }
     }
 
