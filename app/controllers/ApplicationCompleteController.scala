@@ -42,7 +42,7 @@ class ApplicationCompleteController @Inject()(
     implicit request =>
 
       val dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
-      //Change to business rules later
+      // TODO: Change to business rules later
       val leaveDate = dateTimeFormatter.format(LocalDate.now(clock).plusDays(1))
       val cancelDate = dateTimeFormatter.format(LocalDate.now(clock))
 

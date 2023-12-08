@@ -24,9 +24,6 @@ import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.StringContextOps
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration) {
-
-
-
   val host: String    = configuration.get[String]("host")
   val appName: String = configuration.get[String]("appName")
 

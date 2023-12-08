@@ -17,7 +17,6 @@
 package controllers.actions
 
 import controllers.routes
-import models.UserAnswers
 import models.requests.{DataRequest, OptionalDataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
@@ -32,7 +31,7 @@ class DataRequiredActionImpl @Inject()(implicit val executionContext: ExecutionC
     request.userAnswers match {
       case None =>
         Future.successful(Left(Redirect(routes.JourneyRecoveryController.onPageLoad())))
-      case Some(data) =>
+      case Some(data: UserAnswers) =>
         Future.successful(Right(DataRequest(request.request, request.userId, data)))
     }
   }
