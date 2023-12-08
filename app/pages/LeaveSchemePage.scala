@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package queries
+package pages
 
+import controllers.routes
 import models.UserAnswers
 import play.api.libs.json.JsPath
+import play.api.mvc.Call
 
-import scala.util.{Success, Try}
 
-sealed trait Query {
+case object LeaveSchemePage extends QuestionPage[Boolean] {
 
-  def path: JsPath
-}
+  override def path: JsPath = JsPath \ toString
 
-trait Gettable[A] extends Query
+  override def toString: String = "leaveScheme"
 
-trait Settable[A] extends Query {
+  override def route(waypoints: Waypoints): Call =
+    routes.LeaveSchemeController.onPageLoad(waypoints)
 
-  def cleanup(value: Option[A], userAnswers: UserAnswers): Try[UserAnswers] =
-    Success(userAnswers)
-}
-
-trait Derivable[A, B] extends Query {
-  val derive: A => B
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+    answers.get(this).map {
+      case true => StoppedUsingServiceDatePage
+      case false => ApplicationCompletePage
+    }.orRecover
 }

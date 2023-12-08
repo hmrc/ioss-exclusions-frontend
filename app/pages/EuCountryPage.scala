@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package viewmodels
+package pages
 
-package object govuk {
+import controllers.routes
+import models.{Country, UserAnswers}
+import play.api.libs.json.JsPath
+import play.api.mvc.Call
 
-  object all
-    extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with RadiosFluency
-      with SelectFluency
-      with SummaryListFluency
-      with TagFluency
+case object EuCountryPage extends QuestionPage[Country] {
+
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "euCountry"
+
+  override def route(waypoints: Waypoints): Call =
+    routes.EuCountryController.onPageLoad(waypoints)
+
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+    MoveDatePage
 }

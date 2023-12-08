@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package viewmodels
+package utils
 
-package object govuk {
+import pages.{CheckAnswersPage, NonEmptyWaypoints, Waypoints}
 
-  object all
-    extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with RadiosFluency
-      with SelectFluency
-      with SummaryListFluency
-      with TagFluency
+object AmendWaypoints {
+
+  implicit class AmendWaypointsOps(waypoints: Waypoints) {
+    def inAmend: Boolean = false
+
+    private def isInMode(page: CheckAnswersPage) = {
+      waypoints match {
+        case nonEmptyWaypoints: NonEmptyWaypoints =>
+          nonEmptyWaypoints.waypoints.toList.map(_.urlFragment).contains(page.urlFragment)
+        case _ =>
+          false
+      }
+    }
+
+    def inCheck: Boolean = false
+  }
 }

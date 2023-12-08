@@ -14,23 +14,32 @@
  * limitations under the License.
  */
 
-package viewmodels
+package forms
 
-package object govuk {
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-  object all
-    extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with RadiosFluency
-      with SelectFluency
-      with SummaryListFluency
-      with TagFluency
+class StopSellingGoodsFormProviderSpec extends BooleanFieldBehaviours {
+
+  val requiredKey = "stopSellingGoods.error.required"
+  val invalidKey = "error.boolean"
+
+  val form = new StopSellingGoodsFormProvider()()
+
+  ".value" - {
+
+    val fieldName = "value"
+
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
 }

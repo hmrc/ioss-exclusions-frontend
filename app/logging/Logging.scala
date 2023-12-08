@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package viewmodels
+package logging
 
-package object govuk {
+import org.slf4j.{Logger, LoggerFactory}
 
-  object all
-    extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with RadiosFluency
-      with SelectFluency
-      with SummaryListFluency
-      with TagFluency
+trait Logging {
+
+  protected val logger: Logger =
+    LoggerFactory.getLogger("application." + getClass.getCanonicalName)
 }

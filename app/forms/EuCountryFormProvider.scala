@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package viewmodels
+package forms
 
-package object govuk {
+import javax.inject.Inject
+import forms.mappings.Mappings
+import models.Country
+import play.api.data.Form
 
-  object all
-    extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with RadiosFluency
-      with SelectFluency
-      with SummaryListFluency
-      with TagFluency
+class EuCountryFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[Country] =
+    Form(
+      "value" -> text("euCountry.error.required")
+        .verifying("euCountry.error.required", value => Country.euCountries.exists(_.code == value))
+        .transform[Country](value => Country.euCountries.find(_.code == value).get, _.code)
+    )
 }

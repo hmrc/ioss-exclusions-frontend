@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-package viewmodels
+package forms
 
-package object govuk {
+import javax.inject.Inject
 
-  object all
-    extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with RadiosFluency
-      with SelectFluency
-      with SummaryListFluency
-      with TagFluency
+import forms.mappings.Mappings
+import play.api.data.Form
+
+class TaxNumberFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[String] =
+    Form(
+      "value" -> text("taxNumber.error.required")
+        .verifying(maxLength(100, "taxNumber.error.length"))
+    )
 }

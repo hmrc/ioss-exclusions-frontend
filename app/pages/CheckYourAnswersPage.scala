@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package viewmodels
+package pages
+import controllers.routes
+import models.UserAnswers
+import play.api.mvc.Call
 
-package object govuk {
+object CheckYourAnswersPage extends CheckAnswersPage {
 
-  object all
-    extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with RadiosFluency
-      with SelectFluency
-      with SummaryListFluency
-      with TagFluency
+  override def isTheSamePage(other: Page): Boolean = other match {
+    case CheckYourAnswersPage  => true
+    case _ => false
+  }
+
+  override val urlFragment: String = "check-your-answers"
+
+  override def route(waypoints: Waypoints): Call =
+    routes.CheckYourAnswersController.onPageLoad()
+
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+    ApplicationCompletePage
 }

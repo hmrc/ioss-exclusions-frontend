@@ -18,6 +18,8 @@ lazy val root = (project in file("."))
     name := appName,
     RoutesKeys.routesImport ++= Seq(
       "models._",
+      "pages.Waypoints",
+      "pages.EmptyWaypoints",
       "uk.gov.hmrc.play.bootstrap.binders.RedirectUrl"
     ),
     TwirlKeys.templateImports ++= Seq(
@@ -30,7 +32,9 @@ lazy val root = (project in file("."))
       "views.ViewUtils._",
       "models.Mode",
       "controllers.routes._",
-      "viewmodels.govuk.all._"
+      "pages.Waypoints",
+      "viewmodels.govuk.all._",
+      "utils.AmendWaypoints._"
     ),
     PlayKeys.playDefaultPort := 10189,
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;" +

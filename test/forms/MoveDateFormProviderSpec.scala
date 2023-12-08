@@ -14,29 +14,27 @@
  * limitations under the License.
  */
 
-package controllers
+package forms
 
-import base.SpecBase
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import java.time.{LocalDate, ZoneOffset}
+import forms.behaviours.DateBehaviours
+import play.api.i18n.Messages
+import play.api.test.Helpers.stubMessages
 
-class IndexControllerSpec extends SpecBase {
+class MoveDateFormProviderSpec extends DateBehaviours {
 
-  "Index Controller" - {
+  private implicit val messages: Messages = stubMessages()
+  private val form = new MoveDateFormProvider()()
 
-    "must redirect to Move Country" in {
+  ".value" - {
 
-      val application = applicationBuilder(userAnswers = None).build()
+    val validData = datesBetween(
+      min = LocalDate.of(2000, 1, 1),
+      max = LocalDate.now(ZoneOffset.UTC)
+    )
 
-      running(application) {
-        val request = FakeRequest(GET, routes.IndexController.onPageLoad.url)
+    behave like dateField(form, "value", validData)
 
-        val result = route(application, request).value
-
-        status(result) mustBe SEE_OTHER
-
-        redirectLocation(result).value mustBe routes.MoveCountryController.onPageLoad().url
-      }
-    }
+    behave like mandatoryDateField(form, "value", "moveDate.error.required.all")
   }
 }

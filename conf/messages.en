@@ -18,7 +18,7 @@ date.error.day = day
 date.error.month = month
 date.error.year = year
 
-timeout.title = You’re about to be signed out
+timeout.title = You''re about to be signed out
 timeout.message = For security reasons, you will be signed out of this service in
 timeout.keepAlive = Stay signed in
 timeout.signOut = Sign out
@@ -58,3 +58,74 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+
+moveCountry.title = Are you moving your business to a different EU country?
+moveCountry.heading = Are you moving your business to a different EU country?
+moveCountry.checkYourAnswersLabel = Moved to a different country
+moveCountry.error.required = Select yes if moved to a different country
+moveCountry.change.hidden = Moved to a different country
+
+euCountry.title = Which country is your business moving to?
+euCountry.heading = Which country is your business moving to?
+euCountry.checkYourAnswersLabel = Eu Country
+euCountry.error.required = Select yes if euCountry
+euCountry.change.hidden = Eu Country
+
+taxNumber.title = What is your tax number in {0}?
+taxNumber.heading = What is your tax number in {0}?
+taxNumber.checkYourAnswersLabel = taxNumber
+taxNumber.error.required = Enter tax number
+taxNumber.error.length = Tax Number must be 100 characters or less
+taxNumber.change.hidden = Tax Number
+
+moveDate.title = When did or when will your business move to?
+moveDate.heading = When did or when will your business move to?
+moveDate.hint = You can enter a date up to the last day of this month.<br/> For example, 01/12/2023.
+moveDate.checkYourAnswersLabel = Move date
+moveDate.error.required.all = Enter the move date
+moveDate.error.required.two = The move date must include {0} and {1}
+moveDate.error.required = The move date must include {0}
+moveDate.error.invalid = Enter a real move date
+moveDate.change.hidden = move date
+
+stoppedUsingServiceDate.title = When did you or when will you stop using this service?
+stoppedUsingServiceDate.heading = When did you or when will you stop using this service?
+stoppedUsingServiceDate.hint = You can enter a date up to the last day of this month.<br/> For example, 06/12/2023.
+stoppedUsingServiceDate.checkYourAnswersLabel = Stopped using service date
+stoppedUsingServiceDate.error.required.all = Enter the stopped using service date
+stoppedUsingServiceDate.error.required.two = The stoppedUsingServiceDate must include {0} and {1}
+stoppedUsingServiceDate.error.required = The stopped using service date must include {0}
+stoppedUsingServiceDate.error.invalid = Enter a real stopped using service date
+stoppedUsingServiceDate.change.hidden = Stopped using service date
+
+stoppedSellingGoodsDate.title = When did or when will your business stop selling eligible goods?
+stoppedSellingGoodsDate.heading = When did or when will your business stop selling eligible goods?
+stoppedSellingGoodsDate.hint = You can enter a date up to the last day of this month.<br/> For example, 06/12/2023.
+stoppedSellingGoodsDate.checkYourAnswersLabel = Stopped selling goods date
+stoppedSellingGoodsDate.error.required.all = Enter the stopped selling goods date
+stoppedSellingGoodsDate.error.required.two = The stopped selling goods must include {0} and {1}
+stoppedSellingGoodsDate.error.required = The stopped selling goods must include {0}
+stoppedSellingGoodsDate.error.invalid = Enter a real stopped selling goods date
+stoppedSellingGoodsDate.change.hidden =  Stopped selling goods date
+
+stopSellingGoods.title = Has your business stopped selling eligible goods to customers in the EU or Northern Ireland?
+stopSellingGoods.heading = Has your business stopped selling eligible goods to customers in the EU or Northern Ireland?
+stopSellingGoods.checkYourAnswersLabel = stop selling goods
+stopSellingGoods.error.required = Select yes if stopSellingGoods
+stopSellingGoods.change.hidden = Stop selling goods
+
+applicationComplete.title = We have received your request to leave
+applicationComplete.heading = We have received your request to leave
+applicationComplete.registration.text = Your business no longer sells eligible goods to customers in the EU or Northern Ireland.<br/></br/>You will leave this service on {0}.
+applicationComplete.next.heading = What happens next
+applicationComplete.next.info.top = You must:
+applicationComplete.next.info.bullet1 = complete a VAT return for your final month
+applicationComplete.next.info.bullet2 = pay any VAT you still owe
+applicationComplete.next.info.bottom = If you change your mind, you have until {0} to cancel this request and stay on the service.
+applicationComplete.next.info.returnToAccount = Return to your account
+
+leaveScheme.title = Are you sure you want to leave the Import One Stop Shop scheme?
+leaveScheme.heading = Are you sure you want to leave the Import One Stop Shop scheme?
+leaveScheme.checkYourAnswersLabel = leave scheme
+leaveScheme.error.required = Select yes if leaveScheme
+leaveScheme.change.hidden = leave scheme

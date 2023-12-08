@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package viewmodels
+package pages
 
-package object govuk {
+import controllers.routes
+import models.UserAnswers
+import play.api.libs.json.JsPath
+import play.api.mvc.Call
 
-  object all
-    extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with RadiosFluency
-      with SelectFluency
-      with SummaryListFluency
-      with TagFluency
+import java.time.LocalDate
+
+case object StoppedSellingGoodsDatePage extends QuestionPage[LocalDate] {
+
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "stoppedSellingGoodsDate"
+
+  override def route(waypoints: Waypoints): Call = routes.StoppedSellingGoodsDateController.onPageLoad(waypoints)
+
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+    ApplicationCompletePage
 }

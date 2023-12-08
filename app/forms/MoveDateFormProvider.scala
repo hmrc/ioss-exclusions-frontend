@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package viewmodels
+package forms
 
-package object govuk {
+import forms.mappings.Mappings
+import play.api.data.Form
+import play.api.i18n.Messages
 
-  object all
-    extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with RadiosFluency
-      with SelectFluency
-      with SummaryListFluency
-      with TagFluency
+import java.time.LocalDate
+import javax.inject.Inject
+
+class MoveDateFormProvider @Inject() extends Mappings {
+
+  def apply()(implicit messages: Messages): Form[LocalDate] =
+    Form(
+      "value" -> localDate(
+        invalidKey     = "moveDate.error.invalid",
+        allRequiredKey = "moveDate.error.required.all",
+        twoRequiredKey = "moveDate.error.required.two",
+        requiredKey    = "moveDate.error.required"
+      )
+    )
 }

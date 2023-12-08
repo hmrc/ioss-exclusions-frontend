@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package viewmodels
+package pages
 
-package object govuk {
+import models.Mode
 
-  object all
-    extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with RadiosFluency
-      with SelectFluency
-      with SummaryListFluency
-      with TagFluency
+case class Waypoint(
+                     page: WaypointPage,
+                     mode: Mode,
+                     urlFragment: String
+                   )
+
+object Waypoint {
+
+  private val fragments: Map[String, Waypoint] = Map.empty
+
+  def fromString(s: String): Option[Waypoint] = fragments.get(s)
 }
