@@ -25,7 +25,7 @@
     button: ButtonGroup
 )
 
-@(form: Form[_], waypoints: Waypoints, dateHint: String)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], dateHint: String, waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("stoppedUsingServiceDate.title"))) {
 

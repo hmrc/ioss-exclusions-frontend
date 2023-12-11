@@ -51,7 +51,7 @@ class StoppedSellingGoodsDateController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, waypoints, dates.dateHint))
+      Ok(view(preparedForm, dates.dateHint, waypoints))
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -61,7 +61,7 @@ class StoppedSellingGoodsDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints, dates.dateHint))),
+          Future.successful(BadRequest(view(formWithErrors, dates.dateHint, waypoints))),
 
         value =>
           for {
