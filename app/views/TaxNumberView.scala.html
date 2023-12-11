@@ -41,7 +41,7 @@
                 field = form("value"),
                 label = LabelViewModel(messages("taxNumber.heading", country.name)).withCssClass("govuk-label--l").asPageHeading()
             )
-            .withWidth(Full)
+            .withWidth(Fixed20)
         )
 
         @button("site.continue", TaxNumberPage.route(waypoints).url, waypoints)
