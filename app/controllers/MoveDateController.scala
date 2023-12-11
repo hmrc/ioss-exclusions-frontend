@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions._
+import date.Dates
 import forms.MoveDateFormProvider
 import pages.{MoveDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -35,11 +36,12 @@ class MoveDateController @Inject()(
                                      getData: DataRetrievalAction,
                                      requireData: DataRequiredAction,
                                      formProvider: MoveDateFormProvider,
+                                     dates: Dates,
                                      val controllerComponents: MessagesControllerComponents,
                                      view: MoveDateView
                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(mode: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val form = formProvider()
 
@@ -48,7 +50,7 @@ class MoveDateController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode))
+      Ok(view(preparedForm, waypoints, dates.dateHint))
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -57,7 +59,7 @@ class MoveDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints))),
+          Future.successful(BadRequest(view(formWithErrors, waypoints, dates.dateHint))),
 
         exclusionDate =>
           for {

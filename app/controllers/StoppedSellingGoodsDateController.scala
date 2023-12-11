@@ -27,6 +27,7 @@ import views.html.StoppedSellingGoodsDateView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import date.Dates
 
 class StoppedSellingGoodsDateController @Inject()(
                                                    override val messagesApi: MessagesApi,
@@ -35,6 +36,7 @@ class StoppedSellingGoodsDateController @Inject()(
                                                    getData: DataRetrievalAction,
                                                    requireData: DataRequiredAction,
                                                    formProvider: StoppedSellingGoodsDateFormProvider,
+                                                   dates: Dates,
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: StoppedSellingGoodsDateView
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
@@ -49,7 +51,7 @@ class StoppedSellingGoodsDateController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, waypoints))
+      Ok(view(preparedForm, waypoints, dates.dateHint))
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -59,7 +61,7 @@ class StoppedSellingGoodsDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints))),
+          Future.successful(BadRequest(view(formWithErrors, waypoints, dates.dateHint))),
 
         value =>
           for {

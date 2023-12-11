@@ -25,7 +25,7 @@
     button: ButtonGroup
 )
 
-@(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], waypoints: Waypoints, dateHint: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("moveDate.title"))) {
 
@@ -40,7 +40,7 @@
                 field  = form("value"),
                 legend = LegendViewModel(messages("moveDate.heading")).withCssClass("govuk-label--l").asPageHeading()
             )
-            .withHint(HintViewModel(HtmlContent(messages("moveDate.hint"))))
+            .withHint(HintViewModel(HtmlContent(messages("moveDate.hint", dateHint))))
         )
 
         @button("site.continue", MoveDatePage.route(waypoints).url, waypoints)

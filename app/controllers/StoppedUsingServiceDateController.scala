@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions._
+import date.Dates
 import forms.StoppedUsingServiceDateFormProvider
 import pages.{StoppedUsingServiceDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -35,6 +36,7 @@ class StoppedUsingServiceDateController @Inject()(
                                                    getData: DataRetrievalAction,
                                                    requireData: DataRequiredAction,
                                                    formProvider: StoppedUsingServiceDateFormProvider,
+                                                   dates: Dates,
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: StoppedUsingServiceDateView
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
@@ -49,7 +51,7 @@ class StoppedUsingServiceDateController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, waypoints))
+      Ok(view(preparedForm, waypoints, dates.dateHint))
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -59,7 +61,7 @@ class StoppedUsingServiceDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints))),
+          Future.successful(BadRequest(view(formWithErrors, waypoints, dates.dateHint))),
 
         value =>
           for {

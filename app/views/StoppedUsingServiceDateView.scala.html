@@ -25,7 +25,7 @@
     button: ButtonGroup
 )
 
-@(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], waypoints: Waypoints, dateHint: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("stoppedUsingServiceDate.title"))) {
 
@@ -40,7 +40,7 @@
                 field  = form("value"),
                 legend = LegendViewModel(messages("stoppedUsingServiceDate.heading")).withCssClass("govuk-label--l").asPageHeading()
             )
-            .withHint(HintViewModel(HtmlContent(messages("stoppedUsingServiceDate.hint"))))
+            .withHint(HintViewModel(HtmlContent(messages("stoppedUsingServiceDate.hint", dateHint))))
         )
 
         @button("site.continue", StoppedUsingServiceDatePage.route(waypoints).url, waypoints)
