@@ -19,7 +19,7 @@ package controllers
 import controllers.actions._
 import date.Dates
 import forms.MoveDateFormProvider
-import pages.{MoveDatePage, Waypoints}
+import pages.{EuCountryPage, MoveDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -50,7 +50,10 @@ class MoveDateController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, waypoints, dates.dateHint))
+      request.userAnswers.get(EuCountryPage).map { country =>
+        Ok(view(preparedForm, country, dates.dateHint, waypoints))
+      }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -58,9 +61,11 @@ class MoveDateController @Inject()(
       val form = formProvider()
 
       form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints, dates.dateHint))),
-
+        formWithErrors => {
+          request.userAnswers.get(EuCountryPage).map { country =>
+            Future.successful(BadRequest(view(formWithErrors, country, dates.dateHint, waypoints)))
+          }.getOrElse(Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad())))
+        },
         exclusionDate =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(MoveDatePage, exclusionDate))
