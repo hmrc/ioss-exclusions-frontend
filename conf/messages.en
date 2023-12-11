@@ -42,8 +42,8 @@ index.title = ioss-exclusions-frontend
 index.heading = ioss-exclusions-frontend
 index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
 
-checkYourAnswers.title = Check Your Answers
-checkYourAnswers.heading = Check Your Answers
+checkYourAnswers.title = Check your answers before leaving the IOSS scheme
+checkYourAnswers.heading = Check your answers before leaving the IOSS scheme
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
@@ -67,13 +67,13 @@ moveCountry.change.hidden = Moved to a different country
 
 euCountry.title = Which country is your business moving to?
 euCountry.heading = Which country is your business moving to?
-euCountry.checkYourAnswersLabel = Eu Country
+euCountry.checkYourAnswersLabel = New Country
 euCountry.error.required = Select yes if euCountry
 euCountry.change.hidden = Eu Country
 
 taxNumber.title = What is your tax number in {0}?
 taxNumber.heading = What is your tax number in {0}?
-taxNumber.checkYourAnswersLabel = taxNumber
+taxNumber.checkYourAnswersLabel = Tax number
 taxNumber.error.required = Enter tax number
 taxNumber.error.length = Tax Number must be 100 characters or less
 taxNumber.change.hidden = Tax Number
@@ -81,7 +81,7 @@ taxNumber.change.hidden = Tax Number
 moveDate.title = When did or when will your business move to {0}?
 moveDate.heading = When did or when will your business move to {0}?
 moveDate.hint = You can enter a date up to the last day of this month.<br/> For example, {0}.
-moveDate.checkYourAnswersLabel = Move date
+moveDate.checkYourAnswersLabel = Business move date
 moveDate.error.required.all = Enter the move date
 moveDate.error.required.two = The move date must include {0} and {1}
 moveDate.error.required = The move date must include {0}

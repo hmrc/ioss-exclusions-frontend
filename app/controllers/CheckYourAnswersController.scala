@@ -18,10 +18,13 @@ package controllers
 
 import com.google.inject.Inject
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import pages.{CheckYourAnswersPage, Waypoints}
+import models.CheckMode
+import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.CompletionChecks
+import viewmodels.checkAnswers.EuCountrySummary
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
 
@@ -34,16 +37,23 @@ class CheckYourAnswersController @Inject()(
                                             requireData: DataRequiredAction,
                                             val controllerComponents: MessagesControllerComponents,
                                             view: CheckYourAnswersView
-                                          ) extends FrontendBaseController with I18nSupport {
+                                          ) extends FrontendBaseController with I18nSupport with CompletionChecks {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
+      val thisPage = CheckYourAnswersPage
+      val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, CheckYourAnswersPage.urlFragment))
+
+      val euCountrySummaryRow = EuCountrySummary.rowNewCountry(request.userAnswers, waypoints, thisPage)
+
+
       val list = SummaryListViewModel(
-        rows = Seq.empty
+        rows = Seq(euCountrySummaryRow).flatten
       )
 
-      Ok(view(list))
+      val isValid = validate()
+      Ok(view(waypoints, list, isValid))
   }
 
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = (identify andThen getData andThen requireData).async {
