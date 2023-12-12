@@ -21,6 +21,9 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class Dates @Inject() (val clock: Clock) {
+
+  val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+
   val dateHint: String =
     DateTimeFormatter.ofPattern("dd/MM/yyyy").format(LocalDate.now(clock))
 }

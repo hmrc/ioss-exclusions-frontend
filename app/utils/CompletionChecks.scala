@@ -50,17 +50,27 @@ trait CompletionChecks {
   private def isEuCountryValid()(implicit request: DataRequest[AnyContent]): Boolean =
     request.userAnswers.get(EuCountryPage).isDefined
 
+  private def isMoveDateValid()(implicit request: DataRequest[AnyContent]): Boolean =
+    request.userAnswers.get(MoveDatePage).isDefined
+
 
   def validate()(implicit request: DataRequest[AnyContent]): Boolean = {
-    isEuCountryValid()
+    isEuCountryValid() && isMoveDateValid()
   }
 
   def getFirstValidationErrorRedirect(waypoints: Waypoints)(implicit request: DataRequest[AnyContent]): Option[Result] = {
-    incompleteEuCountryRedirect(waypoints)
+    incompleteEuCountryRedirect(waypoints) orElse
+      incompleteMoveDateRedirect(waypoints)
   }
 
   private def incompleteEuCountryRedirect(waypoints: Waypoints)(implicit request: DataRequest[AnyContent]): Option[Result] = if (!isEuCountryValid()) {
     Some(Redirect(controllers.routes.EuCountryController.onPageLoad(waypoints)))
+  } else {
+    None
+  }
+
+  private def incompleteMoveDateRedirect(waypoints: Waypoints)(implicit request: DataRequest[AnyContent]): Option[Result] = if (!isMoveDateValid()) {
+    Some(Redirect(controllers.routes.MoveDateController.onPageLoad(waypoints)))
   } else {
     None
   }

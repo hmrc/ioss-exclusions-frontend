@@ -18,13 +18,14 @@ package controllers
 
 import com.google.inject.Inject
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import date.Dates
 import models.CheckMode
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
-import viewmodels.checkAnswers.EuCountrySummary
+import viewmodels.checkAnswers.{EuCountrySummary, MoveDateSummary}
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
 
@@ -35,6 +36,7 @@ class CheckYourAnswersController @Inject()(
                                             identify: IdentifierAction,
                                             getData: DataRetrievalAction,
                                             requireData: DataRequiredAction,
+                                            dates: Dates,
                                             val controllerComponents: MessagesControllerComponents,
                                             view: CheckYourAnswersView
                                           ) extends FrontendBaseController with I18nSupport with CompletionChecks {
@@ -46,10 +48,13 @@ class CheckYourAnswersController @Inject()(
       val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, CheckYourAnswersPage.urlFragment))
 
       val euCountrySummaryRow = EuCountrySummary.rowNewCountry(request.userAnswers, waypoints, thisPage)
-
+      val moveDateSummaryRow = MoveDateSummary.rowNewCountry(request.userAnswers, waypoints, thisPage, dates)
 
       val list = SummaryListViewModel(
-        rows = Seq(euCountrySummaryRow).flatten
+        rows = Seq(
+          euCountrySummaryRow,
+          moveDateSummaryRow
+        ).flatten
       )
 
       val isValid = validate()
