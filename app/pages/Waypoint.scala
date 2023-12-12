@@ -26,7 +26,9 @@ case class Waypoint(
 
 object Waypoint {
 
-  private val fragments: Map[String, Waypoint] = Map.empty
+  private val fragments: Map[String, Waypoint] = Map(
+    CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint
+  )
 
   def fromString(s: String): Option[Waypoint] = fragments.get(s)
 }
