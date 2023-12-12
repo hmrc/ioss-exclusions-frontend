@@ -40,7 +40,7 @@ class MoveDateControllerSpec extends SpecBase with MockitoSugar {
 
   private implicit val messages: Messages = stubMessages()
 
-  private val formProvider = new MoveDateFormProvider()
+  private val formProvider = new MoveDateFormProvider(Dates.clock)
 
   private val form: Form[LocalDate] = formProvider()
 

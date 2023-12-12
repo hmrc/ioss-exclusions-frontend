@@ -16,21 +16,26 @@
 
 package forms
 
-import java.time.{LocalDate, ZoneOffset}
+import date.Dates
 import forms.behaviours.DateBehaviours
+import org.scalacheck.Gen
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
+
+import java.time.LocalDate
 
 class MoveDateFormProviderSpec extends DateBehaviours {
 
   private implicit val messages: Messages = stubMessages()
-  private val form = new MoveDateFormProvider()()
+  private val form = new MoveDateFormProvider(Dates.clock)()
 
   ".value" - {
 
-    val validData = datesBetween(
-      min = LocalDate.of(2000, 1, 1),
-      max = LocalDate.now(ZoneOffset.UTC)
+    val minDate: LocalDate = LocalDate.now(Dates.clock)
+
+    val validData: Gen[LocalDate] = datesBetween(
+      min = minDate,
+      max = minDate.plusMonths(1).withDayOfMonth(10)
     )
 
     behave like dateField(form, "value", validData)

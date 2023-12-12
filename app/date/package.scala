@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package date
+import java.time.LocalDate
 
-import java.time.{Clock, LocalDate, ZoneOffset}
-import java.time.format.DateTimeFormatter
-import javax.inject.Inject
-
-class Dates @Inject() (val clock: Clock) {
-
-  val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
-
-  val dateHint: String =
-    DateTimeFormatter.ofPattern("dd/MM/yyyy").format(LocalDate.now(clock))
-}
-
-object Dates {
-  val clock: Clock = Clock.systemDefaultZone.withZone(ZoneOffset.UTC)
+package object date {
+  implicit class LocalDateOps(val localDate: LocalDate) extends Ordered[LocalDate] {
+    def compare(other: LocalDate): Int = localDate.compareTo(other)
+  }
 }

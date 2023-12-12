@@ -85,7 +85,7 @@ moveDate.checkYourAnswersLabel = Business move date
 moveDate.error.required.all = Enter the move date
 moveDate.error.required.two = The move date must include {0} and {1}
 moveDate.error.required = The move date must include {0}
-moveDate.error.invalid = Enter a real move date
+moveDate.error.invalid = Enter a real move date, <give validation rules>
 moveDate.change.hidden = Move Date
 
 stoppedUsingServiceDate.title = When did you or when will you stop using this service?
