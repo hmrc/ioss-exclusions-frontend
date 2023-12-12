@@ -53,14 +53,18 @@ trait CompletionChecks {
   private def isMoveDateValid()(implicit request: DataRequest[AnyContent]): Boolean =
     request.userAnswers.get(MoveDatePage).isDefined
 
+  private def isTaxNumberValid()(implicit request: DataRequest[AnyContent]): Boolean =
+    request.userAnswers.get(TaxNumberPage).isDefined
 
   def validate()(implicit request: DataRequest[AnyContent]): Boolean = {
-    isEuCountryValid() && isMoveDateValid()
+    isEuCountryValid() && isMoveDateValid() && isTaxNumberValid()
   }
 
   def getFirstValidationErrorRedirect(waypoints: Waypoints)(implicit request: DataRequest[AnyContent]): Option[Result] = {
     incompleteEuCountryRedirect(waypoints) orElse
-      incompleteMoveDateRedirect(waypoints)
+      incompleteMoveDateRedirect(waypoints) orElse
+      incompleteTaxNumberRedirect(waypoints)
+
   }
 
   private def incompleteEuCountryRedirect(waypoints: Waypoints)(implicit request: DataRequest[AnyContent]): Option[Result] = if (!isEuCountryValid()) {
@@ -71,6 +75,12 @@ trait CompletionChecks {
 
   private def incompleteMoveDateRedirect(waypoints: Waypoints)(implicit request: DataRequest[AnyContent]): Option[Result] = if (!isMoveDateValid()) {
     Some(Redirect(controllers.routes.MoveDateController.onPageLoad(waypoints)))
+  } else {
+    None
+  }
+
+  private def incompleteTaxNumberRedirect(waypoints: Waypoints)(implicit request: DataRequest[AnyContent]): Option[Result] = if (!isTaxNumberValid()) {
+    Some(Redirect(controllers.routes.TaxNumberController.onPageLoad(waypoints)))
   } else {
     None
   }

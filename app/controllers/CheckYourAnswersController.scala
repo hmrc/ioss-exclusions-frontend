@@ -25,7 +25,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
-import viewmodels.checkAnswers.{EuCountrySummary, MoveDateSummary}
+import viewmodels.checkAnswers.{EuCountrySummary, MoveDateSummary, TaxNumberSummary}
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
 
@@ -48,12 +48,14 @@ class CheckYourAnswersController @Inject()(
       val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, CheckYourAnswersPage.urlFragment))
 
       val euCountrySummaryRow = EuCountrySummary.rowNewCountry(request.userAnswers, waypoints, thisPage)
-      val moveDateSummaryRow = MoveDateSummary.rowNewCountry(request.userAnswers, waypoints, thisPage, dates)
+      val moveDateSummaryRow = MoveDateSummary.rowMoveDate(request.userAnswers, waypoints, thisPage, dates)
+      val taxNumberSummaryRow = TaxNumberSummary.rowTaxNumber(request.userAnswers, waypoints, thisPage)
 
       val list = SummaryListViewModel(
         rows = Seq(
           euCountrySummaryRow,
-          moveDateSummaryRow
+          moveDateSummaryRow,
+          taxNumberSummaryRow
         ).flatten
       )
 
