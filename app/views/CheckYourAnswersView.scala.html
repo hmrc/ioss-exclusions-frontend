@@ -30,13 +30,6 @@
 
 @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
 
-    <h1 class="govuk-heading-l">@messages("checkYourAnswers.heading")</h1>
-
-    @govukSummaryList(list)
-}
-
-@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
-
     @if(!isValid) {
         @govukWarningText(WarningText(
             iconFallbackText = Option(messages("site.warning")),
@@ -44,7 +37,7 @@
         ))
     }
 
-    <h1 class="govuk-heading-xl">@messages("checkYourAnswers.heading")</h1>
+    <h1 class="govuk-heading-l">@messages("checkYourAnswers.heading")</h1>
 
     @govukSummaryList(list)
 
