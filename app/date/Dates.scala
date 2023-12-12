@@ -21,8 +21,6 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class Dates @Inject() (val clock: Clock) {
-  private val DayOfTheMonth: Int = 11
-
   val dateHint: String =
-    DateTimeFormatter.ofPattern("dd/MM/yyyy").format(LocalDate.now(clock).withDayOfMonth(DayOfTheMonth))
+    DateTimeFormatter.ofPattern("dd/MM/yyyy").format(LocalDate.now(clock))
 }
