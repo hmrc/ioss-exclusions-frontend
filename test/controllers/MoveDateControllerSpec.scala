@@ -17,12 +17,13 @@
 package controllers
 
 import base.SpecBase
+import date.Dates
 import forms.MoveDateFormProvider
-import models.UserAnswers
+import models.{Country, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, MoveDatePage, Waypoints}
+import pages.{EmptyWaypoints, EuCountryPage, MoveDatePage, Waypoints}
 import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.inject.bind
@@ -51,6 +52,8 @@ class MoveDateControllerSpec extends SpecBase with MockitoSugar {
 
   override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 
+  private val country = Country("IT", "Italy")
+
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, moveDateRoute)
 
@@ -66,35 +69,42 @@ class MoveDateControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val userAnswers = UserAnswers(userAnswersId).set(EuCountryPage, country).success.value
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val result = route(application, getRequest()).value
 
         val view = application.injector.instanceOf[MoveDateView]
+        val dates = application.injector.instanceOf[Dates]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, EmptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form, country, dates.dateHint, EmptyWaypoints)(getRequest, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(MoveDatePage, validAnswer).success.value
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(EuCountryPage, country).success.value
+        .set(MoveDatePage, validAnswer).success.value
+
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val view = application.injector.instanceOf[MoveDateView]
+        val dates = application.injector.instanceOf[Dates]
 
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
 
-        contentAsString(result) mustEqual view(form.fill(validAnswer), EmptyWaypoints)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), country, dates.dateHint, EmptyWaypoints)(getRequest(), messages(application)).toString
       }
     }
 
     "must redirect to the next page when valid data is submitted" in {
+
       val mockSessionRepository = mock[SessionRepository]
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
       val application =
@@ -115,7 +125,12 @@ class MoveDateControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(EuCountryPage, country).success.value
+        .set(MoveDatePage, validAnswer).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       val request =
         FakeRequest(POST, moveDateRoute)
@@ -125,11 +140,12 @@ class MoveDateControllerSpec extends SpecBase with MockitoSugar {
         val boundForm = form.bind(Map("value" -> "invalid value"))
 
         val view = application.injector.instanceOf[MoveDateView]
+        val dates = application.injector.instanceOf[Dates]
 
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, EmptyWaypoints)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, country, dates.dateHint, EmptyWaypoints)(request, messages(application)).toString
       }
     }
 
