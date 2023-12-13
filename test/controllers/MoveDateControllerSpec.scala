@@ -19,11 +19,11 @@ package controllers
 import base.SpecBase
 import date.Dates
 import forms.MoveDateFormProvider
-import models.{Country, UserAnswers}
+import models.UserAnswers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, EuCountryPage, MoveDatePage, Waypoints}
+import pages.{EmptyWaypoints, EuCountryPage, MoveDatePage}
 import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.inject.bind
@@ -33,7 +33,7 @@ import play.api.test.Helpers._
 import repositories.SessionRepository
 import views.html.MoveDateView
 
-import java.time.{LocalDate, ZoneOffset}
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class MoveDateControllerSpec extends SpecBase with MockitoSugar {
@@ -44,15 +44,9 @@ class MoveDateControllerSpec extends SpecBase with MockitoSugar {
 
   private val form: Form[LocalDate] = formProvider()
 
-  private val emptyWaypoints: Waypoints = EmptyWaypoints
-
-  private val validAnswer = LocalDate.now(ZoneOffset.UTC)
+  private val validAnswer = LocalDate.now(Dates.clock)
 
   private lazy val moveDateRoute = routes.MoveDateController.onPageLoad(EmptyWaypoints).url
-
-  override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
-
-  private val country = Country("IT", "Italy")
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, moveDateRoute)

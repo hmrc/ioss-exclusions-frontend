@@ -22,7 +22,7 @@ import models.UserAnswers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, StopSellingGoodsPage, Waypoints}
+import pages.StopSellingGoodsPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -33,12 +33,10 @@ import scala.concurrent.Future
 
 class StopSellingGoodsControllerSpec extends SpecBase with MockitoSugar {
 
-  private val emptyWaypoints: Waypoints = EmptyWaypoints
-
   val formProvider = new StopSellingGoodsFormProvider()
   val form = formProvider()
 
-  lazy val stopSellingGoodsRoute = routes.StopSellingGoodsController.onPageLoad(emptyWaypoints).url
+  val stopSellingGoodsRoute = routes.StopSellingGoodsController.onPageLoad(emptyWaypoints).url
 
   "StopSellingGoods Controller" - {
 

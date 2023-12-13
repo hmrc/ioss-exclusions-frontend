@@ -23,17 +23,17 @@ import models.UserAnswers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, StoppedUsingServiceDatePage, Waypoints}
+import pages.{EmptyWaypoints, StoppedUsingServiceDatePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
+import utils.FutureSyntax.FutureOps
 import views.html.StoppedUsingServiceDateView
 
 import java.time.{LocalDate, ZoneOffset}
-import scala.concurrent.Future
 
 class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
 
@@ -42,8 +42,6 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
   private val formProvider = new StoppedUsingServiceDateFormProvider()
 
   private val form = formProvider()
-
-  private val emptyWaypoints: Waypoints = EmptyWaypoints
 
   private val validAnswer = LocalDate.now(ZoneOffset.UTC)
 
@@ -100,7 +98,7 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))

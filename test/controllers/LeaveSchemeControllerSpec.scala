@@ -22,7 +22,7 @@ import models.UserAnswers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, LeaveSchemePage, Waypoints}
+import pages.LeaveSchemePage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -33,12 +33,10 @@ import scala.concurrent.Future
 
 class LeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
 
-  private val emptyWaypoints: Waypoints = EmptyWaypoints
-
   val formProvider = new LeaveSchemeFormProvider()
   val form = formProvider()
 
-  lazy val leaveSchemeRoute = routes.LeaveSchemeController.onPageLoad(emptyWaypoints).url
+  val leaveSchemeRoute = routes.LeaveSchemeController.onPageLoad(emptyWaypoints).url
 
   "LeaveScheme Controller" - {
 

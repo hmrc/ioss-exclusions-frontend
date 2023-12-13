@@ -23,7 +23,7 @@ import models.UserAnswers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, StoppedSellingGoodsDatePage, Waypoints}
+import pages.{EmptyWaypoints, StoppedSellingGoodsDatePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
@@ -43,13 +43,9 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with MockitoSugar {
 
   private val form = formProvider()
 
-  private val emptyWaypoints: Waypoints = EmptyWaypoints
-
   private val validAnswer = LocalDate.now(ZoneOffset.UTC)
 
   private lazy val stoppedSellingGoodsDateRoute = routes.StoppedSellingGoodsDateController.onPageLoad(EmptyWaypoints).url
-
-  override val emptyUserAnswers = UserAnswers(userAnswersId)
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, stoppedSellingGoodsDateRoute)

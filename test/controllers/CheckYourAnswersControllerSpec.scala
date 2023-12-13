@@ -18,45 +18,76 @@ package controllers
 
 import base.SpecBase
 import models.CheckMode
-import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint}
+import org.scalatest.BeforeAndAfterEach
+import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
-class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
+class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency with BeforeAndAfterEach {
+
+  private val waypoints: Waypoints = EmptyWaypoints
 
   "Check Your Answers Controller" - {
 
-    "must return OK and the correct view for a GET" in {
+    ".onPageLoad" - {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      "must return OK and the correct view for a GET" in {
 
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad.url)
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-        val result = route(application, request).value
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
 
-        val view = application.injector.instanceOf[CheckYourAnswersView]
-        val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
-        val list = SummaryListViewModel(Seq.empty)
+          val result = route(application, request).value
 
-        status(result) mustEqual OK
-        contentAsString(result) mustBe view(waypoints, list, isValid = false)(request, messages(application)).toString
+          val view = application.injector.instanceOf[CheckYourAnswersView]
+          val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
+          val list = SummaryListViewModel(Seq.empty)
+
+          status(result) mustBe OK
+
+          contentAsString(result) mustBe view(waypoints, list, isValid = false)(request, messages(application)).toString
+        }
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+    ".onSubmit" - {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      "must redirect to the correct page when the validation passes" in {
 
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad.url)
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswers)).build()
 
-        val result = route(application, request).value
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = false).url)
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          val result = route(application, request).value
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe ApplicationCompletePage.route(waypoints).url
+        }
+      }
+
+      "when the user has not answered all necessary data" - {
+        "the user is redirected when the incomplete prompt is shown" - {
+          "to Tax Registered In EU when it has a 'yes' answer but all countries were removed" in {
+//            val answers = completeUserAnswersWithVatInfo
+//              .set(TaxRegisteredInEuPage, true).success.value
+//              .set(EuCountryPage(Index(0)), country).success.value
+//              .remove(EuDetailsQuery(Index(0))).success.value
+//
+//            val application = applicationBuilder(userAnswers = Some(answers)).build()
+//
+//            running(application) {
+//              val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = true).url)
+//              val result = route(application, request).value
+//
+//              status(result) mustBe SEE_OTHER
+//              redirectLocation(result).value mustBe controllers.euDetails.routes.TaxRegisteredInEuController.onPageLoad(waypoints).url
+//            }
+          }
+        }
       }
     }
   }

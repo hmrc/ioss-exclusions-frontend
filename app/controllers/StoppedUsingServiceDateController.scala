@@ -24,6 +24,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
 import views.html.StoppedUsingServiceDateView
 
 import javax.inject.Inject
@@ -61,7 +62,7 @@ class StoppedUsingServiceDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, dates.dateHint, waypoints))),
+          BadRequest(view(formWithErrors, dates.dateHint, waypoints)).toFuture,
 
         value =>
           for {

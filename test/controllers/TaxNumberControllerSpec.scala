@@ -18,11 +18,10 @@ package controllers
 
 import base.SpecBase
 import forms.TaxNumberFormProvider
-import models.Country
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, EuCountryPage, TaxNumberPage, Waypoints}
+import pages.{EuCountryPage, TaxNumberPage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -36,10 +35,7 @@ class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
   private val formProvider = new TaxNumberFormProvider()
   private val form = formProvider()
 
-  private val emptyWaypoints: Waypoints = EmptyWaypoints
-  private val country = Country("IT", "Italy")
-
-  lazy val taxNumberRoute = routes.TaxNumberController.onPageLoad(emptyWaypoints).url
+  val taxNumberRoute = routes.TaxNumberController.onPageLoad(emptyWaypoints).url
 
   private val userAnswersWithCountry = emptyUserAnswers.set(EuCountryPage, country).success.value
 

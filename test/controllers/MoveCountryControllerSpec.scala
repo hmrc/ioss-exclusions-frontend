@@ -22,7 +22,7 @@ import models.UserAnswers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, MoveCountryPage, Waypoints}
+import pages.MoveCountryPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -33,12 +33,10 @@ import scala.concurrent.Future
 
 class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
 
-  private val formProvider = new MoveCountryFormProvider()
-  private val form = formProvider()
+  val formProvider = new MoveCountryFormProvider()
+  val form = formProvider()
 
-  private val emptyWaypoints: Waypoints = EmptyWaypoints
-
-  lazy val moveCountryRoute = routes.MoveCountryController.onPageLoad(emptyWaypoints).url
+  val moveCountryRoute = routes.MoveCountryController.onPageLoad(emptyWaypoints).url
 
   "MoveCountry Controller" - {
 

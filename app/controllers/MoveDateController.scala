@@ -24,6 +24,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
 import views.html.MoveDateView
 
 import javax.inject.Inject
@@ -63,8 +64,8 @@ class MoveDateController @Inject()(
       form.bindFromRequest().fold(
         formWithErrors => {
           request.userAnswers.get(EuCountryPage).map { country =>
-            Future.successful(BadRequest(view(formWithErrors, country, dates.dateHint, waypoints)))
-          }.getOrElse(Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad())))
+            BadRequest(view(formWithErrors, country, dates.dateHint, waypoints)).toFuture
+          }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture)
         },
         exclusionDate =>
           for {

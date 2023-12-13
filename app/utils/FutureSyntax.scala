@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package date
+package utils
 
-import java.time.format.DateTimeFormatter
-import java.time.{Clock, LocalDate, ZoneOffset}
-import javax.inject.Inject
+import scala.concurrent.Future
 
-class Dates @Inject() (val clock: Clock) {
+object FutureSyntax {
 
-  val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+  implicit class FutureOps[A](val a: A) extends AnyVal {
 
-  val dateHint: String =
-    DateTimeFormatter.ofPattern("dd/MM/yyyy").format(LocalDate.now(clock))
-}
-
-object Dates {
-  val clock: Clock = Clock.systemDefaultZone.withZone(ZoneOffset.UTC)
+    def toFuture: Future[A] = Future.successful(a)
+  }
 }

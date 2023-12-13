@@ -17,16 +17,20 @@
 package base
 
 import controllers.actions._
-import models.UserAnswers
+import date.Dates
+import models.{Country, UserAnswers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{OptionValues, TryValues}
+import pages.{EmptyWaypoints, EuCountryPage, MoveCountryPage, MoveDatePage, TaxNumberPage, Waypoints}
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
+
+import java.time.LocalDate
 
 trait SpecBase
   extends AnyFreeSpec
@@ -36,7 +40,19 @@ trait SpecBase
     with ScalaFutures
     with IntegrationPatience {
 
+  val emptyWaypoints: Waypoints = EmptyWaypoints
   val userAnswersId: String = "id"
+
+  val country: Country = Country("IT", "Italy")
+  val moveDate: LocalDate = LocalDate.now(Dates.clock)
+  val taxNumber: String = "333333333"
+
+  def completeUserAnswers: UserAnswers =
+    emptyUserAnswers
+      .set(MoveCountryPage, true).success.value
+      .set(EuCountryPage, country).success.value
+      .set(MoveDatePage, moveDate).success.value
+      .set(TaxNumberPage, taxNumber).success.value
 
   def emptyUserAnswers : UserAnswers = UserAnswers(userAnswersId)
 

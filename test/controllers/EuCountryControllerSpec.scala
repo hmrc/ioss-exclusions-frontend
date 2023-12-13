@@ -19,11 +19,11 @@ package controllers
 import base.SpecBase
 import forms.EuCountryFormProvider
 import models.Country._
-import models.{Country, UserAnswers}
+import models.UserAnswers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, EuCountryPage, Waypoints}
+import pages.EuCountryPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -33,10 +33,6 @@ import views.html.EuCountryView
 import scala.concurrent.Future
 
 class EuCountryControllerSpec extends SpecBase with MockitoSugar {
-
-  private val country = Country("IT", "Italy")
-
-  private val emptyWaypoints: Waypoints = EmptyWaypoints
 
   val formProvider = new EuCountryFormProvider()
   val form = formProvider()
