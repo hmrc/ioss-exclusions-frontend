@@ -31,7 +31,7 @@ import play.api.test.Helpers.stubMessages
 class DateMappingsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with Generators with OptionValues
   with Mappings {
 
-  private implicit val messages: Messages = stubMessages()
+  implicit val messages: Messages = stubMessages()
 
   val form = Form(
     "value" -> localDate(

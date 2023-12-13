@@ -27,7 +27,7 @@ import views.html.CheckYourAnswersView
 
 class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency with BeforeAndAfterEach {
 
-  private val waypoints: Waypoints = EmptyWaypoints
+  val waypoints: Waypoints = EmptyWaypoints
 
   "Check Your Answers Controller" - {
 

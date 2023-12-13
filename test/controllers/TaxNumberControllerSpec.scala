@@ -32,12 +32,12 @@ import scala.concurrent.Future
 
 class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
 
-  private val formProvider = new TaxNumberFormProvider()
-  private val form = formProvider()
+  val formProvider = new TaxNumberFormProvider()
+  val form = formProvider()
 
   val taxNumberRoute = routes.TaxNumberController.onPageLoad(emptyWaypoints).url
 
-  private val userAnswersWithCountry = emptyUserAnswers.set(EuCountryPage, country).success.value
+  val userAnswersWithCountry = emptyUserAnswers.set(EuCountryPage, country).success.value
 
   "TaxNumber Controller" - {
 

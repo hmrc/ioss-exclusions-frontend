@@ -26,8 +26,8 @@ import java.time.LocalDate
 
 class MoveDateFormProviderSpec extends DateBehaviours {
 
-  private implicit val messages: Messages = stubMessages()
-  private val form = new MoveDateFormProvider(Dates.clock)()
+  implicit val messages: Messages = stubMessages()
+  val form = new MoveDateFormProvider(Dates.clock)()
 
   ".value" - {
 

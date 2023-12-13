@@ -38,15 +38,15 @@ import scala.concurrent.Future
 
 class MoveDateControllerSpec extends SpecBase with MockitoSugar {
 
-  private implicit val messages: Messages = stubMessages()
+  implicit val messages: Messages = stubMessages()
 
-  private val formProvider = new MoveDateFormProvider(Dates.clock)
+  val formProvider = new MoveDateFormProvider(Dates.clock)
 
-  private val form: Form[LocalDate] = formProvider()
+  val form: Form[LocalDate] = formProvider()
 
-  private val validAnswer = LocalDate.now(Dates.clock)
+  val validAnswer = LocalDate.now(Dates.clock)
 
-  private lazy val moveDateRoute = routes.MoveDateController.onPageLoad(EmptyWaypoints).url
+  lazy val moveDateRoute = routes.MoveDateController.onPageLoad(EmptyWaypoints).url
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, moveDateRoute)

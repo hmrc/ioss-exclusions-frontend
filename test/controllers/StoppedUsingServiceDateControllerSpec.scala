@@ -37,15 +37,15 @@ import java.time.{LocalDate, ZoneOffset}
 
 class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
 
-  private implicit val messages: Messages = stubMessages()
+  implicit val messages: Messages = stubMessages()
 
-  private val formProvider = new StoppedUsingServiceDateFormProvider()
+  val formProvider = new StoppedUsingServiceDateFormProvider()
 
-  private val form = formProvider()
+  val form = formProvider()
 
-  private val validAnswer = LocalDate.now(ZoneOffset.UTC)
+  val validAnswer = LocalDate.now(ZoneOffset.UTC)
 
-  private lazy val stoppedUsingServiceDateRoute = routes.StoppedUsingServiceDateController.onPageLoad(EmptyWaypoints).url
+  lazy val stoppedUsingServiceDateRoute = routes.StoppedUsingServiceDateController.onPageLoad(EmptyWaypoints).url
 
   override val emptyUserAnswers = UserAnswers(userAnswersId)
 

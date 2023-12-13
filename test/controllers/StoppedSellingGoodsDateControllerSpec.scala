@@ -37,15 +37,15 @@ import scala.concurrent.Future
 
 class StoppedSellingGoodsDateControllerSpec extends SpecBase with MockitoSugar {
 
-  private implicit val messages: Messages = stubMessages()
+  implicit val messages: Messages = stubMessages()
 
-  private val formProvider = new StoppedSellingGoodsDateFormProvider()
+  val formProvider = new StoppedSellingGoodsDateFormProvider()
 
-  private val form = formProvider()
+  val form = formProvider()
 
-  private val validAnswer = LocalDate.now(ZoneOffset.UTC)
+  val validAnswer = LocalDate.now(ZoneOffset.UTC)
 
-  private lazy val stoppedSellingGoodsDateRoute = routes.StoppedSellingGoodsDateController.onPageLoad(EmptyWaypoints).url
+  lazy val stoppedSellingGoodsDateRoute = routes.StoppedSellingGoodsDateController.onPageLoad(EmptyWaypoints).url
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, stoppedSellingGoodsDateRoute)
