@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import models.CheckMode
 import org.scalatest.BeforeAndAfterEach
-import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, MoveDatePage, TaxNumberPage, Waypoint, Waypoints}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import viewmodels.govuk.SummaryListFluency
@@ -71,21 +71,46 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
       "when the user has not answered all necessary data" - {
         "the user is redirected when the incomplete prompt is shown" - {
-          "to Tax Registered In EU when it has a 'yes' answer but all countries were removed" in {
-//            val answers = completeUserAnswersWithVatInfo
-//              .set(TaxRegisteredInEuPage, true).success.value
-//              .set(EuCountryPage(Index(0)), country).success.value
-//              .remove(EuDetailsQuery(Index(0))).success.value
-//
-//            val application = applicationBuilder(userAnswers = Some(answers)).build()
-//
-//            running(application) {
-//              val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = true).url)
-//              val result = route(application, request).value
-//
-//              status(result) mustBe SEE_OTHER
-//              redirectLocation(result).value mustBe controllers.euDetails.routes.TaxRegisteredInEuController.onPageLoad(waypoints).url
-//            }
+          "to the Eu Country page when the EU country is missing" in {
+            val answers = completeUserAnswers.remove(EuCountryPage).success.value
+
+            val application = applicationBuilder(userAnswers = Some(answers)).build()
+
+            running(application) {
+              val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = true).url)
+              val result = route(application, request).value
+
+              status(result) mustBe SEE_OTHER
+              redirectLocation(result).value mustBe controllers.routes.EuCountryController.onPageLoad(waypoints).url
+            }
+          }
+
+          "to the Move Date page when the move date is missing" in {
+            val answers = completeUserAnswers.remove(MoveDatePage).success.value
+
+            val application = applicationBuilder(userAnswers = Some(answers)).build()
+
+            running(application) {
+              val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = true).url)
+              val result = route(application, request).value
+
+              status(result) mustBe SEE_OTHER
+              redirectLocation(result).value mustBe controllers.routes.MoveDateController.onPageLoad(waypoints).url
+            }
+          }
+
+          "to the Tax Number page when the tax number is missing" in {
+            val answers = completeUserAnswers.remove(TaxNumberPage).success.value
+
+            val application = applicationBuilder(userAnswers = Some(answers)).build()
+
+            running(application) {
+              val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = true).url)
+              val result = route(application, request).value
+
+              status(result) mustBe SEE_OTHER
+              redirectLocation(result).value mustBe controllers.routes.TaxNumberController.onPageLoad(waypoints).url
+            }
           }
         }
       }
