@@ -71,7 +71,7 @@ moveCountry.change.hidden = Moved to a different country
 
 euCountry.title = Which country is your business moving to?
 euCountry.heading = Which country is your business moving to?
-euCountry.checkYourAnswersLabel = EU Country
+euCountry.checkYourAnswersLabel = New country
 euCountry.error.required = Select the country your business is moving to
 euCountry.change.hidden = EU Country
 
