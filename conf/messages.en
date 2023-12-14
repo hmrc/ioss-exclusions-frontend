@@ -71,9 +71,9 @@ moveCountry.change.hidden = Moved to a different country
 
 euCountry.title = Which country is your business moving to?
 euCountry.heading = Which country is your business moving to?
-euCountry.checkYourAnswersLabel = New Country
-euCountry.error.required = Select yes if euCountry
-euCountry.change.hidden = Eu Country
+euCountry.checkYourAnswersLabel = EU Country
+euCountry.error.required = Select the country your business is moving to
+euCountry.change.hidden = EU Country
 
 taxNumber.title = What is your tax number in {0}?
 taxNumber.heading = What is your tax number in {0}?
