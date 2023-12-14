@@ -19,6 +19,7 @@ package forms
 import date.Dates
 import forms.behaviours.DateBehaviours
 import org.scalacheck.Gen
+import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 
@@ -27,9 +28,10 @@ import java.time.LocalDate
 class MoveDateFormProviderSpec extends DateBehaviours {
 
   implicit val messages: Messages = stubMessages()
-  val form = new MoveDateFormProvider(Dates.clock)()
 
   ".value" - {
+
+    val form = new MoveDateFormProvider(Dates.clock)()
 
     val minDate: LocalDate = LocalDate.now(Dates.clock)
 
@@ -41,5 +43,111 @@ class MoveDateFormProviderSpec extends DateBehaviours {
     behave like dateField(form, "value", validData)
 
     behave like mandatoryDateField(form, "value", "moveDate.error.required.all")
+
+    //If today is after the 10th of the month, the trader can either pick this month or up to the 10th of the following month.
+
+    "bind date if today is the 10th of the month or earlier AND " +
+      "the form's date is in the previous month or the current month or up to the 10th of the following month" in {
+      val todayGen: Gen[LocalDate] = datesBetween(
+        min = LocalDate.of(2023, 12, 1),
+        max = LocalDate.of(2023, 12, 10)
+      )
+
+      val validDatesGen: Gen[LocalDate] = datesBetween(
+        min = LocalDate.of(2023, 11, 1),
+        max = LocalDate.of(2024, 1, 10)
+      )
+
+      forAll(todayGen, validDatesGen) { (today, validDate) =>
+        val form = new MoveDateFormProvider(Dates.clock)(today)
+
+        val data = formData(validDate)
+        val result = form.bind(data)
+        result.value.value mustEqual validDate
+        result.errors mustBe empty
+      }
+    }
+
+    "fail to bind date if today is the 10th of the month or earlier AND the form's date is out of range" in {
+      val todayGen: Gen[LocalDate] = datesBetween(
+        min = LocalDate.of(2023, 12, 1),
+        max = LocalDate.of(2023, 12, 10)
+      )
+
+      val invalidEarlyDatesGen: Gen[LocalDate] = datesBetween(
+        min = LocalDate.of(2020, 1, 1),
+        max = LocalDate.of(2023, 10, 31)
+      )
+
+      val invalidLateDatesGen: Gen[LocalDate] = datesBetween(
+        min = LocalDate.of(2024, 1, 11),
+        max = LocalDate.of(2027, 1, 1)
+      )
+
+      val invalidDatesGen: Gen[LocalDate] = Gen.oneOf(invalidEarlyDatesGen, invalidLateDatesGen)
+
+      forAll(todayGen, invalidDatesGen) { (today, invalidDate) =>
+        val form = new MoveDateFormProvider(Dates.clock)(today)
+
+        val data = formData(invalidDate)
+        val result = form.bind(data)
+        result.errors must contain only FormError("value", "moveDate.error.invalid")
+      }
+    }
+
+    "bind date if today is after the 10th of the month AND " +
+      "the form's date is in the current month or up to the 10th of the following month" in {
+      val todayGen: Gen[LocalDate] = datesBetween(
+        min = LocalDate.of(2023, 12, 11),
+        max = LocalDate.of(2023, 12, 31)
+      )
+
+      val validDatesGen: Gen[LocalDate] = datesBetween(
+        min = LocalDate.of(2023, 12, 1),
+        max = LocalDate.of(2024, 1, 10)
+      )
+
+      forAll(todayGen, validDatesGen) { (today, validDate) =>
+        val form = new MoveDateFormProvider(Dates.clock)(today)
+
+        val data = formData(validDate)
+        val result = form.bind(data)
+        result.value.value mustEqual validDate
+        result.errors mustBe empty
+      }
+    }
+
+    "fail to bind date if today is after the 10th of the month AND the form's date is out of range" in {
+      val todayGen: Gen[LocalDate] = datesBetween(
+        min = LocalDate.of(2023, 12, 11),
+        max = LocalDate.of(2023, 12, 31)
+      )
+
+      val invalidEarlyDatesGen: Gen[LocalDate] = datesBetween(
+        min = LocalDate.of(2020, 1, 1),
+        max = LocalDate.of(2023, 11, 30)
+      )
+
+      val invalidLateDatesGen: Gen[LocalDate] = datesBetween(
+        min = LocalDate.of(2024, 1, 11),
+        max = LocalDate.of(2027, 1, 1)
+      )
+
+      val invalidDatesGen: Gen[LocalDate] = Gen.oneOf(invalidEarlyDatesGen, invalidLateDatesGen)
+
+      forAll(todayGen, invalidDatesGen) { (today, invalidDate) =>
+        val form = new MoveDateFormProvider(Dates.clock)(today)
+
+        val data = formData(invalidDate)
+        val result = form.bind(data)
+        result.errors must contain only FormError("value", "moveDate.error.invalid")
+      }
+    }
   }
+
+  def formData(date: LocalDate): Map[String, String] = Map(
+    "value.day" -> date.getDayOfMonth.toString,
+    "value.month" -> date.getMonthValue.toString,
+    "value.year" -> date.getYear.toString
+  )
 }

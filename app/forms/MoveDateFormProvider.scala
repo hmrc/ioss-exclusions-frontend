@@ -27,21 +27,20 @@ import javax.inject.Inject
 
 class MoveDateFormProvider @Inject()(clock: Clock) extends Mappings {
 
-  def apply()(implicit messages: Messages): Form[LocalDate] =
+  def apply(today: LocalDate = LocalDate.now(clock))(implicit messages: Messages): Form[LocalDate] =
     Form(
       "value" -> localDate(
         invalidKey     = "moveDate.error.invalid",
         allRequiredKey = "moveDate.error.required.all",
         twoRequiredKey = "moveDate.error.required.two",
         requiredKey    = "moveDate.error.required"
-      ).verifying(validDate("moveDate.error.invalid"))
+      ).verifying(validDate(today, "moveDate.error.invalid"))
     )
 
-  private def validDate(errorKey: String): Constraint[LocalDate] = {
+  private def validDate(today: LocalDate, errorKey: String): Constraint[LocalDate] = {
     val dayOfMonthSplit = 10
-    val now = LocalDate.now(clock)
-    val minDate: LocalDate = (if (now.getDayOfMonth <= dayOfMonthSplit) now.minusMonths(1) else now).withDayOfMonth(1)
-    val maxDate: LocalDate = now.plusMonths(1).withDayOfMonth(dayOfMonthSplit)
+    val minDate: LocalDate = (if (today.getDayOfMonth <= dayOfMonthSplit) today.minusMonths(1) else today).withDayOfMonth(1)
+    val maxDate: LocalDate = today.plusMonths(1).withDayOfMonth(dayOfMonthSplit)
 
     Constraint {
       case date if minDate <= date && date <= maxDate => Valid
