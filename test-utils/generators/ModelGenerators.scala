@@ -84,7 +84,6 @@ trait ModelGenerators {
       } yield VatNumberTraderId(vatNumber)
     }
 
-  //arbitrary[Int].map(n => LocalDate.ofEpochDay(n)
   implicit val arbitraryEtmpEuRegistrationDetails: Arbitrary[EtmpEuRegistrationDetails] = {
     Arbitrary {
       for {
