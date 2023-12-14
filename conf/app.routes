@@ -30,19 +30,19 @@ POST        /eu-country                                  controllers.EuCountryCo
 GET         /tax-number                                  controllers.TaxNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /tax-number                                  controllers.TaxNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /move-date                                   controllers.MoveDateController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
-POST        /move-date                                   controllers.MoveDateController.onSubmit(mode: Waypoints ?= EmptyWaypoints)
+GET         /move-date                                   controllers.MoveDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /move-date                                   controllers.MoveDateController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /stopped-using-service-date                  controllers.StoppedUsingServiceDateController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
-POST        /stopped-using-service-date                  controllers.StoppedUsingServiceDateController.onSubmit(mode: Waypoints ?= EmptyWaypoints)
+GET         /stopped-using-service-date                  controllers.StoppedUsingServiceDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /stopped-using-service-date                  controllers.StoppedUsingServiceDateController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /stop-selling-goods                          controllers.StopSellingGoodsController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
-POST        /stop-selling-goods                          controllers.StopSellingGoodsController.onSubmit(mode: Waypoints ?= EmptyWaypoints)
+GET         /stop-selling-goods                          controllers.StopSellingGoodsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /stop-selling-goods                          controllers.StopSellingGoodsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /leave-scheme                                controllers.LeaveSchemeController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
-POST        /leave-scheme                                controllers.LeaveSchemeController.onSubmit(mode: Waypoints ?= EmptyWaypoints)
+GET         /leave-scheme                                controllers.LeaveSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /leave-scheme                                controllers.LeaveSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /stopped-selling-goods-date                  controllers.StoppedSellingGoodsDateController.onPageLoad(mode: Waypoints ?= EmptyWaypoints)
-POST        /stopped-selling-goods-date                  controllers.StoppedSellingGoodsDateController.onSubmit(mode: Waypoints ?= EmptyWaypoints)
+GET         /stopped-selling-goods-date                  controllers.StoppedSellingGoodsDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /stopped-selling-goods-date                  controllers.StoppedSellingGoodsDateController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET         /successful                                  controllers.ApplicationCompleteController.onPageLoad()
