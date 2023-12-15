@@ -19,8 +19,8 @@ package controllers
 import base.SpecBase
 import forms.EuCountryFormProvider
 import models.Country._
-import models.{CheckMode, Country, UserAnswers}
-import pages.{CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, TaxNumberPage, Waypoint}
+import models.UserAnswers
+import pages.{EuCountryPage, TaxNumberPage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.EuCountryView

@@ -24,7 +24,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{OptionValues, TryValues}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, MoveCountryPage, MoveDatePage, NonEmptyWaypoints, TaxNumberPage, Waypoint, Waypoints}
+import pages.{CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, MoveCountryPage, MoveDatePage, TaxNumberPage, Waypoint, Waypoints}
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind

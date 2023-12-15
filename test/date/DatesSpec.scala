@@ -17,12 +17,13 @@
 package date
 
 import base.SpecBase
-import org.scalatestplus.mockito.MockitoSugar
 
 import java.time.LocalDate
 
 class DatesSpec extends SpecBase {
+
   "LocalDateOps" - {
+
     "must implement Ordered to be able to use comparison operators: <, >, <=, >=" in {
       val DaysToAdd = 10
       val before = LocalDate.now
