@@ -18,13 +18,13 @@ package base
 
 import controllers.actions._
 import date.Dates
-import models.{Country, UserAnswers}
+import models.{CheckMode, Country, UserAnswers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{OptionValues, TryValues}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, EuCountryPage, MoveCountryPage, MoveDatePage, TaxNumberPage, Waypoints}
+import pages.{CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, MoveCountryPage, MoveDatePage, NonEmptyWaypoints, TaxNumberPage, Waypoint, Waypoints}
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
@@ -43,9 +43,13 @@ trait SpecBase
     with IntegrationPatience {
 
   val emptyWaypoints: Waypoints = EmptyWaypoints
+  val checkModeWaypoints: Waypoints = emptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
+
   val userAnswersId: String = "id"
 
   val country: Country = Country("IT", "Italy")
+  val anotherCountry: Country = Country("ES", "Spain")
+
   val moveDate: LocalDate = LocalDate.now(Dates.clock)
   val taxNumber: String = "333333333"
 

@@ -19,8 +19,8 @@ package controllers
 import base.SpecBase
 import forms.EuCountryFormProvider
 import models.Country._
-import models.UserAnswers
-import pages.EuCountryPage
+import models.{CheckMode, Country, UserAnswers}
+import pages.{CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, TaxNumberPage, Waypoint}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.EuCountryView
@@ -86,19 +86,17 @@ class EuCountryControllerSpec extends SpecBase {
 
     "must redirect to the tax number page when the user changes the country in check mode" in {
 
+      val euCountryCheckModeRoute = routes.EuCountryController.onPageLoad(checkModeWaypoints).url
+
       val application = applicationBuilder(userAnswers = Some(completeUserAnswers)).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, euCountryRoute)
-            .withFormUrlEncodedBody(("value", country.code))
+        val request = FakeRequest(POST, euCountryCheckModeRoute).withFormUrlEncodedBody(("value", anotherCountry.code))
 
         val result = route(application, request).value
 
-        val userAnswers = UserAnswers(userAnswersId).set(EuCountryPage, country).success.value
-
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual EuCountryPage.navigate(emptyWaypoints, emptyUserAnswers, userAnswers).url
+        redirectLocation(result).value mustEqual TaxNumberPage.route(checkModeWaypoints).url
       }
     }
 
