@@ -20,19 +20,12 @@ import base.SpecBase
 import forms.EuCountryFormProvider
 import models.Country._
 import models.UserAnswers
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
 import pages.EuCountryPage
-import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.SessionRepository
 import views.html.EuCountryView
 
-import scala.concurrent.Future
-
-class EuCountryControllerSpec extends SpecBase with MockitoSugar {
+class EuCountryControllerSpec extends SpecBase {
 
   val formProvider = new EuCountryFormProvider()
   val form = formProvider()
@@ -77,16 +70,23 @@ class EuCountryControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to the next page when valid data is submitted" in {
 
-      val mockSessionRepository = mock[SessionRepository]
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      running(application) {
+        val request = FakeRequest(POST, euCountryRoute).withFormUrlEncodedBody(("value", country.code))
 
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
-          .build()
+        val result = route(application, request).value
+
+        val userAnswers = UserAnswers(userAnswersId).set(EuCountryPage, country).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual EuCountryPage.navigate(emptyWaypoints, emptyUserAnswers, userAnswers).url
+      }
+    }
+
+    "must redirect to the tax number page when the user changes the country in check mode" in {
+
+      val application = applicationBuilder(userAnswers = Some(completeUserAnswers)).build()
 
       running(application) {
         val request =
@@ -107,9 +107,7 @@ class EuCountryControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, euCountryRoute)
-            .withFormUrlEncodedBody(("value", ""))
+        val request = FakeRequest(POST, euCountryRoute).withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
@@ -141,9 +139,7 @@ class EuCountryControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, euCountryRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+        val request = FakeRequest(POST, euCountryRoute).withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
 

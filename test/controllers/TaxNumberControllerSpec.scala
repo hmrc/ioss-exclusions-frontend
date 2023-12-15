@@ -18,19 +18,12 @@ package controllers
 
 import base.SpecBase
 import forms.TaxNumberFormProvider
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
 import pages.{EuCountryPage, TaxNumberPage}
-import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.SessionRepository
 import views.html.TaxNumberView
 
-import scala.concurrent.Future
-
-class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
+class TaxNumberControllerSpec extends SpecBase {
 
   val formProvider = new TaxNumberFormProvider()
   val form = formProvider()
@@ -77,21 +70,10 @@ class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
 
     "must redirect to the next page when valid data is submitted" in {
 
-      val mockSessionRepository = mock[SessionRepository]
-
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-      val application =
-        applicationBuilder(userAnswers = Some(userAnswersWithCountry))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
-          .build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithCountry)).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, taxNumberRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+        val request = FakeRequest(POST, taxNumberRoute).withFormUrlEncodedBody(("value", "answer"))
 
         val result = route(application, request).value
 
@@ -105,9 +87,7 @@ class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
       val application = applicationBuilder(userAnswers = Some(userAnswersWithCountry)).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, taxNumberRoute)
-            .withFormUrlEncodedBody(("value", ""))
+        val request = FakeRequest(POST, taxNumberRoute).withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
@@ -139,9 +119,7 @@ class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, taxNumberRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+        val request = FakeRequest(POST, taxNumberRoute).withFormUrlEncodedBody(("value", "answer"))
 
         val result = route(application, request).value
 
@@ -151,4 +129,3 @@ class TaxNumberControllerSpec extends SpecBase with MockitoSugar{
     }
   }
 }
-

@@ -20,23 +20,17 @@ import base.SpecBase
 import date.Dates
 import forms.MoveDateFormProvider
 import models.UserAnswers
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
 import pages.{EmptyWaypoints, EuCountryPage, MoveDatePage}
 import play.api.data.Form
 import play.api.i18n.Messages
-import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.SessionRepository
 import views.html.MoveDateView
 
 import java.time.LocalDate
-import scala.concurrent.Future
 
-class MoveDateControllerSpec extends SpecBase with MockitoSugar {
+class MoveDateControllerSpec extends SpecBase {
 
   implicit val messages: Messages = stubMessages()
 
@@ -99,14 +93,7 @@ class MoveDateControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to the next page when valid data is submitted" in {
 
-      val mockSessionRepository = mock[SessionRepository]
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
-          .build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val result = route(application, postRequest()).value
@@ -126,9 +113,7 @@ class MoveDateControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
-      val request =
-        FakeRequest(POST, moveDateRoute)
-          .withFormUrlEncodedBody(("value", "invalid value"))
+      val request = FakeRequest(POST, moveDateRoute).withFormUrlEncodedBody(("value", "invalid value"))
 
       running(application) {
         val boundForm = form.bind(Map("value" -> "invalid value"))

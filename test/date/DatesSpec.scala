@@ -21,7 +21,7 @@ import org.scalatestplus.mockito.MockitoSugar
 
 import java.time.LocalDate
 
-class DatesSpec extends SpecBase with MockitoSugar {
+class DatesSpec extends SpecBase {
   "LocalDateOps" - {
     "must implement Ordered to be able to use comparison operators: <, >, <=, >=" in {
       val DaysToAdd = 10

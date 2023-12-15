@@ -19,19 +19,12 @@ package controllers
 import base.SpecBase
 import forms.MoveCountryFormProvider
 import models.UserAnswers
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
 import pages.MoveCountryPage
-import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.SessionRepository
 import views.html.MoveCountryView
 
-import scala.concurrent.Future
-
-class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
+class MoveCountryControllerSpec extends SpecBase {
 
   val formProvider = new MoveCountryFormProvider()
   val form = formProvider()
@@ -76,21 +69,10 @@ class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to the next page when valid data is submitted" in {
 
-      val mockSessionRepository = mock[SessionRepository]
-
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
-          .build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, moveCountryRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+        val request = FakeRequest(POST, moveCountryRoute).withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
 
@@ -106,9 +88,7 @@ class MoveCountryControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, moveCountryRoute)
-            .withFormUrlEncodedBody(("value", ""))
+        val request = FakeRequest(POST, moveCountryRoute).withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 

@@ -20,22 +20,16 @@ import base.SpecBase
 import date.Dates
 import forms.StoppedUsingServiceDateFormProvider
 import models.UserAnswers
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
 import pages.{EmptyWaypoints, StoppedUsingServiceDatePage}
 import play.api.i18n.Messages
-import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.SessionRepository
-import utils.FutureSyntax.FutureOps
 import views.html.StoppedUsingServiceDateView
 
 import java.time.{LocalDate, ZoneOffset}
 
-class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
+class StoppedUsingServiceDateControllerSpec extends SpecBase {
 
   implicit val messages: Messages = stubMessages()
 
@@ -96,16 +90,7 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to the next page when valid data is submitted" in {
 
-      val mockSessionRepository = mock[SessionRepository]
-
-      when(mockSessionRepository.set(any())) thenReturn true.toFuture
-
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
-          .build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val result = route(application, postRequest()).value
@@ -121,9 +106,7 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-      val request =
-        FakeRequest(POST, stoppedUsingServiceDateRoute)
-          .withFormUrlEncodedBody(("value", "invalid value"))
+      val request = FakeRequest(POST, stoppedUsingServiceDateRoute).withFormUrlEncodedBody(("value", "invalid value"))
 
       running(application) {
         val boundForm = form.bind(Map("value" -> "invalid value"))
