@@ -32,6 +32,6 @@ case object StoppedUsingServiceDatePage extends QuestionPage[LocalDate] {
   override def route(waypoints: Waypoints): Call =
     routes.StoppedUsingServiceDateController.onPageLoad(waypoints)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     ApplicationCompletePage
 }

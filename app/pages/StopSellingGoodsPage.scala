@@ -30,7 +30,7 @@ case object StopSellingGoodsPage extends QuestionPage[Boolean] {
   override def route(waypoints: Waypoints): Call =
     routes.StopSellingGoodsController.onPageLoad(waypoints)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     answers.get(this).map {
       case true => StoppedSellingGoodsDatePage
       case false => LeaveSchemePage

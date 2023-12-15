@@ -31,6 +31,6 @@ object CheckYourAnswersPage extends CheckAnswersPage {
   override def route(waypoints: Waypoints): Call =
     routes.CheckYourAnswersController.onPageLoad()
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     ApplicationCompletePage
 }

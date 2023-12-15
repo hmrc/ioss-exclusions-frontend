@@ -30,6 +30,6 @@ case object EuCountryPage extends QuestionPage[Country] {
   override def route(waypoints: Waypoints): Call =
     routes.EuCountryController.onPageLoad(waypoints)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     MoveDatePage
 }
