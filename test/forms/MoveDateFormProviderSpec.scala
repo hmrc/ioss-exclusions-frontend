@@ -24,10 +24,12 @@ import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 
 import java.time.LocalDate
+import date.LocalDateOps
 
 class MoveDateFormProviderSpec extends DateBehaviours {
 
   implicit val messages: Messages = stubMessages()
+  val dates = new Dates(Dates.clock)
 
   ".value" - {
 
@@ -69,6 +71,9 @@ class MoveDateFormProviderSpec extends DateBehaviours {
     }
 
     "fail to bind date if today is the 10th of the month or earlier AND the form's date is out of range" in {
+      val validMinDate: LocalDate = LocalDate.of(2023, 11, 1)
+      val validMaxDate: LocalDate = LocalDate.of(2024, 1, 10)
+
       val todayGen: Gen[LocalDate] = datesBetween(
         min = LocalDate.of(2023, 12, 1),
         max = LocalDate.of(2023, 12, 10)
@@ -76,11 +81,11 @@ class MoveDateFormProviderSpec extends DateBehaviours {
 
       val invalidEarlyDatesGen: Gen[LocalDate] = datesBetween(
         min = LocalDate.of(2020, 1, 1),
-        max = LocalDate.of(2023, 10, 31)
+        max = validMinDate.minusDays(1)
       )
 
       val invalidLateDatesGen: Gen[LocalDate] = datesBetween(
-        min = LocalDate.of(2024, 1, 11),
+        min = validMaxDate.plusDays(1),
         max = LocalDate.of(2027, 1, 1)
       )
 
@@ -91,7 +96,12 @@ class MoveDateFormProviderSpec extends DateBehaviours {
 
         val data = formData(invalidDate)
         val result = form.bind(data)
-        result.errors must contain only FormError("value", "moveDate.error.invalid")
+        val formError = if (invalidDate < today) {
+          FormError("value", "moveDate.error.invalid.minDate", Seq(dates.digitsFormatter.format(validMinDate)))
+        } else {
+          FormError("value", "moveDate.error.invalid.maxDate", Seq(dates.digitsFormatter.format(validMaxDate)))
+        }
+        result.errors must contain only formError
       }
     }
 
@@ -118,6 +128,9 @@ class MoveDateFormProviderSpec extends DateBehaviours {
     }
 
     "fail to bind date if today is after the 10th of the month AND the form's date is out of range" in {
+      val validMinDate: LocalDate = LocalDate.of(2023, 12, 1)
+      val validMaxDate: LocalDate = LocalDate.of(2024, 1, 10)
+
       val todayGen: Gen[LocalDate] = datesBetween(
         min = LocalDate.of(2023, 12, 11),
         max = LocalDate.of(2023, 12, 31)
@@ -125,11 +138,11 @@ class MoveDateFormProviderSpec extends DateBehaviours {
 
       val invalidEarlyDatesGen: Gen[LocalDate] = datesBetween(
         min = LocalDate.of(2020, 1, 1),
-        max = LocalDate.of(2023, 11, 30)
+        max = validMinDate.minusDays(1)
       )
 
       val invalidLateDatesGen: Gen[LocalDate] = datesBetween(
-        min = LocalDate.of(2024, 1, 11),
+        min = validMaxDate.plusDays(1),
         max = LocalDate.of(2027, 1, 1)
       )
 
@@ -140,7 +153,12 @@ class MoveDateFormProviderSpec extends DateBehaviours {
 
         val data = formData(invalidDate)
         val result = form.bind(data)
-        result.errors must contain only FormError("value", "moveDate.error.invalid")
+        val formError = if (invalidDate < today) {
+          FormError("value", "moveDate.error.invalid.minDate", Seq(dates.digitsFormatter.format(validMinDate)))
+        } else {
+          FormError("value", "moveDate.error.invalid.maxDate", Seq(dates.digitsFormatter.format(validMaxDate)))
+        }
+        result.errors must contain only formError
       }
     }
   }

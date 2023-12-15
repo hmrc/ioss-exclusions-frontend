@@ -16,7 +16,7 @@
 
 package forms
 
-import date.LocalDateOps
+import date.{Dates, LocalDateOps}
 import forms.mappings.Mappings
 import play.api.data.Form
 import play.api.data.validation.{Constraint, Invalid, Valid}
@@ -27,6 +27,8 @@ import javax.inject.Inject
 
 class MoveDateFormProvider @Inject()(clock: Clock) extends Mappings {
 
+  private val dates: Dates = new Dates(clock)
+
   def apply(today: LocalDate = LocalDate.now(clock))(implicit messages: Messages): Form[LocalDate] =
     Form(
       "value" -> localDate(
@@ -34,17 +36,18 @@ class MoveDateFormProvider @Inject()(clock: Clock) extends Mappings {
         allRequiredKey = "moveDate.error.required.all",
         twoRequiredKey = "moveDate.error.required.two",
         requiredKey    = "moveDate.error.required"
-      ).verifying(validDate(today, "moveDate.error.invalid"))
+      ).verifying(validDate(today))
     )
 
-  private def validDate(today: LocalDate, errorKey: String): Constraint[LocalDate] = {
+  private def validDate(today: LocalDate): Constraint[LocalDate] = {
     val dayOfMonthSplit = 10
     val minDate: LocalDate = (if (today.getDayOfMonth <= dayOfMonthSplit) today.minusMonths(1) else today).withDayOfMonth(1)
     val maxDate: LocalDate = today.plusMonths(1).withDayOfMonth(dayOfMonthSplit)
 
     Constraint {
-      case date if minDate <= date && date <= maxDate => Valid
-      case _ => Invalid(errorKey)
+      case date if date < minDate => Invalid("moveDate.error.invalid.minDate", dates.digitsFormatter.format(minDate))
+      case date if date > maxDate => Invalid("moveDate.error.invalid.maxDate", dates.digitsFormatter.format(maxDate))
+      case _ => Valid
     }
   }
 }
