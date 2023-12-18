@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions._
+import date.Dates
 import forms.MoveDateFormProvider
 import pages.{EuCountryPage, MoveDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -38,6 +39,7 @@ class MoveDateController @Inject()(
                                      requireData: DataRequiredAction,
                                      formProvider: MoveDateFormProvider,
                                      clock: Clock,
+                                     dates: Dates,
                                      val controllerComponents: MessagesControllerComponents,
                                      view: MoveDateView
                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
@@ -57,9 +59,9 @@ class MoveDateController @Inject()(
         Ok(view(
           preparedForm,
           country,
-          formProvider.minDate(today),
-          formProvider.maxDate(today),
-          today,
+          dates.formatter.format(formProvider.minDate(today)),
+          dates.formatter.format(formProvider.maxDate(today)),
+          dates.dateHint,
           waypoints))
       }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()))
 
@@ -75,9 +77,9 @@ class MoveDateController @Inject()(
             BadRequest(view(
               formWithErrors,
               country,
-              formProvider.minDate(today),
-              formProvider.maxDate(today),
-              today,
+              dates.formatter.format(formProvider.minDate(today)),
+              dates.formatter.format(formProvider.maxDate(today)),
+              dates.dateHint,
               waypoints)).toFuture
           }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture)
         },

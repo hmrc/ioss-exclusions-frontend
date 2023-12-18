@@ -24,8 +24,9 @@ class Dates @Inject() (val clock: Clock) {
 
   val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
-  val dateHint: String =
-    DateTimeFormatter.ofPattern("d MM yyyy").format(LocalDate.now(clock))
+  val digitsFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MM yyyy")
+
+  val dateHint: String = digitsFormatter.format(LocalDate.now(clock))
 }
 
 object Dates {

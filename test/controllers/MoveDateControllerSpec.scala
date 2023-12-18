@@ -38,7 +38,7 @@ class MoveDateControllerSpec extends SpecBase {
 
   val form: Form[LocalDate] = formProvider()
 
-  val validAnswer = LocalDate.now(Dates.clock)
+  val validAnswer: LocalDate = LocalDate.now(Dates.clock)
 
   lazy val moveDateRoute = routes.MoveDateController.onPageLoad(EmptyWaypoints).url
 
@@ -67,7 +67,14 @@ class MoveDateControllerSpec extends SpecBase {
         val dates = application.injector.instanceOf[Dates]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, country, dates.exampleDate, EmptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(
+          form,
+          country,
+          dates.formatter.format(formProvider.minDate(validAnswer)),
+          dates.formatter.format(formProvider.maxDate(validAnswer)),
+          dates.dateHint,
+          emptyWaypoints
+        )(getRequest, messages(application)).toString
       }
     }
 
@@ -87,7 +94,14 @@ class MoveDateControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
 
-        contentAsString(result) mustEqual view(form.fill(validAnswer), country, dates.exampleDate, EmptyWaypoints)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(
+          form.fill(validAnswer),
+          country,
+          dates.formatter.format(formProvider.minDate(validAnswer)),
+          dates.formatter.format(formProvider.maxDate(validAnswer)),
+          dates.dateHint,
+          emptyWaypoints
+        )(getRequest(), messages(application)).toString
       }
     }
 
@@ -124,7 +138,14 @@ class MoveDateControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, country, dates.exampleDate, EmptyWaypoints)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(
+          boundForm,
+          country,
+          dates.formatter.format(formProvider.minDate(validAnswer)),
+          dates.formatter.format(formProvider.maxDate(validAnswer)),
+          dates.dateHint,
+          emptyWaypoints
+        )(request, messages(application)).toString
       }
     }
 

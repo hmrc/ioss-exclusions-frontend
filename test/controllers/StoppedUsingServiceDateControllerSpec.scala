@@ -67,7 +67,7 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
         val dates = application.injector.instanceOf[Dates]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, dates.exampleDate, EmptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form, dates.dateHint, EmptyWaypoints)(getRequest, messages(application)).toString
       }
     }
 
@@ -84,7 +84,7 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), dates.exampleDate, EmptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), dates.dateHint, EmptyWaypoints)(getRequest, messages(application)).toString
       }
     }
 
@@ -117,7 +117,7 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, dates.exampleDate, EmptyWaypoints)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, dates.dateHint, EmptyWaypoints)(request, messages(application)).toString
       }
     }
 

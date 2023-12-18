@@ -95,9 +95,9 @@ class MoveDateFormProviderSpec extends DateBehaviours {
         val data = formData(invalidDate)
         val result = form.bind(data)
         val formError = if (invalidDate < today) {
-          FormError("value", "moveDate.error.invalid.minDate", Seq(dates.digitsFormatter.format(validMinDate)))
+          FormError("value", "moveDate.error.invalid.minDate", Seq(dates.formatter.format(validMinDate)))
         } else {
-          FormError("value", "moveDate.error.invalid.maxDate", Seq(dates.digitsFormatter.format(validMaxDate)))
+          FormError("value", "moveDate.error.invalid.maxDate", Seq(dates.formatter.format(validMaxDate)))
         }
         result.errors must contain only formError
       }
@@ -152,9 +152,9 @@ class MoveDateFormProviderSpec extends DateBehaviours {
         val data = formData(invalidDate)
         val result = form.bind(data)
         val formError = if (invalidDate < today) {
-          FormError("value", "moveDate.error.invalid.minDate", Seq(dates.digitsFormatter.format(validMinDate)))
+          FormError("value", "moveDate.error.invalid.minDate", Seq(dates.formatter.format(validMinDate)))
         } else {
-          FormError("value", "moveDate.error.invalid.maxDate", Seq(dates.digitsFormatter.format(validMaxDate)))
+          FormError("value", "moveDate.error.invalid.maxDate", Seq(dates.formatter.format(validMaxDate)))
         }
         result.errors must contain only formError
       }

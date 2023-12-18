@@ -82,7 +82,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase {
         val dates = application.injector.instanceOf[Dates]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form(), dates.exampleDate, emptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form(), dates.dateHint, emptyWaypoints)(getRequest, messages(application)).toString
       }
     }
 
@@ -99,7 +99,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form().fill(validAnswer), dates.exampleDate, emptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form().fill(validAnswer), dates.dateHint, emptyWaypoints)(getRequest, messages(application)).toString
       }
     }
 
@@ -139,7 +139,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase {
 
         status(result) mustEqual BAD_REQUEST
         val boundForm = form().bind(payload)
-        contentAsString(result) mustEqual view(boundForm, dates.exampleDate, emptyWaypoints)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, dates.dateHint, emptyWaypoints)(request, messages(application)).toString
       }
     }
 
@@ -161,7 +161,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase {
         status(result) mustEqual BAD_REQUEST
 
         val boundForm = form().bind(Map(invalidDataStructure))
-        contentAsString(result) mustEqual view(boundForm, dates.exampleDate, emptyWaypoints)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, dates.dateHint, emptyWaypoints)(request, messages(application)).toString
       }
     }
 

@@ -56,6 +56,4 @@ class MoveDateFormProvider @Inject()(clock: Clock) extends Mappings {
 
   def maxDate(today: LocalDate): LocalDate =
     today.plusMonths(1).withDayOfMonth(DayOfMonthSplit)
-
-
 }

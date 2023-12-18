@@ -31,7 +31,6 @@ lazy val root = (project in file("."))
       "uk.gov.hmrc.hmrcfrontend.views.config._",
       "views.ViewUtils._",
       "models.Mode",
-      "java.time.LocalDate",
       "controllers.routes._",
       "pages.Waypoints",
       "viewmodels.govuk.all._",
