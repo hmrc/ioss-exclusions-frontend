@@ -17,8 +17,9 @@
 package forms.mappings
 
 import java.time.LocalDate
-
 import play.api.data.validation.{Constraint, Invalid, Valid}
+
+import java.time.format.DateTimeFormatter
 
 trait Constraints {
 
@@ -69,6 +70,22 @@ trait Constraints {
           Invalid(errorKey, minimum, maximum)
         }
     }
+
+
+  //inRange formats the date as YYYY-MM-DD in the messages
+  protected def inDateRange(minimum: LocalDate,
+                            maximum: LocalDate,
+                            errorKey: String,
+                            dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")): Constraint[LocalDate] =
+    Constraint {
+      input: LocalDate =>
+        if (input.isAfter(minimum.minusDays(1)) && input.isBefore(maximum.plusDays(1))) {
+          Valid
+        } else {
+          Invalid(errorKey, minimum.format(dateFormatter), maximum.format(dateFormatter))
+        }
+    }
+
 
   protected def regexp(regex: String, errorKey: String): Constraint[String] =
     Constraint {

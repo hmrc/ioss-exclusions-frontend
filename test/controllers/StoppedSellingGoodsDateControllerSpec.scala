@@ -17,10 +17,12 @@
 package controllers
 
 import base.SpecBase
+import connectors.RegistrationConnector
 import forms.StoppedSellingGoodsDateFormProvider
-import models.UserAnswers
+import models.{RegistrationWrapper, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.scalacheck.Arbitrary
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{EmptyWaypoints, StoppedSellingGoodsDatePage, Waypoints}
 import play.api.i18n.Messages
@@ -40,7 +42,8 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with MockitoSugar {
 
   private val formProvider = new StoppedSellingGoodsDateFormProvider()
 
-  private val form = formProvider()
+  private def form(currentDate: LocalDate = LocalDate.now(), registrationDate: LocalDate = LocalDate.now()) =
+    formProvider.apply(currentDate, registrationDate)
 
   private val emptyWaypoints: Waypoints = EmptyWaypoints
 
@@ -53,19 +56,31 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with MockitoSugar {
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, stoppedSellingGoodsDateRoute)
 
-  def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
+
+  def createPostPayload(day: String = validAnswer.getDayOfMonth.toString,
+                        month: String = validAnswer.getMonthValue.toString,
+                        year: String = validAnswer.getYear.toString): Map[String, String] = {
+    Map(
+      "value.day" -> day,
+      "value.month" -> month,
+      "value.year" -> year
+    )
+  }
+
+  def postRequest(payload: Map[String, String] = createPostPayload()): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, stoppedSellingGoodsDateRoute)
       .withFormUrlEncodedBody(
-        "value.day"   -> validAnswer.getDayOfMonth.toString,
-        "value.month" -> validAnswer.getMonthValue.toString,
-        "value.year"  -> validAnswer.getYear.toString
+        payload.toList: _*
       )
 
   "StoppedSellingGoodsDate Controller" - {
 
     "must return OK and the correct view for a GET" in {
+      val registrationConnector = mock[RegistrationConnector]
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+        .build()
 
       running(application) {
         val result = route(application, getRequest()).value
@@ -73,7 +88,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[StoppedSellingGoodsDateView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, EmptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form(), EmptyWaypoints)(getRequest, messages(application)).toString
       }
     }
 
@@ -89,7 +104,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), EmptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form().fill(validAnswer), EmptyWaypoints)(getRequest, messages(application)).toString
       }
     }
 
@@ -99,8 +114,15 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with MockitoSugar {
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
+      val registrationWrapper = Arbitrary.arbitrary[RegistrationWrapper].sample.value
+      val etmpSchemeDetails = registrationWrapper.registration.schemeDetails
+      val validDateWrapper = registrationWrapper.copy(
+        registration = registrationWrapper.registration.copy(
+          schemeDetails = etmpSchemeDetails.copy(commencementDate = LocalDate.now()))
+      )
+
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder(userAnswers = Some(emptyUserAnswers), registration = validDateWrapper)
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository)
           )
@@ -116,22 +138,43 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return a Bad Request and errors when invalid data is submitted" in {
+    "must return a Bad Request and errors when invalid date values are submitted" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-      val request =
-        FakeRequest(POST, stoppedSellingGoodsDateRoute)
-          .withFormUrlEncodedBody(("value", "invalid value"))
+      val payload = createPostPayload(day = "32")
+      val request = postRequest(payload)
 
       running(application) {
-        val boundForm = form.bind(Map("value" -> "invalid value"))
 
         val view = application.injector.instanceOf[StoppedSellingGoodsDateView]
 
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
+
+        val boundForm = form().bind(payload)
+        contentAsString(result) mustEqual view(boundForm, EmptyWaypoints)(request, messages(application)).toString
+      }
+    }
+
+    "must return a Bad Request and errors when invalid data structure is submitted" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      val invalidDataStructure = ("value", "invalid value")
+      val request =
+        FakeRequest(POST, stoppedSellingGoodsDateRoute)
+          .withFormUrlEncodedBody(invalidDataStructure)
+
+      running(application) {
+        val view = application.injector.instanceOf[StoppedSellingGoodsDateView]
+
+        val result = route(application, request).value
+
+        status(result) mustEqual BAD_REQUEST
+
+        val boundForm = form().bind(Map(invalidDataStructure))
         contentAsString(result) mustEqual view(boundForm, EmptyWaypoints)(request, messages(application)).toString
       }
     }
