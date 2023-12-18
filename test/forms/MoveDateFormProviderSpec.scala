@@ -46,8 +46,6 @@ class MoveDateFormProviderSpec extends DateBehaviours {
 
     behave like mandatoryDateField(form, "value", "moveDate.error.required.all")
 
-    //If today is after the 10th of the month, the trader can either pick this month or up to the 10th of the following month.
-
     "bind date if today is the 10th of the month or earlier AND " +
       "the form's date is in the previous month or the current month or up to the 10th of the following month" in {
       val todayGen: Gen[LocalDate] = datesBetween(
