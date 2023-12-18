@@ -32,6 +32,6 @@ case object MoveDatePage extends QuestionPage[LocalDate] {
   override def route(waypoints: Waypoints): Call =
     routes.MoveDateController.onPageLoad(waypoints)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     TaxNumberPage
 }

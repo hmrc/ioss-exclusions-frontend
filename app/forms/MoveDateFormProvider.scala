@@ -16,22 +16,44 @@
 
 package forms
 
+import date.{Dates, LocalDateOps}
 import forms.mappings.Mappings
 import play.api.data.Form
-import play.api.i18n.Messages
+import play.api.data.validation.{Constraint, Invalid, Valid}
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 
-class MoveDateFormProvider @Inject() extends Mappings {
+class MoveDateFormProvider @Inject()(clock: Clock) extends Mappings {
 
-  def apply()(implicit messages: Messages): Form[LocalDate] =
+  private val DayOfMonthSplit: Int = 10
+  private val dates: Dates = new Dates(clock)
+
+  def apply(today: LocalDate = LocalDate.now(clock)): Form[LocalDate] =
     Form(
       "value" -> localDate(
         invalidKey     = "moveDate.error.invalid",
         allRequiredKey = "moveDate.error.required.all",
         twoRequiredKey = "moveDate.error.required.two",
         requiredKey    = "moveDate.error.required"
-      )
+      ).verifying(validDate(today))
     )
+
+  private def validDate(today: LocalDate): Constraint[LocalDate] = {
+    val min: LocalDate = minDate(today)
+    val max: LocalDate = maxDate(today)
+
+    Constraint {
+      case date if date < min => Invalid("moveDate.error.invalid.minDate", dates.formatter.format(min))
+      case date if date > max => Invalid("moveDate.error.invalid.maxDate", dates.formatter.format(max))
+      case _ => Valid
+    }
+  }
+
+  def minDate(today: LocalDate): LocalDate =
+    (if (today.getDayOfMonth <= DayOfMonthSplit) today.minusMonths(1) else today)
+      .withDayOfMonth(1)
+
+  def maxDate(today: LocalDate): LocalDate =
+    today.plusMonths(1).withDayOfMonth(DayOfMonthSplit)
 }

@@ -23,6 +23,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
 import views.html.TaxNumberView
 
 import javax.inject.Inject
@@ -59,8 +60,8 @@ class TaxNumberController @Inject()(
       form.bindFromRequest().fold(
         formWithErrors =>
           request.userAnswers.get(EuCountryPage).map { country =>
-            Future.successful(BadRequest(view(formWithErrors, country, waypoints)))
-          }.getOrElse(Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))),
+            BadRequest(view(formWithErrors, country, waypoints)).toFuture
+          }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(TaxNumberPage, value))

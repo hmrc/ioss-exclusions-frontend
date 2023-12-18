@@ -16,7 +16,8 @@
 
 @import controllers.routes
 @import pages.EuCountryPage
-@import viewmodels.InputWidth
+@import viewmodels.InputWidth.Fixed20
+@import viewmodels.LabelSize
 @import views.html.components.ButtonGroup
 
 @this(
@@ -41,9 +42,11 @@
             SelectViewModel(
                 field = form("value"),
                 items = Country.euCountrySelectItems,
-                label = LabelViewModel(messages("euCountry.heading")).withCssClass("govuk-label--l").asPageHeading()
+                label = HmrcPageHeadingLabel(
+                    content = messages("euCountry.heading")
+                ).asPageHeading(size = LabelSize.Large)
             )
-            .withCssClass(InputWidth.Fixed20.toString)
+            .withCssClass(Fixed20.toString)
             .withCssClass("autocomplete")
         )
 

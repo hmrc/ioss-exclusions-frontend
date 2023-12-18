@@ -18,11 +18,13 @@ package controllers
 
 import controllers.actions._
 import forms.EuCountryFormProvider
-import pages.{EuCountryPage, Waypoints}
+import models.{Country, UserAnswers}
+import pages.{EuCountryPage, TaxNumberPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
 import views.html.EuCountryView
 
 import javax.inject.Inject
@@ -57,13 +59,21 @@ class EuCountryController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints))),
+          BadRequest(view(formWithErrors, waypoints)).toFuture,
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(EuCountryPage, value))
+            updatedAnswersTaxNumber <- updateTaxNumberPage(request.userAnswers, value)
+            updatedAnswers <- Future.fromTry(updatedAnswersTaxNumber.set(EuCountryPage, value))
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(EuCountryPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
       )
   }
+
+  private def updateTaxNumberPage(userAnswers: UserAnswers, country: Country): Future[UserAnswers] =
+    if (userAnswers.get(EuCountryPage).contains(country)) {
+      userAnswers.toFuture
+    } else {
+      Future.fromTry(userAnswers.remove(TaxNumberPage))
+    }
 }

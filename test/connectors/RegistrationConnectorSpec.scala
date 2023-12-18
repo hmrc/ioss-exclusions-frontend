@@ -21,7 +21,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.{get, ok, urlEqualTo}
 import generators.Generators
 import models.RegistrationWrapper
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalatest.funsuite.AnyFunSuiteLike
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.libs.json.Json

@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 
-package pages
-
-import controllers.routes
-import models.UserAnswers
-
 import java.time.LocalDate
-import play.api.libs.json.JsPath
-import play.api.mvc.Call
 
-case object StoppedUsingServiceDatePage extends QuestionPage[LocalDate] {
-
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "stoppedUsingServiceDate"
-
-  override def route(waypoints: Waypoints): Call =
-    routes.StoppedUsingServiceDateController.onPageLoad(waypoints)
-
-  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    ApplicationCompletePage
+package object date {
+  implicit class LocalDateOps(val localDate: LocalDate) extends Ordered[LocalDate] {
+    def compare(other: LocalDate): Int = localDate.compareTo(other)
+  }
 }

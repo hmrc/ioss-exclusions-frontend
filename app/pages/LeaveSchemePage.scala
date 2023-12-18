@@ -31,7 +31,7 @@ case object LeaveSchemePage extends QuestionPage[Boolean] {
   override def route(waypoints: Waypoints): Call =
     routes.LeaveSchemeController.onPageLoad(waypoints)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     answers.get(this).map {
       case true => StoppedUsingServiceDatePage
       case false => ApplicationCompletePage

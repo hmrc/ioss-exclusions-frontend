@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package pages
+package date
 
-import controllers.routes
-import models.UserAnswers
+import java.time.format.DateTimeFormatter
+import java.time.{Clock, LocalDate, ZoneOffset}
+import javax.inject.Inject
 
-import java.time.LocalDate
-import play.api.libs.json.JsPath
-import play.api.mvc.Call
+class Dates @Inject() (val clock: Clock) {
 
-case object StoppedUsingServiceDatePage extends QuestionPage[LocalDate] {
+  val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
-  override def path: JsPath = JsPath \ toString
+  val digitsFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MM yyyy")
 
-  override def toString: String = "stoppedUsingServiceDate"
+  val dateHint: String = digitsFormatter.format(LocalDate.now(clock))
+}
 
-  override def route(waypoints: Waypoints): Call =
-    routes.StoppedUsingServiceDateController.onPageLoad(waypoints)
-
-  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    ApplicationCompletePage
+object Dates {
+  val clock: Clock = Clock.systemDefaultZone.withZone(ZoneOffset.UTC)
 }

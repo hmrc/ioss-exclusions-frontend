@@ -17,14 +17,10 @@
 package forms
 
 import forms.behaviours.DateBehaviours
-import play.api.i18n.Messages
-import play.api.test.Helpers.stubMessages
 
 import java.time.LocalDate
 
 class StoppedSellingGoodsDateFormProviderSpec extends DateBehaviours {
-  private implicit val messages: Messages = stubMessages()
-
 
   ".value" - {
     val commencementDate = LocalDate.parse("2013-12-03")

@@ -18,18 +18,19 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions._
+import date.Dates
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ApplicationCompleteView
 
 import java.time.{Clock, LocalDate}
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class ApplicationCompleteController @Inject()(
                                                override val messagesApi: MessagesApi,
                                                clock: Clock,
+                                               dates: Dates,
                                                config: FrontendAppConfig,
                                                view: ApplicationCompleteView,
                                                identify: IdentifierAction,
@@ -41,10 +42,9 @@ class ApplicationCompleteController @Inject()(
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
-      val dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
       // TODO: Change to business rules later
-      val leaveDate = dateTimeFormatter.format(LocalDate.now(clock).plusDays(1))
-      val cancelDate = dateTimeFormatter.format(LocalDate.now(clock))
+      val leaveDate = dates.formatter.format(LocalDate.now(clock).plusDays(1))
+      val cancelDate = dates.formatter.format(LocalDate.now(clock))
 
       Ok(view(config.iossYourAccountUrl, leaveDate, cancelDate))
   }

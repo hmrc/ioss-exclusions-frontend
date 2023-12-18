@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-package pages
+package utils
 
-import controllers.routes
-import models.UserAnswers
+import scala.concurrent.Future
 
-import java.time.LocalDate
-import play.api.libs.json.JsPath
-import play.api.mvc.Call
+object FutureSyntax {
 
-case object StoppedUsingServiceDatePage extends QuestionPage[LocalDate] {
+  implicit class FutureOps[A](val a: A) extends AnyVal {
 
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "stoppedUsingServiceDate"
-
-  override def route(waypoints: Waypoints): Call =
-    routes.StoppedUsingServiceDateController.onPageLoad(waypoints)
-
-  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    ApplicationCompletePage
+    def toFuture: Future[A] = Future.successful(a)
+  }
 }

@@ -17,7 +17,7 @@
 package controllers.actions
 
 import connectors.RegistrationConnector
-import models.requests.{DataRequest, IdentifierRequest, OptionalDataRequest, RegistrationRequest}
+import models.requests.{DataRequest, RegistrationRequest}
 import play.api.mvc.{ActionRefiner, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter

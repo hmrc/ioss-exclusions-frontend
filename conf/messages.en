@@ -37,13 +37,17 @@ error.non_numeric = Give a value using only numbers
 error.number = Please enter a valid number
 error.required = Please enter a value
 error.summary.title = There is a problem
+error.missing_answers = Some of your information is missing. You must complete this before you can submit your changes.
+error.missing_answers_header = Some information is missing.
+error.missing_answers_prompt.general = You need to complete the missing information before you continue.
+error.resolve_missing_answers = Resolve missing answers
 
 index.title = ioss-exclusions-frontend
 index.heading = ioss-exclusions-frontend
 index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
 
-checkYourAnswers.title = Check Your Answers
-checkYourAnswers.heading = Check Your Answers
+checkYourAnswers.title = Check your answers before leaving the IOSS scheme
+checkYourAnswers.heading = Check your answers before leaving the IOSS scheme
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
@@ -67,30 +71,32 @@ moveCountry.change.hidden = Moved to a different country
 
 euCountry.title = Which country is your business moving to?
 euCountry.heading = Which country is your business moving to?
-euCountry.checkYourAnswersLabel = Eu Country
-euCountry.error.required = Select yes if euCountry
-euCountry.change.hidden = Eu Country
+euCountry.checkYourAnswersLabel = New country
+euCountry.error.required = Select the country your business is moving to
+euCountry.change.hidden = EU Country
 
 taxNumber.title = What is your tax number in {0}?
 taxNumber.heading = What is your tax number in {0}?
-taxNumber.checkYourAnswersLabel = taxNumber
+taxNumber.checkYourAnswersLabel = Tax number
 taxNumber.error.required = Enter tax number
 taxNumber.error.length = Tax Number must be 100 characters or less
 taxNumber.change.hidden = Tax Number
 
-moveDate.title = When did or when will your business move to?
-moveDate.heading = When did or when will your business move to?
-moveDate.hint = You can enter a date up to the last day of this month.<br/> For example, 01/12/2023.
-moveDate.checkYourAnswersLabel = Move date
+moveDate.title = When did or when will your business move to {0}?
+moveDate.heading = When did or when will your business move to {0}?
+moveDate.hint = You can enter a date from {0} up to {1}.<br/> For example, {2}.
+moveDate.checkYourAnswersLabel = Business move date
 moveDate.error.required.all = Enter the move date
 moveDate.error.required.two = The move date must include {0} and {1}
 moveDate.error.required = The move date must include {0}
-moveDate.error.invalid = Enter a real move date
-moveDate.change.hidden = move date
+moveDate.error.invalid = Enter a valid move date
+moveDate.error.invalid.minDate = The date your business moved must be on or after {0}
+moveDate.error.invalid.maxDate = The date your business is moving must be on or before {0}
+moveDate.change.hidden = Move Date
 
 stoppedUsingServiceDate.title = When did you or when will you stop using this service?
 stoppedUsingServiceDate.heading = When did you or when will you stop using this service?
-stoppedUsingServiceDate.hint = You can enter a date up to the last day of this month.<br/> For example, 06/12/2023.
+stoppedUsingServiceDate.hint = You can enter a date up to the last day of this month.<br/> For example, {0}.
 stoppedUsingServiceDate.checkYourAnswersLabel = Stopped using service date
 stoppedUsingServiceDate.error.required.all = Enter the stopped using service date
 stoppedUsingServiceDate.error.required.two = The stoppedUsingServiceDate must include {0} and {1}
@@ -100,7 +106,7 @@ stoppedUsingServiceDate.change.hidden = Stopped using service date
 
 stoppedSellingGoodsDate.title = When did or when will your business stop selling eligible goods?
 stoppedSellingGoodsDate.heading = When did or when will your business stop selling eligible goods?
-stoppedSellingGoodsDate.hint = You can enter a date up to the last day of this month.<br/> For example, 06/12/2023.
+stoppedSellingGoodsDate.hint = You can enter a date up to the last day of this month.<br/> For example, {0}.
 stoppedSellingGoodsDate.error.required.all = Enter the date you stopped selling goods
 stoppedSellingGoodsDate.error.required.two = The date you stopped selling goods must include {0} and {1}
 stoppedSellingGoodsDate.error.required = The date you stopped selling goods must include the {0}

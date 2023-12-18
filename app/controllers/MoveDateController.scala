@@ -17,14 +17,17 @@
 package controllers
 
 import controllers.actions._
+import date.Dates
 import forms.MoveDateFormProvider
-import pages.{MoveDatePage, Waypoints}
+import pages.{EuCountryPage, MoveDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
 import views.html.MoveDateView
 
+import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -35,11 +38,15 @@ class MoveDateController @Inject()(
                                      getData: DataRetrievalAction,
                                      requireData: DataRequiredAction,
                                      formProvider: MoveDateFormProvider,
+                                     clock: Clock,
+                                     dates: Dates,
                                      val controllerComponents: MessagesControllerComponents,
                                      view: MoveDateView
                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(mode: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  val today: LocalDate = LocalDate.now(clock)
+
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val form = formProvider()
 
@@ -48,7 +55,16 @@ class MoveDateController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode))
+      request.userAnswers.get(EuCountryPage).map { country =>
+        Ok(view(
+          preparedForm,
+          country,
+          dates.formatter.format(formProvider.minDate(today)),
+          dates.formatter.format(formProvider.maxDate(today)),
+          dates.dateHint,
+          waypoints))
+      }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -56,9 +72,17 @@ class MoveDateController @Inject()(
       val form = formProvider()
 
       form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints))),
-
+        formWithErrors => {
+          request.userAnswers.get(EuCountryPage).map { country =>
+            BadRequest(view(
+              formWithErrors,
+              country,
+              dates.formatter.format(formProvider.minDate(today)),
+              dates.formatter.format(formProvider.maxDate(today)),
+              dates.dateHint,
+              waypoints)).toFuture
+          }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture)
+        },
         exclusionDate =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(MoveDatePage, exclusionDate))

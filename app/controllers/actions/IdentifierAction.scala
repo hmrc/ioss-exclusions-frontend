@@ -26,6 +26,7 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -68,7 +69,7 @@ class SessionIdentifierAction @Inject()(
       case Some(session) =>
         block(IdentifierRequest(request, session.value))
       case None =>
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture
     }
   }
 }

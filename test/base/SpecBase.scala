@@ -17,18 +17,23 @@
 package base
 
 import controllers.actions._
+import date.Dates
 import generators.Generators
-import models.{RegistrationWrapper, UserAnswers}
+import models.{CheckMode, Country, RegistrationWrapper, UserAnswers}
 import org.scalacheck.Arbitrary
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{OptionValues, TryValues}
+import org.scalatestplus.mockito.MockitoSugar
+import pages.{CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, MoveCountryPage, MoveDatePage, TaxNumberPage, Waypoint, Waypoints}
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
+
+import java.time.LocalDate
 
 trait SpecBase
   extends AnyFreeSpec
@@ -36,9 +41,26 @@ trait SpecBase
     with TryValues
     with OptionValues
     with ScalaFutures
+    with MockitoSugar
     with IntegrationPatience with Generators {
 
+  val emptyWaypoints: Waypoints = EmptyWaypoints
+  val checkModeWaypoints: Waypoints = emptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
+
   val userAnswersId: String = "id"
+
+  val country: Country = Country("IT", "Italy")
+  val anotherCountry: Country = Country("ES", "Spain")
+
+  val moveDate: LocalDate = LocalDate.now(Dates.clock)
+  val taxNumber: String = "333333333"
+
+  def completeUserAnswers: UserAnswers =
+    emptyUserAnswers
+      .set(MoveCountryPage, true).success.value
+      .set(EuCountryPage, country).success.value
+      .set(MoveDatePage, moveDate).success.value
+      .set(TaxNumberPage, taxNumber).success.value
 
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 

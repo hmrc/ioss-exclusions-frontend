@@ -18,36 +18,61 @@ package controllers
 
 import com.google.inject.Inject
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import pages.{CheckYourAnswersPage, Waypoints}
+import date.Dates
+import models.CheckMode
+import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.CompletionChecks
+import utils.FutureSyntax.FutureOps
+import viewmodels.checkAnswers.{EuCountrySummary, MoveDateSummary, TaxNumberSummary}
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
-
-import scala.concurrent.Future
 
 class CheckYourAnswersController @Inject()(
                                             override val messagesApi: MessagesApi,
                                             identify: IdentifierAction,
                                             getData: DataRetrievalAction,
                                             requireData: DataRequiredAction,
+                                            dates: Dates,
                                             val controllerComponents: MessagesControllerComponents,
                                             view: CheckYourAnswersView
-                                          ) extends FrontendBaseController with I18nSupport {
+                                          ) extends FrontendBaseController with I18nSupport with CompletionChecks {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
+      val thisPage = CheckYourAnswersPage
+      val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, CheckYourAnswersPage.urlFragment))
+
+      val euCountrySummaryRow = EuCountrySummary.rowNewCountry(request.userAnswers, waypoints, thisPage)
+      val moveDateSummaryRow = MoveDateSummary.rowMoveDate(request.userAnswers, waypoints, thisPage, dates)
+      val taxNumberSummaryRow = TaxNumberSummary.rowTaxNumber(request.userAnswers, waypoints, thisPage)
+
       val list = SummaryListViewModel(
-        rows = Seq.empty
+        rows = Seq(
+          euCountrySummaryRow,
+          moveDateSummaryRow,
+          taxNumberSummaryRow
+        ).flatten
       )
 
-      Ok(view(list))
+      val isValid = validate()
+      Ok(view(waypoints, list, isValid))
   }
 
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      Future.successful(Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, request.userAnswers).route))
+      getFirstValidationErrorRedirect(waypoints) match {
+        case Some(errorRedirect) => if (incompletePrompt) {
+          errorRedirect.toFuture
+        } else {
+          Redirect(routes.CheckYourAnswersController.onPageLoad()).toFuture
+        }
+
+        case None =>
+          Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, request.userAnswers).route).toFuture
+      }
   }
 }

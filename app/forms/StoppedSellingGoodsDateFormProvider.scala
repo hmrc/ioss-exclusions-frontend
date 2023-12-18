@@ -18,14 +18,13 @@ package forms
 
 import forms.mappings.Mappings
 import play.api.data.Form
-import play.api.i18n.Messages
 
 import java.time.{LocalDate, YearMonth}
 import javax.inject.Inject
 
 class StoppedSellingGoodsDateFormProvider @Inject() extends Mappings {
 
-  def apply(currentDate: LocalDate, registrationDate: LocalDate)(implicit messages: Messages): Form[LocalDate] = {
+  def apply(currentDate: LocalDate, registrationDate: LocalDate): Form[LocalDate] = {
     val lastDayOfMonth = YearMonth.of(currentDate.getYear, currentDate.getMonthValue)
       .atEndOfMonth()
       .getDayOfMonth

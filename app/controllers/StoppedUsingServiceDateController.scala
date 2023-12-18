@@ -17,12 +17,14 @@
 package controllers
 
 import controllers.actions._
+import date.Dates
 import forms.StoppedUsingServiceDateFormProvider
 import pages.{StoppedUsingServiceDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
 import views.html.StoppedUsingServiceDateView
 
 import javax.inject.Inject
@@ -35,6 +37,7 @@ class StoppedUsingServiceDateController @Inject()(
                                                    getData: DataRetrievalAction,
                                                    requireData: DataRequiredAction,
                                                    formProvider: StoppedUsingServiceDateFormProvider,
+                                                   dates: Dates,
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: StoppedUsingServiceDateView
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
@@ -49,7 +52,7 @@ class StoppedUsingServiceDateController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, waypoints))
+      Ok(view(preparedForm, dates.dateHint, waypoints))
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -59,7 +62,7 @@ class StoppedUsingServiceDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints))),
+          BadRequest(view(formWithErrors, dates.dateHint, waypoints)).toFuture,
 
         value =>
           for {

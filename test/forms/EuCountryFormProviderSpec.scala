@@ -23,7 +23,7 @@ import org.scalacheck.Arbitrary.arbitrary
 
 class EuCountryFormProviderSpec extends StringFieldBehaviours {
 
-  private val requiredKey = "euCountry.error.required"
+  val requiredKey = "euCountry.error.required"
   val form = new EuCountryFormProvider()()
 
   ".value" - {

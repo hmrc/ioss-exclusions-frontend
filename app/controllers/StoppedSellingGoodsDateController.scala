@@ -17,12 +17,14 @@
 package controllers
 
 import controllers.actions._
+import date.Dates
 import forms.StoppedSellingGoodsDateFormProvider
 import pages.{StoppedSellingGoodsDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
 import views.html.StoppedSellingGoodsDateView
 
 import java.time.{Clock, LocalDate}
@@ -37,6 +39,7 @@ class StoppedSellingGoodsDateController @Inject()(
                                                    requireData: DataRequiredAction,
                                                    getRegistration: GetRegistrationAction,
                                                    formProvider: StoppedSellingGoodsDateFormProvider,
+                                                   dates: Dates,
                                                    clock: Clock,
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: StoppedSellingGoodsDateView
@@ -52,7 +55,7 @@ class StoppedSellingGoodsDateController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, waypoints))
+      Ok(view(preparedForm, dates.dateHint, waypoints))
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData andThen getRegistration).async {
@@ -62,7 +65,7 @@ class StoppedSellingGoodsDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints))),
+          BadRequest(view(formWithErrors, dates.dateHint, waypoints)).toFuture,
 
         value =>
           for {

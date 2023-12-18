@@ -14,24 +14,34 @@
  * limitations under the License.
  */
 
-package pages
+package date
 
-import controllers.routes
-import models.UserAnswers
+import base.SpecBase
 
 import java.time.LocalDate
-import play.api.libs.json.JsPath
-import play.api.mvc.Call
 
-case object StoppedUsingServiceDatePage extends QuestionPage[LocalDate] {
+class DatesSpec extends SpecBase {
 
-  override def path: JsPath = JsPath \ toString
+  "LocalDateOps" - {
 
-  override def toString: String = "stoppedUsingServiceDate"
+    "must implement Ordered to be able to use comparison operators: <, >, <=, >=" in {
+      val DaysToAdd = 10
+      val before = LocalDate.now
+      val after = before.plusDays(DaysToAdd)
 
-  override def route(waypoints: Waypoints): Call =
-    routes.StoppedUsingServiceDateController.onPageLoad(waypoints)
+      before.compare(after) must be < 0
+      after.compare(before) must be > 0
+      before.compare(before) mustBe 0
 
-  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    ApplicationCompletePage
+      before <= before mustBe true
+      before >= before mustBe true
+
+      before < after mustBe true
+      after < before mustBe false
+
+      after > before mustBe true
+      before > after mustBe false
+    }
+  }
+
 }

@@ -20,9 +20,10 @@ import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class KeepAliveController @Inject()(
                                      val controllerComponents: MessagesControllerComponents,
@@ -38,6 +39,6 @@ class KeepAliveController @Inject()(
           answers =>
             sessionRepository.keepAlive(answers.id).map(_ => Ok)
         }
-        .getOrElse(Future.successful(Ok))
+        .getOrElse(Ok.toFuture)
   }
 }

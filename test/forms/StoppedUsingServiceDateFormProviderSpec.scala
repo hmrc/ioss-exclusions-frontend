@@ -23,8 +23,8 @@ import play.api.test.Helpers.stubMessages
 
 class StoppedUsingServiceDateFormProviderSpec extends DateBehaviours {
 
-  private implicit val messages: Messages = stubMessages()
-  private val form = new StoppedUsingServiceDateFormProvider()()
+  implicit val messages: Messages = stubMessages()
+  val form = new StoppedUsingServiceDateFormProvider()()
 
   ".value" - {
 
