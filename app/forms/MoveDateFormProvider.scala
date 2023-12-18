@@ -20,7 +20,6 @@ import date.{Dates, LocalDateOps}
 import forms.mappings.Mappings
 import play.api.data.Form
 import play.api.data.validation.{Constraint, Invalid, Valid}
-import play.api.i18n.Messages
 
 import java.time.{Clock, LocalDate}
 import javax.inject.Inject
@@ -29,7 +28,7 @@ class MoveDateFormProvider @Inject()(clock: Clock) extends Mappings {
 
   private val dates: Dates = new Dates(clock)
 
-  def apply(today: LocalDate = LocalDate.now(clock))(implicit messages: Messages): Form[LocalDate] =
+  def apply(today: LocalDate = LocalDate.now(clock)): Form[LocalDate] =
     Form(
       "value" -> localDate(
         invalidKey     = "moveDate.error.invalid",

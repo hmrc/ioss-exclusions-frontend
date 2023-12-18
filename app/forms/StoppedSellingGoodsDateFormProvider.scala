@@ -18,20 +18,25 @@ package forms
 
 import forms.mappings.Mappings
 import play.api.data.Form
-import play.api.i18n.Messages
 
-import java.time.LocalDate
+import java.time.{LocalDate, YearMonth}
 import javax.inject.Inject
 
 class StoppedSellingGoodsDateFormProvider @Inject() extends Mappings {
 
-  def apply()(implicit messages: Messages): Form[LocalDate] =
+  def apply(currentDate: LocalDate, registrationDate: LocalDate): Form[LocalDate] = {
+    val lastDayOfMonth = YearMonth.of(currentDate.getYear, currentDate.getMonthValue)
+      .atEndOfMonth()
+      .getDayOfMonth
+
+    val endOfPeriod = currentDate.withDayOfMonth(lastDayOfMonth)
     Form(
       "value" -> localDate(
-        invalidKey     = "stoppedSellingGoodsDate.error.invalid",
+        invalidKey = "stoppedSellingGoodsDate.error.invalid",
         allRequiredKey = "stoppedSellingGoodsDate.error.required.all",
         twoRequiredKey = "stoppedSellingGoodsDate.error.required.two",
-        requiredKey    = "stoppedSellingGoodsDate.error.required"
-      )
+        requiredKey = "stoppedSellingGoodsDate.error.required"
+      ).verifying(inDateRange(registrationDate, endOfPeriod, "stoppedSellingGoodsDate.error.invalidDateRage"))
     )
+  }
 }

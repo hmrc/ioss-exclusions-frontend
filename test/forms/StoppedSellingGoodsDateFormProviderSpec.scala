@@ -16,21 +16,25 @@
 
 package forms
 
-import forms.mappings.Mappings
-import play.api.data.Form
+import forms.behaviours.DateBehaviours
 
 import java.time.LocalDate
-import javax.inject.Inject
 
-class StoppedUsingServiceDateFormProvider @Inject() extends Mappings {
+class StoppedSellingGoodsDateFormProviderSpec extends DateBehaviours {
 
-  def apply(): Form[LocalDate] =
-    Form(
-      "value" -> localDate(
-        invalidKey     = "stoppedUsingServiceDate.error.invalid",
-        allRequiredKey = "stoppedUsingServiceDate.error.required.all",
-        twoRequiredKey = "stoppedUsingServiceDate.error.required.two",
-        requiredKey    = "stoppedUsingServiceDate.error.required"
-      )
+  ".value" - {
+    val commencementDate = LocalDate.parse("2013-12-03")
+    val currentDate = LocalDate.parse("2013-12-01")
+    val endOfPeriod = LocalDate.parse("2013-12-31")
+
+    val form = new StoppedSellingGoodsDateFormProvider().apply(currentDate, commencementDate)
+
+    val validData = datesBetween(
+      min = commencementDate,
+      max = endOfPeriod
     )
+
+    behave like dateField(form, "value", validData)
+    behave like mandatoryDateField(form, "value", "stoppedSellingGoodsDate.error.required.all")
+  }
 }

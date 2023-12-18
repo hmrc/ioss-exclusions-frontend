@@ -27,6 +27,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.StoppedSellingGoodsDateView
 
+import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,16 +37,18 @@ class StoppedSellingGoodsDateController @Inject()(
                                                    identify: IdentifierAction,
                                                    getData: DataRetrievalAction,
                                                    requireData: DataRequiredAction,
+                                                   getRegistration: GetRegistrationAction,
                                                    formProvider: StoppedSellingGoodsDateFormProvider,
                                                    dates: Dates,
+                                                   clock: Clock,
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: StoppedSellingGoodsDateView
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData andThen getRegistration) {
     implicit request =>
-
-      val form = formProvider()
+      val commencementDate = request.registrationWrapper.registration.schemeDetails.commencementDate
+      val form = formProvider(LocalDate.now(clock), commencementDate)
 
       val preparedForm = request.userAnswers.get(StoppedSellingGoodsDatePage) match {
         case None => form
@@ -55,10 +58,10 @@ class StoppedSellingGoodsDateController @Inject()(
       Ok(view(preparedForm, dates.dateHint, waypoints))
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData andThen getRegistration).async {
     implicit request =>
-
-      val form = formProvider()
+      val commencementDate = request.registrationWrapper.registration.schemeDetails.commencementDate
+      val form = formProvider.apply(LocalDate.now(clock), commencementDate)
 
       form.bindFromRequest().fold(
         formWithErrors =>

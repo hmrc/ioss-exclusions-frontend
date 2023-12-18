@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package forms
+package models.requests
 
-import forms.mappings.Mappings
-import play.api.data.Form
+import models.{RegistrationWrapper, UserAnswers}
+import play.api.mvc.{Request, WrappedRequest}
 
-import java.time.LocalDate
-import javax.inject.Inject
-
-class StoppedUsingServiceDateFormProvider @Inject() extends Mappings {
-
-  def apply(): Form[LocalDate] =
-    Form(
-      "value" -> localDate(
-        invalidKey     = "stoppedUsingServiceDate.error.invalid",
-        allRequiredKey = "stoppedUsingServiceDate.error.required.all",
-        twoRequiredKey = "stoppedUsingServiceDate.error.required.two",
-        requiredKey    = "stoppedUsingServiceDate.error.required"
-      )
-    )
-}
+case class RegistrationRequest[A](
+                                   request: Request[A],
+                                   registrationWrapper: RegistrationWrapper,
+                                   userAnswers: UserAnswers,
+                                 ) extends WrappedRequest[A](request)

@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package forms
+package models.etmp
 
-import forms.mappings.Mappings
-import play.api.data.Form
+import play.api.libs.json.{Json, OFormat}
 
-import java.time.LocalDate
-import javax.inject.Inject
+case class EtmpTradingName(tradingName: String)
 
-class StoppedUsingServiceDateFormProvider @Inject() extends Mappings {
+object EtmpTradingName {
 
-  def apply(): Form[LocalDate] =
-    Form(
-      "value" -> localDate(
-        invalidKey     = "stoppedUsingServiceDate.error.invalid",
-        allRequiredKey = "stoppedUsingServiceDate.error.required.all",
-        twoRequiredKey = "stoppedUsingServiceDate.error.required.two",
-        requiredKey    = "stoppedUsingServiceDate.error.required"
-      )
-    )
+  implicit val format: OFormat[EtmpTradingName] = Json.format[EtmpTradingName]
 }

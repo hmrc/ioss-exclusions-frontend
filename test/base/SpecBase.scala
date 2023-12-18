@@ -18,7 +18,9 @@ package base
 
 import controllers.actions._
 import date.Dates
-import models.{CheckMode, Country, UserAnswers}
+import generators.Generators
+import models.{CheckMode, Country, RegistrationWrapper, UserAnswers}
+import org.scalacheck.Arbitrary
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -40,7 +42,7 @@ trait SpecBase
     with OptionValues
     with ScalaFutures
     with MockitoSugar
-    with IntegrationPatience {
+    with IntegrationPatience with Generators {
 
   val emptyWaypoints: Waypoints = EmptyWaypoints
   val checkModeWaypoints: Waypoints = emptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
@@ -60,15 +62,17 @@ trait SpecBase
       .set(MoveDatePage, moveDate).success.value
       .set(TaxNumberPage, taxNumber).success.value
 
-  def emptyUserAnswers : UserAnswers = UserAnswers(userAnswersId)
+  def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
 
-  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None,
+                                   registration: RegistrationWrapper = Arbitrary.arbitrary[RegistrationWrapper].sample.value): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
+        bind[GetRegistrationAction].toInstance(new FakeGetRegistrationAction(registration))
       )
 }

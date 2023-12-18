@@ -107,18 +107,15 @@ stoppedUsingServiceDate.change.hidden = Stopped using service date
 stoppedSellingGoodsDate.title = When did or when will your business stop selling eligible goods?
 stoppedSellingGoodsDate.heading = When did or when will your business stop selling eligible goods?
 stoppedSellingGoodsDate.hint = You can enter a date up to the last day of this month.<br/> For example, {0}.
-stoppedSellingGoodsDate.checkYourAnswersLabel = Stopped selling goods date
-stoppedSellingGoodsDate.error.required.all = Enter the stopped selling goods date
-stoppedSellingGoodsDate.error.required.two = The stopped selling goods must include {0} and {1}
-stoppedSellingGoodsDate.error.required = The stopped selling goods must include {0}
-stoppedSellingGoodsDate.error.invalid = Enter a real stopped selling goods date
-stoppedSellingGoodsDate.change.hidden =  Stopped selling goods date
+stoppedSellingGoodsDate.error.required.all = Enter the date you stopped selling goods
+stoppedSellingGoodsDate.error.required.two = The date you stopped selling goods must include {0} and {1}
+stoppedSellingGoodsDate.error.required = The date you stopped selling goods must include the {0}
+stoppedSellingGoodsDate.error.invalid = Give a correct date
+stoppedSellingGoodsDate.error.invalidDateRage = The date must be between {0} and {1} inclusively
 
 stopSellingGoods.title = Has your business stopped selling eligible goods to customers in the EU or Northern Ireland?
 stopSellingGoods.heading = Has your business stopped selling eligible goods to customers in the EU or Northern Ireland?
-stopSellingGoods.checkYourAnswersLabel = stop selling goods
-stopSellingGoods.error.required = Select yes if stopSellingGoods
-stopSellingGoods.change.hidden = Stop selling goods
+stopSellingGoods.error.required = Select yes if you want to stop selling goods
 
 applicationComplete.title = We have received your request to leave
 applicationComplete.heading = We have received your request to leave
