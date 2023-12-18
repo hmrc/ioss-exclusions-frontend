@@ -67,7 +67,7 @@ class MoveDateControllerSpec extends SpecBase {
         val dates = application.injector.instanceOf[Dates]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, country, dates.dateHint, EmptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form, country, dates.exampleDate, EmptyWaypoints)(getRequest, messages(application)).toString
       }
     }
 
@@ -87,7 +87,7 @@ class MoveDateControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
 
-        contentAsString(result) mustEqual view(form.fill(validAnswer), country, dates.dateHint, EmptyWaypoints)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), country, dates.exampleDate, EmptyWaypoints)(getRequest(), messages(application)).toString
       }
     }
 
@@ -124,7 +124,7 @@ class MoveDateControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, country, dates.dateHint, EmptyWaypoints)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, country, dates.exampleDate, EmptyWaypoints)(request, messages(application)).toString
       }
     }
 

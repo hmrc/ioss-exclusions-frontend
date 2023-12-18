@@ -17,7 +17,6 @@
 package controllers
 
 import controllers.actions._
-import date.Dates
 import forms.MoveDateFormProvider
 import pages.{EuCountryPage, MoveDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -27,6 +26,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.MoveDateView
 
+import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,10 +37,12 @@ class MoveDateController @Inject()(
                                      getData: DataRetrievalAction,
                                      requireData: DataRequiredAction,
                                      formProvider: MoveDateFormProvider,
-                                     dates: Dates,
+                                     clock: Clock,
                                      val controllerComponents: MessagesControllerComponents,
                                      view: MoveDateView
                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+
+  val today: LocalDate = LocalDate.now(clock)
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -52,7 +54,13 @@ class MoveDateController @Inject()(
       }
 
       request.userAnswers.get(EuCountryPage).map { country =>
-        Ok(view(preparedForm, country, dates.dateHint, waypoints))
+        Ok(view(
+          preparedForm,
+          country,
+          formProvider.minDate(today),
+          formProvider.maxDate(today),
+          today,
+          waypoints))
       }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()))
 
   }
@@ -64,7 +72,13 @@ class MoveDateController @Inject()(
       form.bindFromRequest().fold(
         formWithErrors => {
           request.userAnswers.get(EuCountryPage).map { country =>
-            BadRequest(view(formWithErrors, country, dates.dateHint, waypoints)).toFuture
+            BadRequest(view(
+              formWithErrors,
+              country,
+              formProvider.minDate(today),
+              formProvider.maxDate(today),
+              today,
+              waypoints)).toFuture
           }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture)
         },
         exclusionDate =>

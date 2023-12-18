@@ -84,7 +84,7 @@ taxNumber.change.hidden = Tax Number
 
 moveDate.title = When did or when will your business move to {0}?
 moveDate.heading = When did or when will your business move to {0}?
-moveDate.hint = You can enter a date up to the last day of this month.<br/> For example, {0}.
+moveDate.hint = You can enter a date from {0} up to {1}.<br/> For example, {2}.
 moveDate.checkYourAnswersLabel = Business move date
 moveDate.error.required.all = Enter the move date
 moveDate.error.required.two = The move date must include {0} and {1}

@@ -26,6 +26,7 @@ import javax.inject.Inject
 
 class MoveDateFormProvider @Inject()(clock: Clock) extends Mappings {
 
+  private val DayOfMonthSplit: Int = 10
   private val dates: Dates = new Dates(clock)
 
   def apply(today: LocalDate = LocalDate.now(clock)): Form[LocalDate] =
@@ -39,14 +40,22 @@ class MoveDateFormProvider @Inject()(clock: Clock) extends Mappings {
     )
 
   private def validDate(today: LocalDate): Constraint[LocalDate] = {
-    val dayOfMonthSplit = 10
-    val minDate: LocalDate = (if (today.getDayOfMonth <= dayOfMonthSplit) today.minusMonths(1) else today).withDayOfMonth(1)
-    val maxDate: LocalDate = today.plusMonths(1).withDayOfMonth(dayOfMonthSplit)
+    val min: LocalDate = minDate(today)
+    val max: LocalDate = maxDate(today)
 
     Constraint {
-      case date if date < minDate => Invalid("moveDate.error.invalid.minDate", dates.digitsFormatter.format(minDate))
-      case date if date > maxDate => Invalid("moveDate.error.invalid.maxDate", dates.digitsFormatter.format(maxDate))
+      case date if date < min => Invalid("moveDate.error.invalid.minDate", dates.formatter.format(min))
+      case date if date > max => Invalid("moveDate.error.invalid.maxDate", dates.formatter.format(max))
       case _ => Valid
     }
   }
+
+  def minDate(today: LocalDate): LocalDate =
+    (if (today.getDayOfMonth <= DayOfMonthSplit) today.minusMonths(1) else today)
+      .withDayOfMonth(1)
+
+  def maxDate(today: LocalDate): LocalDate =
+    today.plusMonths(1).withDayOfMonth(DayOfMonthSplit)
+
+
 }
