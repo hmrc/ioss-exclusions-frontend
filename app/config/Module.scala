@@ -18,7 +18,7 @@ package config
 
 import com.google.inject.AbstractModule
 import controllers.actions._
-import date.Dates
+import date.{Dates, Today, TodayImpl}
 
 import java.time.Clock
 
@@ -33,5 +33,6 @@ class Module extends AbstractModule {
     bind(classOf[IdentifierAction]).to(classOf[AuthenticatedIdentifierAction]).asEagerSingleton()
 
     bind(classOf[Clock]).toInstance(Dates.clock)
+    bind(classOf[Today]).to(classOf[TodayImpl]).asEagerSingleton()
   }
 }

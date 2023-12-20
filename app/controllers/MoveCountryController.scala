@@ -35,7 +35,6 @@ class MoveCountryController @Inject()(
                                                     sessionRepository: SessionRepository,
                                                     identify: IdentifierAction,
                                                     getData: DataRetrievalAction,
-                                                    requireData: DataRequiredAction,
                                                     formProvider: MoveCountryFormProvider,
                                                     val controllerComponents: MessagesControllerComponents,
                                                     view: MoveCountryView

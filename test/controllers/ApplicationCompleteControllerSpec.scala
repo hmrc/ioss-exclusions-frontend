@@ -18,26 +18,37 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
+import date.Today
+import org.mockito.MockitoSugar.when
+import pages.{MoveCountryPage, StopSellingGoodsPage, StoppedUsingServiceDatePage}
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.ApplicationCompleteView
-import play.api.inject.bind
 
-import java.time.{Clock, Instant, ZoneId}
+import java.time.LocalDate
 
 class ApplicationCompleteControllerSpec extends SpecBase {
 
   "ExclusionsRequestReceivedConfirmation Controller" - {
 
-    "must return OK and the correct view for a GET" in {
+    "must return OK with the leave date and cancel date being 1st day of next month (1st Feb) when someone stops using the service " +
+      "at least 15 days prior to the end of the month (16th Jan)" in {
 
+      val today = LocalDate.of(2024, 1, 25)
+      val mockToday = mock[Today]
+      when(mockToday.date).thenReturn(today)
 
-      val clock = Clock.fixed(Instant.EPOCH, ZoneId.of("UTC"))
+      val stoppedUsingServiceDate = LocalDate.of(2024, 1, 16)
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          bind[Clock].toInstance(clock)
-        ).build()
+      val userAnswers = emptyUserAnswers
+        .set(MoveCountryPage, false).success.get
+        .set(StopSellingGoodsPage, false).success.get
+        .set(StoppedUsingServiceDatePage, stoppedUsingServiceDate).success.get
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[Today].toInstance(mockToday))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
@@ -49,9 +60,41 @@ class ApplicationCompleteControllerSpec extends SpecBase {
         val config = application.injector.instanceOf[FrontendAppConfig]
 
         status(result) mustEqual OK
-        val dummyLeaveDate = "2 January 1970"
-        val dummyCancelDate = "1 January 1970"
-        contentAsString(result) mustEqual view(config.iossYourAccountUrl, dummyLeaveDate, dummyCancelDate)(request, messages(application)).toString
+        val leaveDate = "1 February 2024"
+        contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate, leaveDate)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK with the leave date and cancel date being 1st day of the following month (1st March) when someone stops using the service " +
+      "less than 15 days prior to the end of the month (17th Jan)" in {
+
+      val today = LocalDate.of(2024, 1, 25)
+      val mockToday = mock[Today]
+      when(mockToday.date).thenReturn(today)
+
+      val stoppedUsingServiceDate = LocalDate.of(2024, 1, 17)
+
+      val userAnswers = emptyUserAnswers
+        .set(MoveCountryPage, false).success.get
+        .set(StopSellingGoodsPage, false).success.get
+        .set(StoppedUsingServiceDatePage, stoppedUsingServiceDate).success.get
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[Today].toInstance(mockToday))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[ApplicationCompleteView]
+
+        val config = application.injector.instanceOf[FrontendAppConfig]
+
+        status(result) mustEqual OK
+        val leaveDate = "1 March 2024"
+        contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate, leaveDate)(request, messages(application)).toString
       }
     }
   }

@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import date.Dates
+import date.{Dates, Today, TodayImpl}
 import forms.MoveDateFormProvider
 import models.UserAnswers
 import pages.{EmptyWaypoints, EuCountryPage, MoveDatePage}
@@ -34,7 +34,10 @@ class MoveDateControllerSpec extends SpecBase {
 
   implicit val messages: Messages = stubMessages()
 
-  val formProvider = new MoveDateFormProvider(Dates.clock)
+  val today: Today = new TodayImpl(Dates.clock)
+  val dates = new Dates(today)
+
+  val formProvider = new MoveDateFormProvider(dates)
 
   val form: Form[LocalDate] = formProvider()
 
@@ -70,8 +73,8 @@ class MoveDateControllerSpec extends SpecBase {
         contentAsString(result) mustEqual view(
           form,
           country,
-          dates.formatter.format(formProvider.minDate(validAnswer)),
-          dates.formatter.format(formProvider.maxDate(validAnswer)),
+          dates.formatter.format(dates.minMoveDate),
+          dates.formatter.format(dates.maxMoveDate),
           dates.dateHint,
           emptyWaypoints
         )(getRequest, messages(application)).toString
@@ -97,8 +100,8 @@ class MoveDateControllerSpec extends SpecBase {
         contentAsString(result) mustEqual view(
           form.fill(validAnswer),
           country,
-          dates.formatter.format(formProvider.minDate(validAnswer)),
-          dates.formatter.format(formProvider.maxDate(validAnswer)),
+          dates.formatter.format(dates.minMoveDate),
+          dates.formatter.format(dates.maxMoveDate),
           dates.dateHint,
           emptyWaypoints
         )(getRequest(), messages(application)).toString
@@ -141,8 +144,8 @@ class MoveDateControllerSpec extends SpecBase {
         contentAsString(result) mustEqual view(
           boundForm,
           country,
-          dates.formatter.format(formProvider.minDate(validAnswer)),
-          dates.formatter.format(formProvider.maxDate(validAnswer)),
+          dates.formatter.format(dates.minMoveDate),
+          dates.formatter.format(dates.maxMoveDate),
           dates.dateHint,
           emptyWaypoints
         )(request, messages(application)).toString

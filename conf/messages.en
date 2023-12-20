@@ -119,9 +119,12 @@ stopSellingGoods.error.required = Select yes if you want to stop selling goods
 
 applicationComplete.title = We have received your request to leave
 applicationComplete.heading = We have received your request to leave
-applicationComplete.registration.text = Your business no longer sells eligible goods to customers in the EU or Northern Ireland.<br/></br/>You will leave this service on {0}.
+applicationComplete.stopSellingGoods.text = Your business no longer sells eligible goods to customers in the EU or Northern Ireland.
+applicationComplete.moving.text = You are moving your business operations to {0}.
+applicationComplete.leave.text = You will leave this service on {0}.
 applicationComplete.next.heading = What happens next
 applicationComplete.next.info.top = You must:
+applicationComplete.next.info.bullet0 = register for the Import One Stop Shop scheme in {0} by {1} to continue using the scheme without a break
 applicationComplete.next.info.bullet1 = complete a VAT return for your final month
 applicationComplete.next.info.bullet2 = pay any VAT you still owe
 applicationComplete.next.info.bottom = If you change your mind, you have until {0} to cancel this request and stay on the service.

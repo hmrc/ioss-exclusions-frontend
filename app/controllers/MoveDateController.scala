@@ -27,24 +27,20 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.MoveDateView
 
-import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class MoveDateController @Inject()(
-                                     override val messagesApi: MessagesApi,
-                                     sessionRepository: SessionRepository,
-                                     identify: IdentifierAction,
-                                     getData: DataRetrievalAction,
-                                     requireData: DataRequiredAction,
-                                     formProvider: MoveDateFormProvider,
-                                     clock: Clock,
-                                     dates: Dates,
-                                     val controllerComponents: MessagesControllerComponents,
-                                     view: MoveDateView
-                                   )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
-
-  val today: LocalDate = LocalDate.now(clock)
+                                    override val messagesApi: MessagesApi,
+                                    sessionRepository: SessionRepository,
+                                    identify: IdentifierAction,
+                                    getData: DataRetrievalAction,
+                                    requireData: DataRequiredAction,
+                                    formProvider: MoveDateFormProvider,
+                                    dates: Dates,
+                                    val controllerComponents: MessagesControllerComponents,
+                                    view: MoveDateView
+                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -59,8 +55,8 @@ class MoveDateController @Inject()(
         Ok(view(
           preparedForm,
           country,
-          dates.formatter.format(formProvider.minDate(today)),
-          dates.formatter.format(formProvider.maxDate(today)),
+          dates.formatter.format(dates.minMoveDate),
+          dates.formatter.format(dates.maxMoveDate),
           dates.dateHint,
           waypoints))
       }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()))
@@ -77,8 +73,8 @@ class MoveDateController @Inject()(
             BadRequest(view(
               formWithErrors,
               country,
-              dates.formatter.format(formProvider.minDate(today)),
-              dates.formatter.format(formProvider.maxDate(today)),
+              dates.formatter.format(dates.minMoveDate),
+              dates.formatter.format(dates.maxMoveDate),
               dates.dateHint,
               waypoints)).toFuture
           }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture)

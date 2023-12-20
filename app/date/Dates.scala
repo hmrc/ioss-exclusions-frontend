@@ -20,13 +20,22 @@ import java.time.format.DateTimeFormatter
 import java.time.{Clock, LocalDate, ZoneOffset}
 import javax.inject.Inject
 
-class Dates @Inject() (val clock: Clock) {
+class Dates @Inject()(val today: Today) {
+
+  private val MoveDayOfMonthSplit: Int = 10
 
   val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
-  val digitsFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MM yyyy")
+  private val digitsFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MM yyyy")
 
-  val dateHint: String = digitsFormatter.format(LocalDate.now(clock))
+  val dateHint: String = digitsFormatter.format(today.date)
+
+  val minMoveDate: LocalDate =
+    (if (today.date.getDayOfMonth <= MoveDayOfMonthSplit) today.date.minusMonths(1) else today.date)
+      .withDayOfMonth(1)
+
+  val maxMoveDate: LocalDate =
+    today.date.plusMonths(1).withDayOfMonth(MoveDayOfMonthSplit)
 }
 
 object Dates {
