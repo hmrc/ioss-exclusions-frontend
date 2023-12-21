@@ -133,5 +133,5 @@ applicationComplete.next.info.returnToAccount = Return to your account
 leaveScheme.title = Are you sure you want to leave the Import One Stop Shop scheme?
 leaveScheme.heading = Are you sure you want to leave the Import One Stop Shop scheme?
 leaveScheme.checkYourAnswersLabel = leave scheme
-leaveScheme.error.required = Select yes if leaveScheme
+leaveScheme.error.required = Select yes if you want to leave the Import One Stop Shop scheme
 leaveScheme.change.hidden = leave scheme
