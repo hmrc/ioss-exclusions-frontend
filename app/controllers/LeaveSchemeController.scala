@@ -16,9 +16,10 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import forms.LeaveSchemeFormProvider
-import pages.{LeaveSchemePage, Waypoints}
+import pages.{LeaveSchemePage, StoppedUsingServiceDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -30,15 +31,16 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class LeaveSchemeController @Inject()(
-                                         override val messagesApi: MessagesApi,
-                                         sessionRepository: SessionRepository,
-                                         identify: IdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: LeaveSchemeFormProvider,
-                                         val controllerComponents: MessagesControllerComponents,
-                                         view: LeaveSchemeView
-                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                       override val messagesApi: MessagesApi,
+                                       sessionRepository: SessionRepository,
+                                       identify: IdentifierAction,
+                                       getData: DataRetrievalAction,
+                                       requireData: DataRequiredAction,
+                                       formProvider: LeaveSchemeFormProvider,
+                                       config: FrontendAppConfig,
+                                       val controllerComponents: MessagesControllerComponents,
+                                       view: LeaveSchemeView
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
@@ -63,8 +65,14 @@ class LeaveSchemeController @Inject()(
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(LeaveSchemePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(LeaveSchemePage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+            _ <- sessionRepository.set(updatedAnswers)
+          } yield {
+            if (value) {
+              Redirect(StoppedUsingServiceDatePage.route(waypoints).url)
+            } else {
+              Redirect(config.iossYourAccountUrl)
+            }
+          }
       )
   }
 }

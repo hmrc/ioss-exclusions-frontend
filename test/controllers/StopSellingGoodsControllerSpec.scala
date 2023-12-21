@@ -29,7 +29,7 @@ class StopSellingGoodsControllerSpec extends SpecBase {
   val formProvider = new StopSellingGoodsFormProvider()
   val form = formProvider()
 
-  val stopSellingGoodsRoute = routes.StopSellingGoodsController.onPageLoad(emptyWaypoints).url
+  lazy val stopSellingGoodsRoute = routes.StopSellingGoodsController.onPageLoad(emptyWaypoints).url
 
   "StopSellingGoods Controller" - {
 

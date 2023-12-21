@@ -28,7 +28,7 @@ class TaxNumberControllerSpec extends SpecBase {
   val formProvider = new TaxNumberFormProvider()
   val form = formProvider()
 
-  val taxNumberRoute = routes.TaxNumberController.onPageLoad(emptyWaypoints).url
+  lazy val taxNumberRoute = routes.TaxNumberController.onPageLoad(emptyWaypoints).url
 
   val userAnswersWithCountry = emptyUserAnswers.set(EuCountryPage, country).success.value
 

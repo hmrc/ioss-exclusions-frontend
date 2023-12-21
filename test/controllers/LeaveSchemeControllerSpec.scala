@@ -17,9 +17,10 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
 import forms.LeaveSchemeFormProvider
 import models.UserAnswers
-import pages.LeaveSchemePage
+import pages.{LeaveSchemePage, StoppedUsingServiceDatePage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.LeaveSchemeView
@@ -29,7 +30,7 @@ class LeaveSchemeControllerSpec extends SpecBase {
   val formProvider = new LeaveSchemeFormProvider()
   val form = formProvider()
 
-  val leaveSchemeRoute = routes.LeaveSchemeController.onPageLoad(emptyWaypoints).url
+  lazy val leaveSchemeRoute = routes.LeaveSchemeController.onPageLoad(emptyWaypoints).url
 
   "LeaveScheme Controller" - {
 
@@ -67,7 +68,7 @@ class LeaveSchemeControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to the next page when valid data is submitted" in {
+    "must redirect to StoppedUsingServiceDatePage when the user submits true and is leaving the scheme" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
@@ -76,10 +77,24 @@ class LeaveSchemeControllerSpec extends SpecBase {
 
         val result = route(application, request).value
 
-        val userAnswers = UserAnswers(userAnswersId).set(LeaveSchemePage, true).success.value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual StoppedUsingServiceDatePage.route(emptyWaypoints).url
+      }
+    }
+
+    "must redirect to /your-account when the user submits false and is not leaving the scheme" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(POST, leaveSchemeRoute).withFormUrlEncodedBody(("value", "false"))
+
+        val config = application.injector.instanceOf[FrontendAppConfig]
+
+        val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual LeaveSchemePage.navigate(emptyWaypoints, emptyUserAnswers, userAnswers).url
+        redirectLocation(result).value mustEqual config.iossYourAccountUrl
       }
     }
 
