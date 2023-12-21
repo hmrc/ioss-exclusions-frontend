@@ -64,15 +64,11 @@ class ApplicationCompleteController @Inject()(
   private def onMovingBusiness()(implicit request: DataRequest[AnyContent]): Option[Result] = {
     val messages: Messages = implicitly[Messages]
 
-    for {
-      moveDate <- request.userAnswers.get(MoveDatePage)
-      country <- request.userAnswers.get(EuCountryPage)
-    } yield {
-      val leaveDate = dates.formatter.format(toLeaveDate(moveDate))
+    request.userAnswers.get(EuCountryPage).map {country =>
+      val leaveDate = dates.formatter.format(dates.maxMoveDate)
 
       Ok(view(
         config.iossYourAccountUrl,
-        leaveDate,
         leaveDate,
         Some(messages("applicationComplete.moving.text", country.name)),
         Some(messages("applicationComplete.next.info.bullet0", country.name, leaveDate))
@@ -85,12 +81,9 @@ class ApplicationCompleteController @Inject()(
     val messages: Messages = implicitly[Messages]
 
     request.userAnswers.get(StoppedSellingGoodsDatePage).map { stoppedSellingGoodsDate =>
-      val leaveDate = toLeaveDate(stoppedSellingGoodsDate)
-
       Ok(view(
         config.iossYourAccountUrl,
-        dates.formatter.format(leaveDate),
-        dates.formatter.format(leaveDate),
+        dates.formatter.format(toLeaveDate(stoppedSellingGoodsDate)),
         Some(messages("applicationComplete.stopSellingGoods.text"))
       ))
     }
@@ -98,12 +91,9 @@ class ApplicationCompleteController @Inject()(
 
   private def onStopUsingService()(implicit request: DataRequest[_]): Option[Result] = {
     request.userAnswers.get(StoppedUsingServiceDatePage).map { stoppedUsingServiceDate =>
-      val leaveDate = toLeaveDate(stoppedUsingServiceDate)
-
       Ok(view(
         config.iossYourAccountUrl,
-        dates.formatter.format(leaveDate),
-        dates.formatter.format(leaveDate)
+        dates.formatter.format(toLeaveDate(stoppedUsingServiceDate))
       ))
     }
   }

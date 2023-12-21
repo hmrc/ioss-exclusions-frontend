@@ -61,7 +61,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
         val leaveDate = "1 February 2024"
-        contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate, leaveDate)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate)(request, messages(application)).toString
       }
     }
 
@@ -94,7 +94,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
         val leaveDate = "1 March 2024"
-        contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate, leaveDate)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate)(request, messages(application)).toString
       }
     }
   }
