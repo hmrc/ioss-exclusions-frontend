@@ -20,17 +20,20 @@ import forms.mappings.Mappings
 import play.api.data.Form
 
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 import javax.inject.Inject
 
 class StoppedUsingServiceDateFormProvider @Inject() extends Mappings {
 
-  def apply(): Form[LocalDate] =
+  def apply(currentDate: LocalDate, registrationDate: LocalDate): Form[LocalDate] = {
+    val endOfPeriod = currentDate.`with`(lastDayOfMonth())
     Form(
       "value" -> localDate(
-        invalidKey     = "stoppedUsingServiceDate.error.invalid",
+        invalidKey = "stoppedUsingServiceDate.error.invalid",
         allRequiredKey = "stoppedUsingServiceDate.error.required.all",
         twoRequiredKey = "stoppedUsingServiceDate.error.required.two",
-        requiredKey    = "stoppedUsingServiceDate.error.required"
-      )
+        requiredKey = "stoppedUsingServiceDate.error.required"
+      ).verifying(inDateRange(registrationDate, endOfPeriod, "stoppedUsingServiceDate.error.invalidDateRage"))
     )
+  }
 }

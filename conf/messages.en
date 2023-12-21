@@ -97,12 +97,11 @@ moveDate.change.hidden = Move Date
 stoppedUsingServiceDate.title = When did you or when will you stop using this service?
 stoppedUsingServiceDate.heading = When did you or when will you stop using this service?
 stoppedUsingServiceDate.hint = You can enter a date up to the last day of this month.<br/> For example, {0}.
-stoppedUsingServiceDate.checkYourAnswersLabel = Stopped using service date
-stoppedUsingServiceDate.error.required.all = Enter the stopped using service date
-stoppedUsingServiceDate.error.required.two = The stoppedUsingServiceDate must include {0} and {1}
-stoppedUsingServiceDate.error.required = The stopped using service date must include {0}
-stoppedUsingServiceDate.error.invalid = Enter a real stopped using service date
-stoppedUsingServiceDate.change.hidden = Stopped using service date
+stoppedUsingServiceDate.error.required.all = Enter the date you stopped using this service
+stoppedUsingServiceDate.error.required.two = The date you stopped using this service must include {0} and {1}
+stoppedUsingServiceDate.error.required = The date you stopped using this service must include {0}
+stoppedUsingServiceDate.error.invalid = Give a correct date
+stoppedUsingServiceDate.error.invalidDateRage = The date must be between {0} and {1} inclusively
 
 stoppedSellingGoodsDate.title = When did or when will your business stop selling eligible goods?
 stoppedSellingGoodsDate.heading = When did or when will your business stop selling eligible goods?
