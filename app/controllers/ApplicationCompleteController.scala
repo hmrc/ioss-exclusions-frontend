@@ -19,16 +19,14 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions._
-import date.{Dates, LocalDateOps}
+import date.Dates
 import models.requests.DataRequest
-import pages.{EuCountryPage, MoveCountryPage, MoveDatePage, StopSellingGoodsPage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
+import pages.{EuCountryPage, MoveCountryPage, StopSellingGoodsPage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ApplicationCompleteView
 
-import java.time.LocalDate
-import java.time.temporal.TemporalAdjusters.{firstDayOfNextMonth, lastDayOfMonth}
 import javax.inject.Inject
 
 class ApplicationCompleteController @Inject()(
@@ -41,8 +39,6 @@ class ApplicationCompleteController @Inject()(
                                                requireData: DataRequiredAction,
                                                val controllerComponents: MessagesControllerComponents
                                              ) extends FrontendBaseController with I18nSupport {
-
-  private val DayOfMonthSplit: Int = 15
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -83,7 +79,7 @@ class ApplicationCompleteController @Inject()(
     request.userAnswers.get(StoppedSellingGoodsDatePage).map { stoppedSellingGoodsDate =>
       Ok(view(
         config.iossYourAccountUrl,
-        dates.formatter.format(toLeaveDate(stoppedSellingGoodsDate)),
+        dates.formatter.format(dates.getLeaveDateWhenStopUsingServiceOrSellingGoods(stoppedSellingGoodsDate)),
         Some(messages("applicationComplete.stopSellingGoods.text"))
       ))
     }
@@ -93,20 +89,8 @@ class ApplicationCompleteController @Inject()(
     request.userAnswers.get(StoppedUsingServiceDatePage).map { stoppedUsingServiceDate =>
       Ok(view(
         config.iossYourAccountUrl,
-        dates.formatter.format(toLeaveDate(stoppedUsingServiceDate))
+        dates.formatter.format(dates.getLeaveDateWhenStopUsingServiceOrSellingGoods(stoppedUsingServiceDate))
       ))
-    }
-  }
-
-  private def toLeaveDate(exclusionDate: LocalDate): LocalDate = {
-    val today = dates.today.date
-    val lastDayOfTheMonth = today.`with`(lastDayOfMonth())
-    val firstDayOfTheNextMonth = today.`with`(firstDayOfNextMonth())
-
-    if (exclusionDate <= lastDayOfTheMonth.minusDays(DayOfMonthSplit)) {
-      firstDayOfTheNextMonth
-    } else {
-      firstDayOfTheNextMonth.plusMonths(1)
     }
   }
 }
