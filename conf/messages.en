@@ -134,3 +134,14 @@ leaveScheme.heading = Are you sure you want to leave the Import One Stop Shop sc
 leaveScheme.checkYourAnswersLabel = leave scheme
 leaveScheme.error.required = Select yes if you want to leave the Import One Stop Shop scheme
 leaveScheme.change.hidden = leave scheme
+
+cancelLeaveScheme.title = Do you want to cancel your request to leave the Import One Stop Shop scheme?
+cancelLeaveScheme.heading = Do you want to cancel your request to leave the Import One Stop Shop scheme?
+cancelLeaveScheme.checkYourAnswersLabel = cancel leave scheme
+cancelLeaveScheme.error.required = Select yes if you want to cancel your request to leave the Import One Stop Shop scheme
+cancelLeaveScheme.change.hidden = cancel leave scheme
+
+cancelLeaveSchemeComplete.title = You have cancelled your request to leave
+cancelLeaveSchemeComplete.heading = You have cancelled your request to leave
+cancelLeaveSchemeComplete.next.info.top = You can continue using this service.
+cancelLeaveSchemeComplete.next.info.returnToAccount = Return to your account
