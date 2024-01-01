@@ -19,10 +19,13 @@ package controllers
 import controllers.actions._
 import date.Dates
 import forms.StoppedSellingGoodsDateFormProvider
+import models.etmp.EtmpExclusionReason
 import pages.{StoppedSellingGoodsDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.RegistrationService
+import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.StoppedSellingGoodsDateView
@@ -40,7 +43,8 @@ class StoppedSellingGoodsDateController @Inject()(
                                                    formProvider: StoppedSellingGoodsDateFormProvider,
                                                    dates: Dates,
                                                    val controllerComponents: MessagesControllerComponents,
-                                                   view: StoppedSellingGoodsDateView
+                                                   view: StoppedSellingGoodsDateView,
+                                                   registrationService: RegistrationService
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData andThen getRegistration) {
@@ -69,6 +73,11 @@ class StoppedSellingGoodsDateController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(StoppedSellingGoodsDatePage, value))
             _ <- sessionRepository.set(updatedAnswers)
+            _ <- registrationService.amendRegistration(
+              request.userAnswers,
+              Some(EtmpExclusionReason.NoLongerSupplies),
+              Vrn("123456789") // TODO VRN
+            )
           } yield Redirect(StoppedSellingGoodsDatePage.navigate(waypoints, updatedAnswers, updatedAnswers).url)
       )
   }

@@ -20,9 +20,12 @@ import com.google.inject.Inject
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import date.Dates
 import models.CheckMode
+import models.etmp.EtmpExclusionReason
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.RegistrationService
+import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
 import utils.FutureSyntax.FutureOps
@@ -37,7 +40,8 @@ class CheckYourAnswersController @Inject()(
                                             requireData: DataRequiredAction,
                                             dates: Dates,
                                             val controllerComponents: MessagesControllerComponents,
-                                            view: CheckYourAnswersView
+                                            view: CheckYourAnswersView,
+                                            registrationService: RegistrationService
                                           ) extends FrontendBaseController with I18nSupport with CompletionChecks {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
@@ -72,6 +76,11 @@ class CheckYourAnswersController @Inject()(
         }
 
         case None =>
+          registrationService.amendRegistration(
+            request.userAnswers,
+            Some(EtmpExclusionReason.TransferringMSID),
+            Vrn("123456789") // TODO VRN
+          )
           Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, request.userAnswers).route).toFuture
       }
   }

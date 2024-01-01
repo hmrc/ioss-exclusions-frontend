@@ -17,9 +17,11 @@
 package connectors
 
 import base.SpecBase
-import com.github.tomakehurst.wiremock.client.WireMock.{get, ok, urlEqualTo}
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, ok, post, urlEqualTo}
+import data.RegistrationData.etmpAmendRegistrationRequest
 import generators.Generators
 import models.RegistrationWrapper
+import models.responses.UnexpectedResponseStatus
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
@@ -62,6 +64,36 @@ class RegistrationConnectorSpec
       }
     }
 
+  }
+
+  ".amend" - {
+    val url = s"/ioss-registration/amend"
+
+    "must return Right when a new registration is created on the backend" in {
+
+      running(application) {
+        val connector = application.injector.instanceOf[RegistrationConnector]
+
+        server.stubFor(post(urlEqualTo(url)).willReturn(ok()))
+
+        val result = connector.amend(etmpAmendRegistrationRequest).futureValue
+
+        result mustBe Right(())
+      }
+    }
+
+    "must return Left(UnexpectedResponseStatus) when the backend returns UnexpectedResponseStatus" in {
+
+      running(application) {
+        val connector = application.injector.instanceOf[RegistrationConnector]
+
+        server.stubFor(post(urlEqualTo(url)).willReturn(aResponse().withStatus(123)))
+
+        val result = connector.amend(etmpAmendRegistrationRequest).futureValue
+
+        result mustBe Left(UnexpectedResponseStatus(123, "Unexpected amend response, status 123 returned"))
+      }
+    }
   }
 
 }
