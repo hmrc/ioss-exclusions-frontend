@@ -32,8 +32,9 @@ import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
+import uk.gov.hmrc.domain.Vrn
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate, ZoneId}
 
 trait SpecBase
   extends AnyFreeSpec
@@ -48,12 +49,15 @@ trait SpecBase
   val checkModeWaypoints: Waypoints = emptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
 
   val userAnswersId: String = "id"
+  val vrn: Vrn = Vrn("123456789")
 
   val country: Country = Country("IT", "Italy")
   val anotherCountry: Country = Country("ES", "Spain")
 
   val moveDate: LocalDate = LocalDate.now(Dates.clock)
   val taxNumber: String = "333333333"
+
+  val stubClock: Clock = Clock.fixed(LocalDate.now.atStartOfDay(ZoneId.systemDefault).toInstant, ZoneId.systemDefault)
 
   def completeUserAnswers: UserAnswers =
     emptyUserAnswers

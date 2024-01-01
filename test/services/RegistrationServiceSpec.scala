@@ -1,21 +1,40 @@
+/*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package services
 
 import base.SpecBase
-import org.mockito.Mockito.reset
+import connectors.RegistrationConnector
+import data.RegistrationData.etmpAmendRegistrationRequest
+import models.etmp.EtmpExclusionReason
+import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.BeforeAndAfterEach
-import play.api.mvc.AnyContent
-import play.api.test.FakeRequest
 import play.api.test.Helpers.running
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.FutureSyntax.FutureOps
 
-import java.time.LocalDateTime
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach {
 
   implicit private lazy val hc: HeaderCarrier = HeaderCarrier()
-  implicit private lazy val ar: AuthorisedMandatoryIossRequest[AnyContent] = AuthorisedMandatoryIossRequest(FakeRequest(), userId, vrn, iossNumber)
 
   private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
+  private val registrationService = new RegistrationService(stubClock, mockRegistrationConnector)
 
   override def beforeEach(): Unit = {
     reset(mockRegistrationConnector)
@@ -26,23 +45,18 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach {
     "must create registration request and return a successful ETMP enrolment response" in {
 
       val amendRegistrationResponse =
-        AmendRegistrationResponse(
-          processingDateTime = LocalDateTime.now(stubClock),
-          formBundleNumber = "123456789",
-          vrn = vrn.vrn,
-          iossReference = "test",
-          businessPartner = "test businessPartner"
-        )
+        Right(())
 
-      when(mockRegistrationConnector.amendRegistration(etmpAmendRegistrationRequest)) thenReturn Right(amendRegistrationResponse).toFuture
+      // TODO request per type
+      when(mockRegistrationConnector.amend(etmpAmendRegistrationRequest)) thenReturn Right(amendRegistrationResponse).toFuture
 
-      val app = applicationBuilder
+      val app = applicationBuilder()
         .build()
 
       running(app) {
 
-        registrationService.amendRegistration(etmpAmendRegistrationRequest).futureValue mustBe AmendSucceeded
-        verify(mockRegistrationConnector, times(1)).amendRegistration(eqTo(etmpAmendRegistrationRequest))
+        registrationService.amendRegistration(completeUserAnswers, Some(EtmpExclusionReason.TransferringMSID), vrn).futureValue mustBe amendRegistrationResponse
+        verify(mockRegistrationConnector, times(1)).amend(eqTo(etmpAmendRegistrationRequest))
       }
     }
   }
