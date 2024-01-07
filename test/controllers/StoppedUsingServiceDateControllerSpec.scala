@@ -144,17 +144,22 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with BeforeAndAfter
 
     "must show failure page when amend registration call fails to submit" in {
 
+      val registrationWrapper = Arbitrary.arbitrary[RegistrationWrapper].sample.value
+      val etmpSchemeDetails = registrationWrapper.registration.schemeDetails
+      val validDateWrapper = registrationWrapper.copy(
+        registration = registrationWrapper.registration.copy(
+          schemeDetails = etmpSchemeDetails.copy(commencementDate = LocalDate.now()))
+      )
+
       when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn
         Future.successful(Left(UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "Error occurred")))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), registration = validDateWrapper)
         .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
         .build()
 
       running(application) {
         val result = route(application, postRequest()).value
-
-        val userAnswers = UserAnswers(userAnswersId).set(StoppedUsingServiceDatePage, validAnswer).success.value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.SubmissionFailureController.onPageLoad().url

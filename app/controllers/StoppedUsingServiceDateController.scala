@@ -39,7 +39,6 @@ class StoppedUsingServiceDateController @Inject()(
                                                    identify: IdentifierAction,
                                                    getData: DataRetrievalAction,
                                                    requireData: DataRequiredAction,
-                                                   getRegistration: GetRegistrationAction,
                                                    formProvider: StoppedUsingServiceDateFormProvider,
                                                    dates: Dates,
                                                    val controllerComponents: MessagesControllerComponents,
@@ -47,7 +46,7 @@ class StoppedUsingServiceDateController @Inject()(
                                                    registrationService: RegistrationService
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData andThen getRegistration) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val commencementDate = request.registrationWrapper.registration.schemeDetails.commencementDate
       val form = formProvider(dates.today.date, commencementDate)
@@ -60,7 +59,7 @@ class StoppedUsingServiceDateController @Inject()(
       Ok(view(preparedForm, dates.dateHint, waypoints))
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData andThen getRegistration).async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val commencementDate = request.registrationWrapper.registration.schemeDetails.commencementDate
       val form = formProvider.apply(dates.today.date, commencementDate)
