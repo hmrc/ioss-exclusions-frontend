@@ -16,26 +16,28 @@
 
 package forms
 
-import date.Dates
+import date.{Dates, LocalDateOps, Today, TodayImpl}
 import forms.behaviours.DateBehaviours
+import org.mockito.MockitoSugar.when
 import org.scalacheck.Gen
 import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 
 import java.time.LocalDate
-import date.LocalDateOps
+import org.scalatestplus.mockito.MockitoSugar.mock
 
 class MoveDateFormProviderSpec extends DateBehaviours {
 
   implicit val messages: Messages = stubMessages()
-  val dates = new Dates(Dates.clock)
+
+  val mockToday = mock[Today]
 
   ".value" - {
+    val dates = new Dates(new TodayImpl(Dates.clock))
+    val form = new MoveDateFormProvider(dates)()
 
-    val form = new MoveDateFormProvider(Dates.clock)()
-
-    val minDate: LocalDate = LocalDate.now(Dates.clock)
+    val minDate: LocalDate = dates.today.date
 
     val validData: Gen[LocalDate] = datesBetween(
       min = minDate,
@@ -59,7 +61,9 @@ class MoveDateFormProviderSpec extends DateBehaviours {
       )
 
       forAll(todayGen, validDatesGen) { (today, validDate) =>
-        val form = new MoveDateFormProvider(Dates.clock)(today)
+        when(mockToday.date).thenReturn(today)
+        val dates = new Dates(mockToday)
+        val form = new MoveDateFormProvider(dates)()
 
         val data = formData(validDate)
         val result = form.bind(data)
@@ -90,7 +94,9 @@ class MoveDateFormProviderSpec extends DateBehaviours {
       val invalidDatesGen: Gen[LocalDate] = Gen.oneOf(invalidEarlyDatesGen, invalidLateDatesGen)
 
       forAll(todayGen, invalidDatesGen) { (today, invalidDate) =>
-        val form = new MoveDateFormProvider(Dates.clock)(today)
+        when(mockToday.date).thenReturn(today)
+        val dates = new Dates(mockToday)
+        val form = new MoveDateFormProvider(dates)()
 
         val data = formData(invalidDate)
         val result = form.bind(data)
@@ -116,7 +122,9 @@ class MoveDateFormProviderSpec extends DateBehaviours {
       )
 
       forAll(todayGen, validDatesGen) { (today, validDate) =>
-        val form = new MoveDateFormProvider(Dates.clock)(today)
+        when(mockToday.date).thenReturn(today)
+        val dates = new Dates(mockToday)
+        val form = new MoveDateFormProvider(dates)()
 
         val data = formData(validDate)
         val result = form.bind(data)
@@ -147,7 +155,9 @@ class MoveDateFormProviderSpec extends DateBehaviours {
       val invalidDatesGen: Gen[LocalDate] = Gen.oneOf(invalidEarlyDatesGen, invalidLateDatesGen)
 
       forAll(todayGen, invalidDatesGen) { (today, invalidDate) =>
-        val form = new MoveDateFormProvider(Dates.clock)(today)
+        when(mockToday.date).thenReturn(today)
+        val dates = new Dates(mockToday)
+        val form = new MoveDateFormProvider(dates)()
 
         val data = formData(invalidDate)
         val result = form.bind(data)

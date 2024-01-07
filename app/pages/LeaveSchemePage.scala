@@ -17,7 +17,6 @@
 package pages
 
 import controllers.routes
-import models.UserAnswers
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
@@ -30,10 +29,4 @@ case object LeaveSchemePage extends QuestionPage[Boolean] {
 
   override def route(waypoints: Waypoints): Call =
     routes.LeaveSchemeController.onPageLoad(waypoints)
-
-  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    answers.get(this).map {
-      case true => StoppedUsingServiceDatePage
-      case false => ApplicationCompletePage
-    }.orRecover
 }

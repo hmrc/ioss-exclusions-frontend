@@ -16,6 +16,8 @@
 
 package forms.mappings
 
+import date.LocalDateOps
+
 import java.time.LocalDate
 import play.api.data.validation.{Constraint, Invalid, Valid}
 
@@ -79,7 +81,7 @@ trait Constraints {
                             dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")): Constraint[LocalDate] =
     Constraint {
       input: LocalDate =>
-        if (input.isAfter(minimum.minusDays(1)) && input.isBefore(maximum.plusDays(1))) {
+        if (minimum <= input && input <= maximum) {
           Valid
         } else {
           Invalid(errorKey, minimum.format(dateFormatter), maximum.format(dateFormatter))

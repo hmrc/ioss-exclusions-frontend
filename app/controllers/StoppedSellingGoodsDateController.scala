@@ -27,7 +27,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.StoppedSellingGoodsDateView
 
-import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,7 +39,6 @@ class StoppedSellingGoodsDateController @Inject()(
                                                    getRegistration: GetRegistrationAction,
                                                    formProvider: StoppedSellingGoodsDateFormProvider,
                                                    dates: Dates,
-                                                   clock: Clock,
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: StoppedSellingGoodsDateView
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
@@ -48,7 +46,7 @@ class StoppedSellingGoodsDateController @Inject()(
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData andThen getRegistration) {
     implicit request =>
       val commencementDate = request.registrationWrapper.registration.schemeDetails.commencementDate
-      val form = formProvider(LocalDate.now(clock), commencementDate)
+      val form = formProvider(dates.today.date, commencementDate)
 
       val preparedForm = request.userAnswers.get(StoppedSellingGoodsDatePage) match {
         case None => form
@@ -61,7 +59,7 @@ class StoppedSellingGoodsDateController @Inject()(
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData andThen getRegistration).async {
     implicit request =>
       val commencementDate = request.registrationWrapper.registration.schemeDetails.commencementDate
-      val form = formProvider.apply(LocalDate.now(clock), commencementDate)
+      val form = formProvider.apply(dates.today.date, commencementDate)
 
       form.bindFromRequest().fold(
         formWithErrors =>

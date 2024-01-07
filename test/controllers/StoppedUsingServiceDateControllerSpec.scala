@@ -17,11 +17,15 @@
 package controllers
 
 import base.SpecBase
+import connectors.RegistrationConnector
 import date.Dates
 import forms.StoppedUsingServiceDateFormProvider
-import models.UserAnswers
+import models.{RegistrationWrapper, UserAnswers}
+import org.scalacheck.Arbitrary
 import pages.{EmptyWaypoints, StoppedUsingServiceDatePage}
+import play.api.data.Form
 import play.api.i18n.Messages
+import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -35,30 +39,41 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
 
   val formProvider = new StoppedUsingServiceDateFormProvider()
 
-  val form = formProvider()
+  private def form(currentDate: LocalDate = LocalDate.now(), registrationDate: LocalDate = LocalDate.now()): Form[LocalDate] =
+    formProvider.apply(currentDate, registrationDate)
 
   val validAnswer = LocalDate.now(ZoneOffset.UTC)
 
   lazy val stoppedUsingServiceDateRoute = routes.StoppedUsingServiceDateController.onPageLoad(EmptyWaypoints).url
 
-  override val emptyUserAnswers = UserAnswers(userAnswersId)
-
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, stoppedUsingServiceDateRoute)
 
-  def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
+
+  def createPostPayload(day: String = validAnswer.getDayOfMonth.toString,
+                        month: String = validAnswer.getMonthValue.toString,
+                        year: String = validAnswer.getYear.toString): Map[String, String] = {
+    Map(
+      "value.day" -> day,
+      "value.month" -> month,
+      "value.year" -> year
+    )
+  }
+
+  def postRequest(payload: Map[String, String] = createPostPayload()): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, stoppedUsingServiceDateRoute)
       .withFormUrlEncodedBody(
-        "value.day"   -> validAnswer.getDayOfMonth.toString,
-        "value.month" -> validAnswer.getMonthValue.toString,
-        "value.year"  -> validAnswer.getYear.toString
+        payload.toList: _*
       )
 
   "StoppedUsingServiceDate Controller" - {
 
     "must return OK and the correct view for a GET" in {
+      val registrationConnector = mock[RegistrationConnector]
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+        .build()
 
       running(application) {
         val result = route(application, getRequest()).value
@@ -67,7 +82,7 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
         val dates = application.injector.instanceOf[Dates]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, dates.dateHint, EmptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form(), dates.dateHint, emptyWaypoints)(getRequest, messages(application)).toString
       }
     }
 
@@ -84,13 +99,20 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), dates.dateHint, EmptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form().fill(validAnswer), dates.dateHint, emptyWaypoints)(getRequest, messages(application)).toString
       }
     }
 
     "must redirect to the next page when valid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val registrationWrapper = Arbitrary.arbitrary[RegistrationWrapper].sample.value
+      val etmpSchemeDetails = registrationWrapper.registration.schemeDetails
+      val validDateWrapper = registrationWrapper.copy(
+        registration = registrationWrapper.registration.copy(
+          schemeDetails = etmpSchemeDetails.copy(commencementDate = LocalDate.now()))
+      )
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), registration = validDateWrapper).build()
 
       running(application) {
         val result = route(application, postRequest()).value
@@ -102,14 +124,13 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
       }
     }
 
-    "must return a Bad Request and errors when invalid data is submitted" in {
+    "must return a Bad Request and errors when invalid date values are submitted" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-
-      val request = FakeRequest(POST, stoppedUsingServiceDateRoute).withFormUrlEncodedBody(("value", "invalid value"))
+      val payload = createPostPayload(day = "32")
+      val request = postRequest(payload)
 
       running(application) {
-        val boundForm = form.bind(Map("value" -> "invalid value"))
 
         val view = application.injector.instanceOf[StoppedUsingServiceDateView]
         val dates = application.injector.instanceOf[Dates]
@@ -117,7 +138,30 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, dates.dateHint, EmptyWaypoints)(request, messages(application)).toString
+        val boundForm = form().bind(payload)
+        contentAsString(result) mustEqual view(boundForm, dates.dateHint, emptyWaypoints)(request, messages(application)).toString
+      }
+    }
+
+    "must return a Bad Request and errors when invalid data structure is submitted" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      val invalidDataStructure = ("value", "invalid value")
+      val request =
+        FakeRequest(POST, stoppedUsingServiceDateRoute)
+          .withFormUrlEncodedBody(invalidDataStructure)
+
+      running(application) {
+        val view = application.injector.instanceOf[StoppedUsingServiceDateView]
+        val dates = application.injector.instanceOf[Dates]
+
+        val result = route(application, request).value
+
+        status(result) mustEqual BAD_REQUEST
+
+        val boundForm = form().bind(Map(invalidDataStructure))
+        contentAsString(result) mustEqual view(boundForm, dates.dateHint, emptyWaypoints)(request, messages(application)).toString
       }
     }
 

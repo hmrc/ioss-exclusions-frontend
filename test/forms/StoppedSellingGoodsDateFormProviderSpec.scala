@@ -27,7 +27,7 @@ class StoppedSellingGoodsDateFormProviderSpec extends DateBehaviours {
     val currentDate = LocalDate.parse("2013-12-01")
     val endOfPeriod = LocalDate.parse("2013-12-31")
 
-    val form = new StoppedSellingGoodsDateFormProvider().apply(currentDate, commencementDate)
+    val form = new StoppedSellingGoodsDateFormProvider()(currentDate, commencementDate)
 
     val validData = datesBetween(
       min = commencementDate,

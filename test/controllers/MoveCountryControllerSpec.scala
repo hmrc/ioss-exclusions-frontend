@@ -29,7 +29,7 @@ class MoveCountryControllerSpec extends SpecBase {
   val formProvider = new MoveCountryFormProvider()
   val form = formProvider()
 
-  val moveCountryRoute = routes.MoveCountryController.onPageLoad(emptyWaypoints).url
+  lazy val moveCountryRoute = routes.MoveCountryController.onPageLoad(emptyWaypoints).url
 
   "MoveCountry Controller" - {
 

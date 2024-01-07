@@ -18,41 +18,185 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
+import date.Today
+import org.mockito.MockitoSugar.when
+import pages.{EuCountryPage, MoveCountryPage, StopSellingGoodsPage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.ApplicationCompleteView
-import play.api.inject.bind
 
-import java.time.{Clock, Instant, ZoneId}
+import java.time.LocalDate
 
 class ApplicationCompleteControllerSpec extends SpecBase {
 
-  "ExclusionsRequestReceivedConfirmation Controller" - {
+  val today = LocalDate.of(2024, 1, 25)
+  val mockToday = mock[Today]
+  when(mockToday.date).thenReturn(today)
 
-    "must return OK and the correct view for a GET" in {
+  "ApplicationComplete Controller" - {
 
+    "when someone moves business" - {
+      "must return OK with the leave date being the 10th of next month (10th Feb)" in {
+        val userAnswers = emptyUserAnswers
+          .set(MoveCountryPage, true).success.get
+          .set(EuCountryPage, country).success.get
 
-      val clock = Clock.fixed(Instant.EPOCH, ZoneId.of("UTC"))
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[Today].toInstance(mockToday))
+          .build()
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          bind[Clock].toInstance(clock)
-        ).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
 
-      running(application) {
-        val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
+          val result = route(application, request).value
 
-        val result = route(application, request).value
+          val view = application.injector.instanceOf[ApplicationCompleteView]
 
-        val view = application.injector.instanceOf[ApplicationCompleteView]
+          val config = application.injector.instanceOf[FrontendAppConfig]
 
-        val config = application.injector.instanceOf[FrontendAppConfig]
+          status(result) mustEqual OK
+          val leaveDate = "10 February 2024"
 
-        status(result) mustEqual OK
-        val dummyLeaveDate = "2 January 1970"
-        val dummyCancelDate = "1 January 1970"
-        contentAsString(result) mustEqual view(config.iossYourAccountUrl, dummyLeaveDate, dummyCancelDate)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(
+            config.iossYourAccountUrl,
+            leaveDate,
+            Some(messages(application)("applicationComplete.moving.text", country.name)),
+            Some(messages(application)("applicationComplete.next.info.bullet0", country.name, leaveDate))
+          )(request, messages(application)).toString
+        }
+      }
+    }
+
+    "when someone stops selling goods" - {
+      "must return OK with the leave date being 1st day of next month (1st Feb) " +
+        "when stopping at least 15 days prior to the end of the month (16th Jan)" in {
+
+        val stoppedSellingGoodsDate = LocalDate.of(2024, 1, 16)
+
+        val userAnswers = emptyUserAnswers
+          .set(MoveCountryPage, false).success.get
+          .set(StopSellingGoodsPage, true).success.get
+          .set(StoppedSellingGoodsDatePage, stoppedSellingGoodsDate).success.get
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[Today].toInstance(mockToday))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ApplicationCompleteView]
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+
+          status(result) mustEqual OK
+          val leaveDate = "1 February 2024"
+
+          contentAsString(result) mustEqual view(
+            config.iossYourAccountUrl,
+            leaveDate,
+            Some(messages(application)("applicationComplete.stopSellingGoods.text"))
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must return OK with the leave date being 1st day of the following month (1st March) " +
+        "when stopping less than 15 days prior to the end of the month (17th Jan)" in {
+
+        val stoppedSellingGoodsDate = LocalDate.of(2024, 1, 17)
+
+        val userAnswers = emptyUserAnswers
+          .set(MoveCountryPage, false).success.get
+          .set(StopSellingGoodsPage, true).success.get
+          .set(StoppedSellingGoodsDatePage, stoppedSellingGoodsDate).success.get
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[Today].toInstance(mockToday))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ApplicationCompleteView]
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+
+          status(result) mustEqual OK
+          val leaveDate = "1 March 2024"
+
+          contentAsString(result) mustEqual view(
+            config.iossYourAccountUrl,
+            leaveDate,
+            Some(messages(application)("applicationComplete.stopSellingGoods.text"))
+          )(request, messages(application)).toString
+        }
+      }
+    }
+
+    "when someone stops using the service" - {
+      "must return OK with the leave date being 1st day of next month (1st Feb) " +
+        "when stopping at least 15 days prior to the end of the month (16th Jan)" in {
+
+        val stoppedUsingServiceDate = LocalDate.of(2024, 1, 16)
+
+        val userAnswers = emptyUserAnswers
+          .set(MoveCountryPage, false).success.get
+          .set(StopSellingGoodsPage, false).success.get
+          .set(StoppedUsingServiceDatePage, stoppedUsingServiceDate).success.get
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[Today].toInstance(mockToday))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ApplicationCompleteView]
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+
+          status(result) mustEqual OK
+          val leaveDate = "1 February 2024"
+          contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate)(request, messages(application)).toString
+        }
+      }
+
+      "must return OK with the leave date being 1st day of the following month (1st March) " +
+        "when stopping less than 15 days prior to the end of the month (17th Jan)" in {
+
+        val stoppedUsingServiceDate = LocalDate.of(2024, 1, 17)
+
+        val userAnswers = emptyUserAnswers
+          .set(MoveCountryPage, false).success.get
+          .set(StopSellingGoodsPage, false).success.get
+          .set(StoppedUsingServiceDatePage, stoppedUsingServiceDate).success.get
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[Today].toInstance(mockToday))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ApplicationCompleteView]
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+
+          status(result) mustEqual OK
+          val leaveDate = "1 March 2024"
+          contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate)(request, messages(application)).toString
+        }
       }
     }
   }
+
 }

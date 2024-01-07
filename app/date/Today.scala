@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package pages
+package date
 
-import controllers.routes
-import models.UserAnswers
+import java.time.{Clock, LocalDate}
+import javax.inject.Inject
 
-import java.time.LocalDate
-import play.api.libs.json.JsPath
-import play.api.mvc.Call
+class TodayImpl @Inject() (val clock: Clock) extends Today {
+  override val date: LocalDate = LocalDate.now(clock)
+}
 
-case object StoppedUsingServiceDatePage extends QuestionPage[LocalDate] {
-
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "stoppedUsingServiceDate"
-
-  override def route(waypoints: Waypoints): Call = routes.StoppedUsingServiceDateController.onPageLoad(waypoints)
-
-  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    ApplicationCompletePage
+trait Today {
+  def date: LocalDate
 }

@@ -16,20 +16,21 @@
 
 package controllers
 
+
 import config.FrontendAppConfig
 import controllers.actions._
 import date.Dates
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import models.requests.DataRequest
+import pages.{EuCountryPage, MoveCountryPage, StopSellingGoodsPage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ApplicationCompleteView
 
-import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 
 class ApplicationCompleteController @Inject()(
                                                override val messagesApi: MessagesApi,
-                                               clock: Clock,
                                                dates: Dates,
                                                config: FrontendAppConfig,
                                                view: ApplicationCompleteView,
@@ -41,11 +42,56 @@ class ApplicationCompleteController @Inject()(
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
+      request.userAnswers.get(MoveCountryPage).flatMap { isMovingCountry =>
+        if (isMovingCountry) {
+          onMovingBusiness()
+        } else {
+          request.userAnswers.get(StopSellingGoodsPage).flatMap { stopSellingGoods =>
+            if (stopSellingGoods) {
+              onStopSellingGoods()
+            } else {
+              onStopUsingService()
+            }
+          }
+        }
+      }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+  }
 
-      // TODO: Change to business rules later
-      val leaveDate = dates.formatter.format(LocalDate.now(clock).plusDays(1))
-      val cancelDate = dates.formatter.format(LocalDate.now(clock))
+  private def onMovingBusiness()(implicit request: DataRequest[AnyContent]): Option[Result] = {
+    val messages: Messages = implicitly[Messages]
 
-      Ok(view(config.iossYourAccountUrl, leaveDate, cancelDate))
+    request.userAnswers.get(EuCountryPage).map {country =>
+      val leaveDate = dates.formatter.format(dates.maxMoveDate)
+
+      Ok(view(
+        config.iossYourAccountUrl,
+        leaveDate,
+        Some(messages("applicationComplete.moving.text", country.name)),
+        Some(messages("applicationComplete.next.info.bullet0", country.name, leaveDate))
+      ))
+    }
+  }
+
+
+  private def onStopSellingGoods()(implicit request: DataRequest[_]): Option[Result] = {
+    val messages: Messages = implicitly[Messages]
+
+    request.userAnswers.get(StoppedSellingGoodsDatePage).map { stoppedSellingGoodsDate =>
+      Ok(view(
+        config.iossYourAccountUrl,
+        dates.formatter.format(dates.getLeaveDateWhenStopUsingServiceOrSellingGoods(stoppedSellingGoodsDate)),
+        Some(messages("applicationComplete.stopSellingGoods.text"))
+      ))
+    }
+  }
+
+  private def onStopUsingService()(implicit request: DataRequest[_]): Option[Result] = {
+    request.userAnswers.get(StoppedUsingServiceDatePage).map { stoppedUsingServiceDate =>
+      Ok(view(
+        config.iossYourAccountUrl,
+        dates.formatter.format(dates.getLeaveDateWhenStopUsingServiceOrSellingGoods(stoppedUsingServiceDate))
+      ))
+    }
   }
 }
+

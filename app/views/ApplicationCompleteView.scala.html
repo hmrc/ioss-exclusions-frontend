@@ -19,7 +19,7 @@
         govukButton: GovukButton
 )
 
-@(yourAccountUrl: String, leaveDate: String, cancelDate: String)(implicit request: Request[_], messages: Messages)
+@(yourAccountUrl: String, leaveDate: String, recap: Option[String] = None, bullet0: Option[String] = None)(implicit request: Request[_], messages: Messages)
 
     @layout(pageTitle = titleNoForm(messages("applicationComplete.title"))) {
 
@@ -27,7 +27,10 @@
             <h1 class="govuk-panel__title">@messages("applicationComplete.heading")</h1>
         </div>
 
-        <p class="govuk-body">@Html(messages("applicationComplete.registration.text", leaveDate))</p>
+        <p class="govuk-body">
+            @recap.map { text => @text <br/></br/> }
+            @messages("applicationComplete.leave.text", leaveDate)
+        </p>
 
         <h2 class="govuk-heading-m">@messages("applicationComplete.next.heading")</h2>
         <p class="govuk-body">
@@ -35,12 +38,13 @@
         </p>
 
         <ul class="govuk-list govuk-list--bullet">
+            @bullet0.map { info => <li>@info</li> }
             <li>@messages("applicationComplete.next.info.bullet1")</li>
             <li>@messages("applicationComplete.next.info.bullet2")</li>
         </ul>
 
         <p class="govuk-body">
-        @messages("applicationComplete.next.info.bottom", cancelDate)
+        @messages("applicationComplete.next.info.bottom", leaveDate)
         </p>
 
         <p class="govuk-body">
