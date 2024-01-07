@@ -18,7 +18,7 @@ package services
 
 import connectors.RegistrationConnector
 import connectors.RegistrationHttpParser.AmendRegistrationResultResponse
-import models.UserAnswers
+import models.{RegistrationWrapper, UserAnswers}
 import models.etmp._
 import models.requests.{EtmpAmendRegistrationRequest, EtmpExclusionDetails, EtmpNewMemberState}
 import pages.{EuCountryPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage, TaxNumberPage}
@@ -37,10 +37,10 @@ class RegistrationService @Inject()(
   def amendRegistration(
                          answers: UserAnswers,
                          exclusionReason: Option[EtmpExclusionReason],
-                         vrn: Vrn
+                         vrn: Vrn,
+                         registrationWrapper: RegistrationWrapper
                        )(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
     for {
-      registrationWrapper <- registrationConnector.get()
       amend <- registrationConnector.amend(buildEtmpAmendRegistrationRequest(
         answers,
         exclusionReason,
@@ -94,7 +94,7 @@ class RegistrationService @Inject()(
       noLongerSupplyGoods = false,
       exclusionRequestDate = Some(LocalDate.now(clock)),
       identificationValidityDate = None,
-      intExclusionRequestDate = None,
+      intExclusionRequestDate = Some(LocalDate.now(clock)),
       newMemberState = Some(EtmpNewMemberState(
         newMemberState = true,
         ceaseSpecialSchemeDate = None,
@@ -107,10 +107,11 @@ class RegistrationService @Inject()(
   }
 
   private def getExclusionDetailsForNoLongerSupplies(answers: UserAnswers): EtmpExclusionDetails = {
+    val stoppedSellingGoodsDate = answers.get(StoppedSellingGoodsDatePage).getOrElse(throw new Exception("No stopped selling goods date provided"))
     EtmpExclusionDetails(
       revertExclusion = false,
       noLongerSupplyGoods = true,
-      exclusionRequestDate = answers.get(StoppedSellingGoodsDatePage),
+      exclusionRequestDate = Some(stoppedSellingGoodsDate),
       identificationValidityDate = None,
       intExclusionRequestDate = Some(LocalDate.now(clock)),
       newMemberState = None
@@ -118,10 +119,11 @@ class RegistrationService @Inject()(
   }
 
   private def getExclusionDetailsForVoluntarilyLeaves(answers: UserAnswers): EtmpExclusionDetails = {
+    val stoppedUsingServiceDate = answers.get(StoppedUsingServiceDatePage).getOrElse(throw new Exception("No stopped using service date provided"))
     EtmpExclusionDetails(
       revertExclusion = false,
       noLongerSupplyGoods = false,
-      exclusionRequestDate = answers.get(StoppedUsingServiceDatePage),
+      exclusionRequestDate = Some(stoppedUsingServiceDate),
       identificationValidityDate = None,
       intExclusionRequestDate = Some(LocalDate.now(clock)),
       newMemberState = None

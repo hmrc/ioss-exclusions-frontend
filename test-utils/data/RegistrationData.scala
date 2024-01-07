@@ -76,7 +76,7 @@ object RegistrationData extends SpecBase {
   )
 
   val etmpAmendRegistrationRequest: EtmpAmendRegistrationRequest = EtmpAmendRegistrationRequest(
-    administration = arbitrary[EtmpAdministration].sample.value,
+    administration = EtmpAdministration(EtmpMessageType.IOSSSubscriptionAmend),
     changeLog = EtmpAmendRegistrationChangeLog(
       tradingNames = true,
       fixedEstablishments = true,
@@ -88,6 +88,6 @@ object RegistrationData extends SpecBase {
     tradingNames = Seq(arbitrary[EtmpTradingName].sample.value),
     schemeDetails = etmpSchemeDetails,
     bankDetails = genBankDetails,
-    exclusionDetails = None // TODO
+    exclusionDetails = None
   )
 }

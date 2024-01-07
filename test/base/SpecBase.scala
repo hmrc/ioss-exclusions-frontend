@@ -31,8 +31,10 @@ import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.BodyParsers
 import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Vrn
+import org.scalacheck.Arbitrary.arbitrary
 
 import java.time.{Clock, LocalDate, ZoneId}
 
@@ -50,6 +52,8 @@ trait SpecBase
 
   val userAnswersId: String = "id"
   val vrn: Vrn = Vrn("123456789")
+
+  val registrationWrapper: RegistrationWrapper = arbitrary[RegistrationWrapper].sample.value
 
   val country: Country = Country("IT", "Italy")
   val anotherCountry: Country = Country("ES", "Spain")
@@ -71,12 +75,14 @@ trait SpecBase
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
 
   protected def applicationBuilder(userAnswers: Option[UserAnswers] = None,
-                                   registration: RegistrationWrapper = Arbitrary.arbitrary[RegistrationWrapper].sample.value): GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
+                                   registration: RegistrationWrapper = Arbitrary.arbitrary[RegistrationWrapper].sample.value): GuiceApplicationBuilder = {
+    val application = new GuiceApplicationBuilder()
+    val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
+    application
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
-        bind[GetRegistrationAction].toInstance(new FakeGetRegistrationAction(registration))
+        bind[IdentifierAction].toInstance(new FakeIdentifierAction(bodyParsers, vrn, registration)),
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers, vrn, registration))
       )
+  }
 }

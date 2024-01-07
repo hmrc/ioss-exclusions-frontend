@@ -46,3 +46,5 @@ GET         /stopped-selling-goods-date                  controllers.StoppedSell
 POST        /stopped-selling-goods-date                  controllers.StoppedSellingGoodsDateController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET         /successful                                  controllers.ApplicationCompleteController.onPageLoad()
+
+GET         /submission-failure                          controllers.SubmissionFailureController.onPageLoad()

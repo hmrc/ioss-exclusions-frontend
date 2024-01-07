@@ -18,13 +18,13 @@ package models.etmp
 
 import play.api.libs.json.{Json, OFormat}
 
-case class EtmpAmendRegistrationChangeLog (
-                                   tradingNames: Boolean,
-                                   fixedEstablishments: Boolean,
-                                   contactDetails: Boolean,
-                                   bankDetails: Boolean,
-                                   reRegistration: Boolean
-                                 )
+case class EtmpAmendRegistrationChangeLog(
+                                           tradingNames: Boolean,
+                                           fixedEstablishments: Boolean,
+                                           contactDetails: Boolean,
+                                           bankDetails: Boolean,
+                                           reRegistration: Boolean
+                                         )
 
 object EtmpAmendRegistrationChangeLog {
 

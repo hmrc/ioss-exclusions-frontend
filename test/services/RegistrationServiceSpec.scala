@@ -19,14 +19,18 @@ package services
 import base.SpecBase
 import connectors.RegistrationConnector
 import data.RegistrationData.etmpAmendRegistrationRequest
-import models.etmp.EtmpExclusionReason
+import models.etmp.{EtmpAmendRegistrationChangeLog, EtmpCustomerIdentification, EtmpExclusionReason}
+import models.requests.{EtmpExclusionDetails, EtmpNewMemberState}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.BeforeAndAfterEach
+import pages.{StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
 import play.api.test.Helpers.running
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.FutureSyntax.FutureOps
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach {
@@ -40,23 +44,165 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach {
     reset(mockRegistrationConnector)
   }
 
+  private def buildExpectedAmendRequest(etmpChangeLog: EtmpAmendRegistrationChangeLog, etmpExclusionsDetails: EtmpExclusionDetails) = {
+    etmpAmendRegistrationRequest.copy(
+      changeLog = etmpChangeLog,
+      exclusionDetails = Some(etmpExclusionsDetails),
+      customerIdentification = EtmpCustomerIdentification(vrn),
+      tradingNames = registrationWrapper.registration.tradingNames,
+      schemeDetails = registrationWrapper.registration.schemeDetails,
+      bankDetails = registrationWrapper.registration.bankDetails
+    )
+  }
+
   ".amendRegistration" - {
 
-    "must create registration request and return a successful ETMP enrolment response" in {
+    "when transferring of MSID" - {
 
-      val amendRegistrationResponse =
-        Right(())
+      "must create registration request and return a successful ETMP enrolment response" in {
 
-      // TODO request per type
-      when(mockRegistrationConnector.amend(etmpAmendRegistrationRequest)) thenReturn Right(amendRegistrationResponse).toFuture
+        val amendRegistrationResponse =
+          Right(())
 
-      val app = applicationBuilder()
-        .build()
+        val expectedChangeLog = EtmpAmendRegistrationChangeLog(
+          tradingNames = false,
+          fixedEstablishments = false,
+          contactDetails = false,
+          bankDetails = false,
+          reRegistration = false
+        )
 
-      running(app) {
+        val expectedExclusionDetails = EtmpExclusionDetails(
+          revertExclusion = false,
+          noLongerSupplyGoods = false,
+          exclusionRequestDate = Some(LocalDate.now),
+          identificationValidityDate = None,
+          intExclusionRequestDate = Some(LocalDate.now),
+          newMemberState = Some(EtmpNewMemberState(
+            newMemberState = true,
+            ceaseSpecialSchemeDate = None,
+            ceaseFixedEstDate = None,
+            movePOBDate = moveDate,
+            issuedBy = country.code,
+            vatNumber = taxNumber
+          ))
+        )
 
-        registrationService.amendRegistration(completeUserAnswers, Some(EtmpExclusionReason.TransferringMSID), vrn).futureValue mustBe amendRegistrationResponse
-        verify(mockRegistrationConnector, times(1)).amend(eqTo(etmpAmendRegistrationRequest))
+        val exceptedAmendRegistrationRequest = buildExpectedAmendRequest(expectedChangeLog, expectedExclusionDetails)
+
+        when(mockRegistrationConnector.amend(any())(any())) thenReturn amendRegistrationResponse.toFuture
+
+        val app = applicationBuilder()
+          .build()
+
+        running(app) {
+
+          registrationService.amendRegistration(
+            completeUserAnswers,
+            Some(EtmpExclusionReason.TransferringMSID),
+            vrn,
+            registrationWrapper
+          ).futureValue mustBe amendRegistrationResponse
+          verify(mockRegistrationConnector, times(1)).amend(eqTo(exceptedAmendRegistrationRequest))(any())
+        }
+      }
+    }
+
+    "when no longer supplying goods" - {
+
+      "must create registration request and return a successful ETMP enrolment response" in {
+
+        val amendRegistrationResponse =
+          Right(())
+
+        val expectedChangeLog = EtmpAmendRegistrationChangeLog(
+          tradingNames = false,
+          fixedEstablishments = false,
+          contactDetails = false,
+          bankDetails = false,
+          reRegistration = false
+        )
+
+        val stoppedSellingGoodsDate = LocalDate.of(2023, 10, 5)
+
+        val expectedExclusionDetails = EtmpExclusionDetails(
+          revertExclusion = false,
+          noLongerSupplyGoods = true,
+          exclusionRequestDate = Some(stoppedSellingGoodsDate),
+          identificationValidityDate = None,
+          intExclusionRequestDate = Some(LocalDate.now),
+          newMemberState = None
+        )
+
+        val userAnswers = emptyUserAnswers
+          .set(StoppedSellingGoodsDatePage, stoppedSellingGoodsDate).success.value
+
+        val exceptedAmendRegistrationRequest = buildExpectedAmendRequest(expectedChangeLog, expectedExclusionDetails)
+
+        when(mockRegistrationConnector.amend(any())(any())) thenReturn amendRegistrationResponse.toFuture
+
+        val app = applicationBuilder()
+          .build()
+
+        running(app) {
+
+          registrationService.amendRegistration(
+            userAnswers,
+            Some(EtmpExclusionReason.NoLongerSupplies),
+            vrn,
+            registrationWrapper
+          ).futureValue mustBe amendRegistrationResponse
+          verify(mockRegistrationConnector, times(1)).amend(eqTo(exceptedAmendRegistrationRequest))(any())
+        }
+      }
+    }
+
+    "when voluntarily leaves" - {
+
+      "must create registration request and return a successful ETMP enrolment response" in {
+
+        val amendRegistrationResponse =
+          Right(())
+
+        val expectedChangeLog = EtmpAmendRegistrationChangeLog(
+          tradingNames = false,
+          fixedEstablishments = false,
+          contactDetails = false,
+          bankDetails = false,
+          reRegistration = false
+        )
+
+        val stoppedUsingServiceDate = LocalDate.of(2023, 10, 4)
+
+        val expectedExclusionDetails = EtmpExclusionDetails(
+          revertExclusion = false,
+          noLongerSupplyGoods = false,
+          exclusionRequestDate = Some(stoppedUsingServiceDate),
+          identificationValidityDate = None,
+          intExclusionRequestDate = Some(LocalDate.now),
+          newMemberState = None
+        )
+
+        val userAnswers = emptyUserAnswers
+          .set(StoppedUsingServiceDatePage, stoppedUsingServiceDate).success.value
+
+        val exceptedAmendRegistrationRequest = buildExpectedAmendRequest(expectedChangeLog, expectedExclusionDetails)
+
+        when(mockRegistrationConnector.amend(any())(any())) thenReturn amendRegistrationResponse.toFuture
+
+        val app = applicationBuilder()
+          .build()
+
+        running(app) {
+
+          registrationService.amendRegistration(
+            userAnswers,
+            Some(EtmpExclusionReason.VoluntarilyLeaves),
+            vrn,
+            registrationWrapper
+          ).futureValue mustBe amendRegistrationResponse
+          verify(mockRegistrationConnector, times(1)).amend(eqTo(exceptedAmendRegistrationRequest))(any())
+        }
       }
     }
   }
