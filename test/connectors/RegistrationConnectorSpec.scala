@@ -17,8 +17,8 @@
 package connectors
 
 import base.SpecBase
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, ok, post, urlEqualTo}
-import data.RegistrationData.etmpAmendRegistrationRequest
+import com.github.tomakehurst.wiremock.client.WireMock._
+import data.RegistrationData
 import generators.Generators
 import models.RegistrationWrapper
 import models.responses.UnexpectedResponseStatus
@@ -33,7 +33,8 @@ class RegistrationConnectorSpec
   extends SpecBase
     with WireMockHelper
     with ScalaCheckPropertyChecks
-    with Generators {
+    with Generators
+    with RegistrationData {
 
   implicit private lazy val hc: HeaderCarrier = HeaderCarrier()
 

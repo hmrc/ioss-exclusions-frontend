@@ -17,15 +17,13 @@
 package controllers
 
 import base.SpecBase
-import connectors.RegistrationConnector
 import date.Dates
 import forms.StoppedUsingServiceDateFormProvider
 import models.{RegistrationWrapper, UserAnswers}
-import org.scalacheck.Arbitrary
-import models.UserAnswers
 import models.responses.UnexpectedResponseStatus
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
+import org.scalacheck.Arbitrary
 import org.scalatest.BeforeAndAfterEach
 import pages.{EmptyWaypoints, StoppedUsingServiceDatePage}
 import play.api.data.Form

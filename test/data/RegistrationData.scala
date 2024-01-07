@@ -25,7 +25,8 @@ import org.scalacheck.Gen
 
 import java.time.{LocalDate, LocalDateTime}
 
-object RegistrationData extends SpecBase {
+trait RegistrationData {
+  self: SpecBase =>
 
   val etmpEuRegistrationDetails: EtmpEuRegistrationDetails = EtmpEuRegistrationDetails(
     countryOfRegistration = arbitrary[Country].sample.value.code,

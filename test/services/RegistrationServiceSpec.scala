@@ -18,7 +18,7 @@ package services
 
 import base.SpecBase
 import connectors.RegistrationConnector
-import data.RegistrationData.etmpAmendRegistrationRequest
+import data.RegistrationData
 import models.etmp.{EtmpAmendRegistrationChangeLog, EtmpCustomerIdentification, EtmpExclusionReason}
 import models.requests.{EtmpExclusionDetails, EtmpNewMemberState}
 import org.mockito.ArgumentMatchers.any
@@ -33,7 +33,7 @@ import utils.FutureSyntax.FutureOps
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach {
+class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with RegistrationData {
 
   implicit private lazy val hc: HeaderCarrier = HeaderCarrier()
 
