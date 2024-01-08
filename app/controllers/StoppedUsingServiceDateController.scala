@@ -73,7 +73,7 @@ class StoppedUsingServiceDateController @Inject()(
             updatedAnswers <- Future.fromTry(request.userAnswers.set(StoppedUsingServiceDatePage, value))
             _ <- sessionRepository.set(updatedAnswers)
             result <- registrationService.amendRegistration(
-              request.userAnswers,
+              updatedAnswers,
               Some(EtmpExclusionReason.VoluntarilyLeaves),
               request.vrn,
               request.registrationWrapper

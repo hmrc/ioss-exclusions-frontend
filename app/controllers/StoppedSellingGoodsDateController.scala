@@ -73,7 +73,7 @@ class StoppedSellingGoodsDateController @Inject()(
             updatedAnswers <- Future.fromTry(request.userAnswers.set(StoppedSellingGoodsDatePage, value))
             _ <- sessionRepository.set(updatedAnswers)
             result <- registrationService.amendRegistration(
-              request.userAnswers,
+              updatedAnswers,
               Some(EtmpExclusionReason.NoLongerSupplies),
               request.vrn,
               request.registrationWrapper
