@@ -74,7 +74,7 @@ class StoppedUsingServiceDateController @Inject()(
             _ <- sessionRepository.set(updatedAnswers)
             result <- registrationService.amendRegistration(
               request.userAnswers,
-              Some(EtmpExclusionReason.NoLongerSupplies),
+              Some(EtmpExclusionReason.VoluntarilyLeaves),
               request.vrn,
               request.registrationWrapper
             ) map {
