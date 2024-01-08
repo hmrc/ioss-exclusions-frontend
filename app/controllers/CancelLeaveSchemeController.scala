@@ -19,6 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import forms.CancelLeaveSchemeFormProvider
+import models.UserAnswers
 import pages.{CancelLeaveSchemeCompletePage, CancelLeaveSchemePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -43,9 +44,9 @@ class CancelLeaveSchemeController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-      val preparedForm = request.userAnswers.get(CancelLeaveSchemePage) match {
+      val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(CancelLeaveSchemePage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
