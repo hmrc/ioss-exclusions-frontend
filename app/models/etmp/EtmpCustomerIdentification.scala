@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package models.requests
+package models.etmp
 
-import models.RegistrationWrapper
-import play.api.mvc.{Request, WrappedRequest}
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.domain.Vrn
 
-case class IdentifierRequest[A](request: Request[A], userId: String, vrn: Vrn, registrationWrapper: RegistrationWrapper) extends WrappedRequest[A](request)
+case class EtmpCustomerIdentification(vrn: Vrn)
+
+object EtmpCustomerIdentification {
+
+  implicit val format: OFormat[EtmpCustomerIdentification] = Json.format[EtmpCustomerIdentification]
+}

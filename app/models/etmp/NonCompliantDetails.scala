@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-package models.requests
+package models.etmp
 
-import models.RegistrationWrapper
-import play.api.mvc.{Request, WrappedRequest}
-import uk.gov.hmrc.domain.Vrn
+import play.api.libs.json._
 
-case class IdentifierRequest[A](request: Request[A], userId: String, vrn: Vrn, registrationWrapper: RegistrationWrapper) extends WrappedRequest[A](request)
+case class NonCompliantDetails(
+                                nonCompliantReturns: Option[Int],
+                                nonCompliantPayments: Option[Int]
+                              )
+
+object NonCompliantDetails {
+
+  implicit val format: OFormat[NonCompliantDetails] = Json.format[NonCompliantDetails]
+}

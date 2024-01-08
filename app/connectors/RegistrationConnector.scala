@@ -17,7 +17,9 @@
 package connectors
 
 import config.Service
+import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, AmendRegistrationResultResponseReads}
 import models.RegistrationWrapper
+import models.requests.EtmpAmendRegistrationRequest
 import play.api.Configuration
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions}
 
@@ -31,6 +33,10 @@ class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpCli
 
   def get()(implicit hc: HeaderCarrier): Future[RegistrationWrapper] = {
     httpClient.GET[RegistrationWrapper](s"$baseUrl/registration")
+  }
+
+  def amend(registrationRequest: EtmpAmendRegistrationRequest)(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
+    httpClient.POST[EtmpAmendRegistrationRequest, AmendRegistrationResultResponse](s"$baseUrl/amend", registrationRequest)
   }
 
 }

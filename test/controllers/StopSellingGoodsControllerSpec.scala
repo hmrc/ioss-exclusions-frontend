@@ -19,23 +19,35 @@ package controllers
 import base.SpecBase
 import forms.StopSellingGoodsFormProvider
 import models.UserAnswers
+import org.mockito.Mockito.reset
+import org.scalatest.BeforeAndAfterEach
 import pages.StopSellingGoodsPage
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import services.RegistrationService
 import views.html.StopSellingGoodsView
 
-class StopSellingGoodsControllerSpec extends SpecBase {
+class StopSellingGoodsControllerSpec extends SpecBase with BeforeAndAfterEach {
 
   val formProvider = new StopSellingGoodsFormProvider()
   val form = formProvider()
 
   lazy val stopSellingGoodsRoute = routes.StopSellingGoodsController.onPageLoad(emptyWaypoints).url
 
+  private val mockRegistrationService = mock[RegistrationService]
+
+  override protected def beforeEach(): Unit = {
+    reset(mockRegistrationService)
+  }
+
   "StopSellingGoods Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, stopSellingGoodsRoute)
@@ -53,7 +65,9 @@ class StopSellingGoodsControllerSpec extends SpecBase {
 
       val userAnswers = UserAnswers(userAnswersId).set(StopSellingGoodsPage, true).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, stopSellingGoodsRoute)
@@ -69,7 +83,9 @@ class StopSellingGoodsControllerSpec extends SpecBase {
 
     "must redirect to the next page when valid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
 
       running(application) {
         val request = FakeRequest(POST, stopSellingGoodsRoute).withFormUrlEncodedBody(("value", "true"))
@@ -85,7 +101,9 @@ class StopSellingGoodsControllerSpec extends SpecBase {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
 
       running(application) {
         val request = FakeRequest(POST, stopSellingGoodsRoute).withFormUrlEncodedBody(("value", ""))
@@ -103,7 +121,9 @@ class StopSellingGoodsControllerSpec extends SpecBase {
 
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, stopSellingGoodsRoute)
@@ -117,7 +137,9 @@ class StopSellingGoodsControllerSpec extends SpecBase {
 
     "must redirect to Journey Recovery for a POST if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
 
       running(application) {
         val request = FakeRequest(POST, stopSellingGoodsRoute).withFormUrlEncodedBody(("value", "true"))

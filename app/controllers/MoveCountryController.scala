@@ -44,7 +44,6 @@ class MoveCountryController @Inject()(
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-
       val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(MoveCountryPage) match {
         case None => form
         case Some(value) => form.fill(value)

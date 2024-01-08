@@ -18,16 +18,29 @@ package controllers
 
 import base.SpecBase
 import models.CheckMode
+import models.responses.UnexpectedResponseStatus
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
 import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, MoveDatePage, TaxNumberPage, Waypoint, Waypoints}
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import services.RegistrationService
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
+
+import scala.concurrent.Future
 
 class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency with BeforeAndAfterEach {
 
   val waypoints: Waypoints = EmptyWaypoints
+
+  private val mockRegistrationService = mock[RegistrationService]
+
+  override protected def beforeEach(): Unit = {
+    reset(mockRegistrationService)
+  }
 
   "Check Your Answers Controller" - {
 
@@ -35,7 +48,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
       "must return OK and the correct view for a GET" in {
 
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .build()
 
         running(application) {
           val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
@@ -57,7 +72,12 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
       "must redirect to the correct page when the validation passes" in {
 
-        val application = applicationBuilder(userAnswers = Some(completeUserAnswers)).build()
+        when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn
+          Future.successful(Right(()))
+
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswers))
+          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .build()
 
         running(application) {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = false).url)
@@ -69,12 +89,33 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
         }
       }
 
+      "must redirect to the failure page when the validation passes but amend call failures" in {
+
+        when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn
+          Future.successful(Left(UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "Error occurred")))
+
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswers))
+          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = false).url)
+
+          val result = route(application, request).value
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe routes.SubmissionFailureController.onPageLoad().url
+        }
+      }
+
       "when the user has not answered all necessary data" - {
         "the user is redirected when the incomplete prompt is shown" - {
           "to the Eu Country page when the EU country is missing" in {
             val answers = completeUserAnswers.remove(EuCountryPage).success.value
 
-            val application = applicationBuilder(userAnswers = Some(answers)).build()
+            val application = applicationBuilder(userAnswers = Some(answers))
+              .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+              .build()
 
             running(application) {
               val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = true).url)
@@ -88,7 +129,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           "to the Move Date page when the move date is missing" in {
             val answers = completeUserAnswers.remove(MoveDatePage).success.value
 
-            val application = applicationBuilder(userAnswers = Some(answers)).build()
+            val application = applicationBuilder(userAnswers = Some(answers))
+              .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+              .build()
 
             running(application) {
               val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = true).url)
@@ -102,7 +145,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           "to the Tax Number page when the tax number is missing" in {
             val answers = completeUserAnswers.remove(TaxNumberPage).success.value
 
-            val application = applicationBuilder(userAnswers = Some(answers)).build()
+            val application = applicationBuilder(userAnswers = Some(answers))
+              .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+              .build()
 
             running(application) {
               val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = true).url)

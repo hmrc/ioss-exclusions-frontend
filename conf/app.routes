@@ -51,3 +51,5 @@ POST        /cancel-leave-scheme                         controllers.CancelLeave
 GET         /cancel-leave-scheme-complete                controllers.CancelLeaveSchemeCompleteController.onPageLoad()
 
 GET         /successful                                  controllers.ApplicationCompleteController.onPageLoad()
+
+GET         /submission-failure                          controllers.SubmissionFailureController.onPageLoad()

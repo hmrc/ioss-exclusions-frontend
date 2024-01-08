@@ -45,7 +45,6 @@ class CancelLeaveSchemeController @Inject()(
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-
       val preparedForm = request.userAnswers.get(CancelLeaveSchemePage) match {
         case None => form
         case Some(value) => form.fill(value)

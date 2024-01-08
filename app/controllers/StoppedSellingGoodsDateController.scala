@@ -19,10 +19,13 @@ package controllers
 import controllers.actions._
 import date.Dates
 import forms.StoppedSellingGoodsDateFormProvider
+import logging.Logging
+import models.etmp.EtmpExclusionReason
 import pages.{StoppedSellingGoodsDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.StoppedSellingGoodsDateView
@@ -36,14 +39,14 @@ class StoppedSellingGoodsDateController @Inject()(
                                                    identify: IdentifierAction,
                                                    getData: DataRetrievalAction,
                                                    requireData: DataRequiredAction,
-                                                   getRegistration: GetRegistrationAction,
                                                    formProvider: StoppedSellingGoodsDateFormProvider,
                                                    dates: Dates,
                                                    val controllerComponents: MessagesControllerComponents,
-                                                   view: StoppedSellingGoodsDateView
-                                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                                   view: StoppedSellingGoodsDateView,
+                                                   registrationService: RegistrationService
+                                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData andThen getRegistration) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val commencementDate = request.registrationWrapper.registration.schemeDetails.commencementDate
       val form = formProvider(dates.today.date, commencementDate)
@@ -56,7 +59,7 @@ class StoppedSellingGoodsDateController @Inject()(
       Ok(view(preparedForm, dates.dateHint, waypoints))
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData andThen getRegistration).async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val commencementDate = request.registrationWrapper.registration.schemeDetails.commencementDate
       val form = formProvider.apply(dates.today.date, commencementDate)
@@ -69,7 +72,18 @@ class StoppedSellingGoodsDateController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(StoppedSellingGoodsDatePage, value))
             _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(StoppedSellingGoodsDatePage.navigate(waypoints, updatedAnswers, updatedAnswers).url)
+            result <- registrationService.amendRegistration(
+              updatedAnswers,
+              Some(EtmpExclusionReason.NoLongerSupplies),
+              request.vrn,
+              request.registrationWrapper
+            ).map {
+              case Right(_) => Redirect(StoppedSellingGoodsDatePage.navigate(waypoints, updatedAnswers, updatedAnswers).url)
+              case Left(e) =>
+                logger.error(s"Failure to submit self exclusion ${e.body}")
+                Redirect(routes.SubmissionFailureController.onPageLoad())
+            }
+          } yield result
       )
   }
 }
