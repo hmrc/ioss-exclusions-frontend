@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-package models.requests
+package models.etmp
 
-import models.RegistrationWrapper
-import play.api.mvc.{Request, WrappedRequest}
-import uk.gov.hmrc.domain.Vrn
+import models.{Enumerable, WithName}
 
-case class IdentifierRequest[A](request: Request[A], userId: String, vrn: Vrn, registrationWrapper: RegistrationWrapper) extends WrappedRequest[A](request)
+sealed trait EtmpMessageType
+
+object EtmpMessageType extends Enumerable.Implicits {
+
+  case object IOSSSubscriptionCreate extends WithName("IOSSSubscriptionCreate") with EtmpMessageType
+  case object IOSSSubscriptionAmend extends WithName("IOSSSubscriptionAmend") with EtmpMessageType
+
+  val values: Seq[EtmpMessageType] = Seq(
+    IOSSSubscriptionCreate,
+    IOSSSubscriptionAmend
+  )
+
+  implicit val enumerable: Enumerable[EtmpMessageType] =
+    Enumerable(values.map(v => v.toString -> v): _*)
+}

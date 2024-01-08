@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package models.requests
+package models.etmp
 
-import models.{RegistrationWrapper, UserAnswers}
-import play.api.mvc.{Request, WrappedRequest}
+import play.api.libs.json.{Json, OFormat}
 
-case class RegistrationRequest[A](
-                                   request: Request[A],
-                                   registrationWrapper: RegistrationWrapper,
-                                   userAnswers: UserAnswers,
-                                 ) extends WrappedRequest[A](request)
+case class EtmpAdministration(messageType: EtmpMessageType, regimeID: String = "IOSS")
+
+object EtmpAdministration {
+
+  implicit val format: OFormat[EtmpAdministration] = Json.format[EtmpAdministration]
+}

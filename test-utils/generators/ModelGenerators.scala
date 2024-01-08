@@ -17,9 +17,11 @@
 package generators
 
 import models._
-import models.etmp.{DesAddress, EtmpAdminUse, EtmpBankDetails, EtmpDisplayRegistration, EtmpEuRegistrationDetails, EtmpExclusion, EtmpExclusionReason, EtmpPreviousEuRegistrationDetails, EtmpSchemeDetails, EtmpTradingName, EtmpWebsite, SchemeType, VatCustomerInfo, VatNumberTraderId}
+import models.etmp.{DesAddress, EtmpAdministration, EtmpAdminUse, EtmpBankDetails, EtmpCustomerIdentification, EtmpDisplayRegistration, EtmpEuRegistrationDetails, EtmpExclusion, EtmpExclusionReason, EtmpMessageType, EtmpPreviousEuRegistrationDetails, EtmpSchemeDetails, EtmpTradingName, EtmpWebsite, NonCompliantDetails, SchemeType, VatCustomerInfo, VatNumberTraderId}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Gen.option
+import uk.gov.hmrc.domain.Vrn
 
 import java.time.{LocalDate, LocalDateTime}
 
@@ -132,7 +134,7 @@ trait ModelGenerators {
   implicit val arbitraryEtmpSchemeDetails: Arbitrary[EtmpSchemeDetails] = {
     Arbitrary {
       for {
-        commencementDate <-  arbitrary[LocalDate]
+        commencementDate <- arbitrary[LocalDate]
         euRegistrationDetails <- Gen.listOfN(5, arbitraryEtmpEuRegistrationDetails.arbitrary)
         previousEURegistrationDetails <- Gen.listOfN(5, arbitraryEtmpPreviousEURegistrationDetails.arbitrary)
         websites <- Gen.listOfN(10, arbitraryWebsite.arbitrary)
@@ -255,5 +257,44 @@ trait ModelGenerators {
       adminUse
     )
   }
+
+  implicit lazy val arbitraryVrn: Arbitrary[Vrn] =
+    Arbitrary {
+      for {
+        chars <- Gen.listOfN(9, Gen.numChar)
+      } yield Vrn(chars.mkString(""))
+    }
+
+  implicit lazy val arbitraryEtmpAdministration: Arbitrary[EtmpAdministration] =
+    Arbitrary {
+      for {
+        messageType <- Gen.oneOf(EtmpMessageType.values)
+      } yield EtmpAdministration(messageType, "IOSS")
+    }
+
+  implicit lazy val arbitraryEtmpCustomerIdentification: Arbitrary[EtmpCustomerIdentification] =
+    Arbitrary {
+      for {
+        vrn <- arbitraryVrn.arbitrary
+      } yield EtmpCustomerIdentification(vrn)
+    }
+
+  implicit lazy val arbitrarySchemeType: Arbitrary[SchemeType] =
+    Arbitrary {
+      Gen.oneOf(SchemeType.values)
+    }
+
+  implicit lazy val arbitraryNonCompliantDetails: Arbitrary[NonCompliantDetails] =
+    Arbitrary {
+      for {
+        nonCompliantReturns <- option(Gen.chooseNum(1, 2))
+        nonCompliantPayments <- option(Gen.chooseNum(1, 2))
+      } yield {
+        NonCompliantDetails(
+          nonCompliantReturns = nonCompliantReturns,
+          nonCompliantPayments = nonCompliantPayments
+        )
+      }
+    }
 
 }

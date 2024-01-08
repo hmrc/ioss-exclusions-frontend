@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package models.requests
+package models.responses
 
-import models.RegistrationWrapper
-import play.api.mvc.{Request, WrappedRequest}
-import uk.gov.hmrc.domain.Vrn
+sealed trait ErrorResponse {
+  def body: String
+}
 
-case class IdentifierRequest[A](request: Request[A], userId: String, vrn: Vrn, registrationWrapper: RegistrationWrapper) extends WrappedRequest[A](request)
+case class UnexpectedResponseStatus(status: Int, body: String) extends ErrorResponse

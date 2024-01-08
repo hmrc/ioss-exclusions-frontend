@@ -17,11 +17,14 @@
 package controllers
 
 import base.SpecBase
-import connectors.RegistrationConnector
 import date.Dates
 import forms.StoppedUsingServiceDateFormProvider
 import models.{RegistrationWrapper, UserAnswers}
+import models.responses.UnexpectedResponseStatus
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{reset, when}
 import org.scalacheck.Arbitrary
+import org.scalatest.BeforeAndAfterEach
 import pages.{EmptyWaypoints, StoppedUsingServiceDatePage}
 import play.api.data.Form
 import play.api.i18n.Messages
@@ -29,22 +32,26 @@ import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import services.RegistrationService
 import views.html.StoppedUsingServiceDateView
 
 import java.time.{LocalDate, ZoneOffset}
+import scala.concurrent.Future
 
-class StoppedUsingServiceDateControllerSpec extends SpecBase {
+class StoppedUsingServiceDateControllerSpec extends SpecBase with BeforeAndAfterEach {
 
   implicit val messages: Messages = stubMessages()
 
   val formProvider = new StoppedUsingServiceDateFormProvider()
-
   private def form(currentDate: LocalDate = LocalDate.now(), registrationDate: LocalDate = LocalDate.now()): Form[LocalDate] =
     formProvider.apply(currentDate, registrationDate)
-
   val validAnswer = LocalDate.now(ZoneOffset.UTC)
 
   lazy val stoppedUsingServiceDateRoute = routes.StoppedUsingServiceDateController.onPageLoad(EmptyWaypoints).url
+
+  override val emptyUserAnswers = UserAnswers(userAnswersId)
+
+  private val mockRegistrationService: RegistrationService = mock[RegistrationService]
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, stoppedUsingServiceDateRoute)
@@ -66,13 +73,16 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
         payload.toList: _*
       )
 
+  override def beforeEach(): Unit = {
+    reset(mockRegistrationService)
+  }
+
   "StoppedUsingServiceDate Controller" - {
 
     "must return OK and the correct view for a GET" in {
-      val registrationConnector = mock[RegistrationConnector]
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
         .build()
 
       running(application) {
@@ -90,7 +100,9 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
 
       val userAnswers = UserAnswers(userAnswersId).set(StoppedUsingServiceDatePage, validAnswer).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
 
       running(application) {
         val view = application.injector.instanceOf[StoppedUsingServiceDateView]
@@ -112,7 +124,11 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
           schemeDetails = etmpSchemeDetails.copy(commencementDate = LocalDate.now()))
       )
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), registration = validDateWrapper).build()
+      when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn Future.successful(Right(()))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), registration = validDateWrapper)
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
 
       running(application) {
         val result = route(application, postRequest()).value
@@ -124,9 +140,35 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
       }
     }
 
+    "must show failure page when amend registration call fails to submit" in {
+
+      val registrationWrapper = Arbitrary.arbitrary[RegistrationWrapper].sample.value
+      val etmpSchemeDetails = registrationWrapper.registration.schemeDetails
+      val validDateWrapper = registrationWrapper.copy(
+        registration = registrationWrapper.registration.copy(
+          schemeDetails = etmpSchemeDetails.copy(commencementDate = LocalDate.now()))
+      )
+
+      when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn
+        Future.successful(Left(UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "Error occurred")))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), registration = validDateWrapper)
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
+
+      running(application) {
+        val result = route(application, postRequest()).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.SubmissionFailureController.onPageLoad().url
+      }
+    }
+
     "must return a Bad Request and errors when invalid date values are submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
       val payload = createPostPayload(day = "32")
       val request = postRequest(payload)
 
@@ -167,7 +209,9 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
 
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
 
       running(application) {
         val result = route(application, getRequest).value
@@ -179,7 +223,9 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase {
 
     "must redirect to Journey Recovery for a POST if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
 
       running(application) {
         val result = route(application, postRequest()).value

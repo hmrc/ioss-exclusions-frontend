@@ -18,15 +18,18 @@ package controllers.actions
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
+import connectors.RegistrationConnector
 import controllers.routes
 import models.requests.IdentifierRequest
-import play.api.mvc.Results._
 import play.api.mvc._
+import play.api.mvc.Results._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
+import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
-import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -35,7 +38,8 @@ trait IdentifierAction extends ActionBuilder[IdentifierRequest, AnyContent] with
 class AuthenticatedIdentifierAction @Inject()(
                                                override val authConnector: AuthConnector,
                                                config: FrontendAppConfig,
-                                               val parser: BodyParsers.Default
+                                               val parser: BodyParsers.Default,
+                                               registrationConnector: RegistrationConnector
                                              )
                                              (implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
 
@@ -43,33 +47,70 @@ class AuthenticatedIdentifierAction @Inject()(
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    authorised().retrieve(Retrievals.internalId) {
-      _.map {
-        internalId => block(IdentifierRequest(request, internalId))
-      }.getOrElse(throw new UnauthorizedException("Unable to retrieve internal Id"))
-    } recover {
-      case _: NoActiveSession =>
-        Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
-      case _: AuthorisationException =>
-        Redirect(routes.UnauthorisedController.onPageLoad)
+    authorised().retrieve(Retrievals.internalId and
+      Retrievals.allEnrolments and
+      Retrievals.affinityGroup and
+      Retrievals.confidenceLevel and
+      Retrievals.credentialRole) {
+      case Some(internalId) ~ enrolments ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == User =>
+        getRegistrationAndBlock(request, block, internalId, enrolments)
+
+      case _ ~ _ ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == Assistant =>
+        throw UnsupportedCredentialRole("Unsupported credential role")
+
+      case Some(internalId) ~ enrolments ~ Some(Individual) ~ confidence ~ _ =>
+        if (confidence >= ConfidenceLevel.L200) {
+          getRegistrationAndBlock(request, block, internalId, enrolments)
+        } else {
+          throw InsufficientConfidenceLevel("Insufficient confidence level")
+        }
+
+      case _ =>
+        throw new UnauthorizedException("Unable to retrieve authorisation data")
+    }
+
+
+  } recover {
+    case _: NoActiveSession =>
+      Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
+    case _: AuthorisationException =>
+      Redirect(routes.UnauthorisedController.onPageLoad)
+  }
+
+  private def getRegistrationAndBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result], internalId: String, enrolments: Enrolments)
+                                        (implicit hc: HeaderCarrier): Future[Result] = {
+    val maybeVrn = findVrnFromEnrolments(enrolments)
+    val maybeIossNumber = findIossFromEnrolments(enrolments)
+
+    (maybeVrn, maybeIossNumber) match {
+      case (Some(vrn), Some(_)) =>
+        registrationConnector.get()
+          .flatMap { registrationWrapper =>
+            block(IdentifierRequest(request, internalId, vrn, registrationWrapper))
+          }
+          .recover {
+            case e: Exception => throw new UnauthorizedException(s"No registration found ${e.getMessage}")
+          }
+      case _ =>
+        throw InsufficientEnrolments(s"VAT enrolment was $maybeVrn and IOSS enrolment was $maybeIossNumber")
     }
   }
-}
 
-class SessionIdentifierAction @Inject()(
-                                         val parser: BodyParsers.Default
-                                       )
-                                       (implicit val executionContext: ExecutionContext) extends IdentifierAction {
+  private def findVrnFromEnrolments(enrolments: Enrolments): Option[Vrn] =
+    enrolments.enrolments.find(_.key == "HMRC-MTD-VAT")
+      .flatMap {
+        enrolment =>
+          enrolment.identifiers.find(_.key == "VRN").map(e => Vrn(e.value))
+      } orElse enrolments.enrolments.find(_.key == "HMCE-VATDEC-ORG")
+      .flatMap {
+        enrolment =>
+          enrolment.identifiers.find(_.key == "VATRegNo").map(e => Vrn(e.value))
+      }
 
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
-
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-
-    hc.sessionId match {
-      case Some(session) =>
-        block(IdentifierRequest(request, session.value))
-      case None =>
-        Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture
-    }
-  }
+  private def findIossFromEnrolments(enrolments: Enrolments): Option[String] =
+    enrolments.enrolments.find(_.key == "HMRC-IOSS-ORG")
+      .flatMap {
+        enrolment =>
+          enrolment.identifiers.find(_.key == "IOSSNumber").map(_.value)
+      }
 }
