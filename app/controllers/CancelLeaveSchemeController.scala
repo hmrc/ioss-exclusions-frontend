@@ -54,16 +54,17 @@ class CancelLeaveSchemeController @Inject()(
       Ok(view(preparedForm, waypoints))
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, waypoints))),
 
-        value =>
+        value => {
+          val originalAnswers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(CancelLeaveSchemePage, value))
+            updatedAnswers <- Future.fromTry(originalAnswers.set(CancelLeaveSchemePage, value))
             _ <- sessionRepository.set(updatedAnswers)
           } yield {
             if (value) {
@@ -72,6 +73,7 @@ class CancelLeaveSchemeController @Inject()(
               Redirect(config.iossYourAccountUrl)
             }
           }
+        }
       )
   }
 }
