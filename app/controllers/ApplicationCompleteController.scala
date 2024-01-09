@@ -94,4 +94,3 @@ class ApplicationCompleteController @Inject()(
     }
   }
 }
-

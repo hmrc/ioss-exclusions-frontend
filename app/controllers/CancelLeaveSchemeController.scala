@@ -16,35 +16,37 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
-import forms.MoveCountryFormProvider
+import forms.CancelLeaveSchemeFormProvider
 import models.UserAnswers
-import pages.{MoveCountryPage, Waypoints}
+import pages.{CancelLeaveSchemeCompletePage, CancelLeaveSchemePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.FutureSyntax.FutureOps
-import views.html.MoveCountryView
+import views.html.CancelLeaveSchemeView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class MoveCountryController @Inject()(
-                                                    override val messagesApi: MessagesApi,
-                                                    sessionRepository: SessionRepository,
-                                                    identify: IdentifierAction,
-                                                    getData: DataRetrievalAction,
-                                                    formProvider: MoveCountryFormProvider,
-                                                    val controllerComponents: MessagesControllerComponents,
-                                                    view: MoveCountryView
-                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+class CancelLeaveSchemeController @Inject()(
+                                             override val messagesApi: MessagesApi,
+                                             sessionRepository: SessionRepository,
+                                             identify: IdentifierAction,
+                                             getData: DataRetrievalAction,
+                                             requireData: DataRequiredAction,
+                                             formProvider: CancelLeaveSchemeFormProvider,
+                                             config: FrontendAppConfig,
+                                             val controllerComponents: MessagesControllerComponents,
+                                             view: CancelLeaveSchemeView
+                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-      val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(MoveCountryPage) match {
+      val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(CancelLeaveSchemePage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -57,14 +59,20 @@ class MoveCountryController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          BadRequest(view(formWithErrors, waypoints)).toFuture,
+          Future.successful(BadRequest(view(formWithErrors, waypoints))),
 
         value => {
           val originalAnswers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
           for {
-            updatedAnswers <- Future.fromTry(originalAnswers.set(MoveCountryPage, value))
+            updatedAnswers <- Future.fromTry(originalAnswers.set(CancelLeaveSchemePage, value))
             _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(MoveCountryPage.navigate(waypoints, originalAnswers, updatedAnswers).route)
+          } yield {
+            if (value) {
+              Redirect(CancelLeaveSchemeCompletePage.route(waypoints).url)
+            } else {
+              Redirect(config.iossYourAccountUrl)
+            }
+          }
         }
       )
   }
