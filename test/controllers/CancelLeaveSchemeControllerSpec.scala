@@ -116,7 +116,7 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+    "must return OK with default data if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -125,8 +125,10 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        val view = application.injector.instanceOf[CancelLeaveSchemeView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, emptyWaypoints)(request, messages(application)).toString
       }
     }
 
