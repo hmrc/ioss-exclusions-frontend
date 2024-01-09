@@ -19,11 +19,15 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import forms.CancelLeaveSchemeFormProvider
+import logging.Logging
 import models.UserAnswers
+import models.etmp.EtmpExclusionReason
+import models.requests.OptionalDataRequest
 import pages.{CancelLeaveSchemeCompletePage, CancelLeaveSchemePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
+import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.CancelLeaveSchemeView
 
@@ -35,12 +39,12 @@ class CancelLeaveSchemeController @Inject()(
                                              sessionRepository: SessionRepository,
                                              identify: IdentifierAction,
                                              getData: DataRetrievalAction,
-                                             requireData: DataRequiredAction,
                                              formProvider: CancelLeaveSchemeFormProvider,
                                              config: FrontendAppConfig,
                                              val controllerComponents: MessagesControllerComponents,
-                                             view: CancelLeaveSchemeView
-                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                             view: CancelLeaveSchemeView,
+                                             registrationService: RegistrationService
+                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
 
@@ -61,19 +65,33 @@ class CancelLeaveSchemeController @Inject()(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, waypoints))),
 
-        value => {
+        hasCancelled => {
           val originalAnswers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
           for {
-            updatedAnswers <- Future.fromTry(originalAnswers.set(CancelLeaveSchemePage, value))
+            updatedAnswers <- Future.fromTry(originalAnswers.set(CancelLeaveSchemePage, hasCancelled))
             _ <- sessionRepository.set(updatedAnswers)
-          } yield {
-            if (value) {
-              Redirect(CancelLeaveSchemeCompletePage.route(waypoints).url)
-            } else {
-              Redirect(config.iossYourAccountUrl)
-            }
-          }
+            result <- amendRegistration(waypoints, hasCancelled, updatedAnswers)
+          } yield result
         }
       )
+  }
+
+  private def amendRegistration(waypoints: Waypoints, hasCancelled: Boolean, updatedAnswers: UserAnswers)
+                               (implicit request: OptionalDataRequest[AnyContent]): Future[Result] = {
+    if (hasCancelled) {
+      registrationService.amendRegistration(
+        updatedAnswers,
+        Some(EtmpExclusionReason.Reversal),
+        request.vrn,
+        request.registrationWrapper
+      ).map {
+        case Right(_) => Redirect(CancelLeaveSchemeCompletePage.route(waypoints).url)
+        case Left(e) =>
+          logger.error(s"Failure to submit self exclusion ${e.body}")
+          Redirect(routes.SubmissionFailureController.onPageLoad())
+      }
+    } else {
+      Future.successful(Redirect(config.iossYourAccountUrl))
+    }
   }
 }

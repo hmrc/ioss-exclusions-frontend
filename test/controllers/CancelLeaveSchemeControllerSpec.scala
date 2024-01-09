@@ -20,11 +20,17 @@ import base.SpecBase
 import config.FrontendAppConfig
 import forms.CancelLeaveSchemeFormProvider
 import models.UserAnswers
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{CancelLeaveSchemeCompletePage, CancelLeaveSchemePage}
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import services.RegistrationService
 import views.html.CancelLeaveSchemeView
+
+import scala.concurrent.Future
 
 class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
 
@@ -32,6 +38,8 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
   val form = formProvider()
 
   lazy val cancelLeaveSchemeRoute = routes.CancelLeaveSchemeController.onPageLoad(emptyWaypoints).url
+
+  val mockRegistrationService: RegistrationService = mock[RegistrationService]
 
   "CancelLeaveScheme Controller" - {
 
@@ -71,7 +79,11 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to CancelLeaveSchemeCompletePage when the user submits true and is cancelling their request to leave the scheme" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .build()
+
+      when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn Future.successful(Right(()))
 
       running(application) {
         val request = FakeRequest(POST, cancelLeaveSchemeRoute).withFormUrlEncodedBody(("value", "true"))
