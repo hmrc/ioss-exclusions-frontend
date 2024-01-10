@@ -18,11 +18,15 @@ package controllers
 
 import base.SpecBase
 import forms.MoveCountryFormProvider
-import models.UserAnswers
+import models.etmp.EtmpExclusion
+import models.etmp.EtmpExclusionReason.NoLongerSupplies
+import models.{RegistrationWrapper, UserAnswers}
 import pages.MoveCountryPage
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.MoveCountryView
+
+import java.time.LocalDate
 
 class MoveCountryControllerSpec extends SpecBase {
 
@@ -31,11 +35,17 @@ class MoveCountryControllerSpec extends SpecBase {
 
   lazy val moveCountryRoute = routes.MoveCountryController.onPageLoad(emptyWaypoints).url
 
+  val registrationNoExclusions: RegistrationWrapper =
+    registrationWrapper.copy(registration = registrationWrapper.registration.copy(exclusions = Seq()))
+
   "MoveCountry Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswers),
+        registration = registrationNoExclusions
+      ).build()
 
       running(application) {
         val request = FakeRequest(GET, moveCountryRoute)
@@ -53,7 +63,10 @@ class MoveCountryControllerSpec extends SpecBase {
 
       val userAnswers = UserAnswers(userAnswersId).set(MoveCountryPage, true).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(
+        userAnswers = Some(userAnswers),
+        registration = registrationNoExclusions
+      ).build()
 
       running(application) {
         val request = FakeRequest(GET, moveCountryRoute)
@@ -69,7 +82,10 @@ class MoveCountryControllerSpec extends SpecBase {
 
     "must redirect to the next page when valid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswers),
+        registration = registrationNoExclusions
+      ).build()
 
       running(application) {
         val request = FakeRequest(POST, moveCountryRoute).withFormUrlEncodedBody(("value", "true"))
@@ -85,7 +101,10 @@ class MoveCountryControllerSpec extends SpecBase {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswers),
+        registration = registrationNoExclusions
+      ).build()
 
       running(application) {
         val request = FakeRequest(POST, moveCountryRoute).withFormUrlEncodedBody(("value", ""))
@@ -101,16 +120,46 @@ class MoveCountryControllerSpec extends SpecBase {
       }
     }
 
+    "must return a Bad Request and errors when a trader is already excluded" in {
+
+      val noLongerSuppliesExclusion = EtmpExclusion(
+        NoLongerSupplies,
+        LocalDate.now(stubClock).plusDays(2),
+        LocalDate.now(stubClock).minusDays(1),
+        false
+      )
+
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswers),
+        registration = registrationWrapper.copy(registration = registrationWrapper.registration.copy(exclusions = Seq(noLongerSuppliesExclusion)))
+      ).build()
+
+      running(application) {
+
+        val request = FakeRequest(GET, moveCountryRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[MoveCountryView]
+
+        status(result) mustEqual BAD_REQUEST
+        //contentAsString(result) mustEqual view(form, emptyWaypoints)(request, messages(application)).toString
+      }
+    }
+
     "must return OK with default data if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(
+        userAnswers = None,
+        registration = registrationNoExclusions
+      ).build()
 
       running(application) {
         val request = FakeRequest(GET, moveCountryRoute)
 
         val result = route(application, request).value
 
-         val view = application.injector.instanceOf[MoveCountryView]
+        val view = application.injector.instanceOf[MoveCountryView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, emptyWaypoints)(request, messages(application)).toString

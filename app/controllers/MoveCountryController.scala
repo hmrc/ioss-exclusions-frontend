@@ -19,9 +19,12 @@ package controllers
 import controllers.actions._
 import forms.MoveCountryFormProvider
 import models.UserAnswers
+import models.etmp.EtmpExclusion
+import models.etmp.EtmpExclusionReason.Reversal
+import models.requests.OptionalDataRequest
 import pages.{MoveCountryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
@@ -31,41 +34,52 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class MoveCountryController @Inject()(
-                                                    override val messagesApi: MessagesApi,
-                                                    sessionRepository: SessionRepository,
-                                                    identify: IdentifierAction,
-                                                    getData: DataRetrievalAction,
-                                                    formProvider: MoveCountryFormProvider,
-                                                    val controllerComponents: MessagesControllerComponents,
-                                                    view: MoveCountryView
-                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                       override val messagesApi: MessagesApi,
+                                       sessionRepository: SessionRepository,
+                                       identify: IdentifierAction,
+                                       getData: DataRetrievalAction,
+                                       formProvider: MoveCountryFormProvider,
+                                       val controllerComponents: MessagesControllerComponents,
+                                       view: MoveCountryView
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(MoveCountryPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
+      onValidExclusion {
+        val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(MoveCountryPage) match {
+          case None => form
+          case Some(value) => form.fill(value)
+        }
+        Future.successful(Ok(view(preparedForm, waypoints)))
       }
-
-      Ok(view(preparedForm, waypoints))
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
+      onValidExclusion {
+        form.bindFromRequest().fold(
+          formWithErrors =>
+            BadRequest(view(formWithErrors, waypoints)).toFuture,
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          BadRequest(view(formWithErrors, waypoints)).toFuture,
+          value => {
+            val originalAnswers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+            for {
+              updatedAnswers <- Future.fromTry(originalAnswers.set(MoveCountryPage, value))
+              _ <- sessionRepository.set(updatedAnswers)
+            } yield Redirect(MoveCountryPage.navigate(waypoints, originalAnswers, updatedAnswers).route)
+          }
+        )
+      }
+  }
 
-        value => {
-          val originalAnswers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
-          for {
-            updatedAnswers <- Future.fromTry(originalAnswers.set(MoveCountryPage, value))
-            _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(MoveCountryPage.navigate(waypoints, originalAnswers, updatedAnswers).route)
-        }
-      )
+  private def onValidExclusion(f: => Future[Result])(implicit request: OptionalDataRequest[AnyContent]): Future[Result] = {
+    val lastExclusion: Option[EtmpExclusion] = request.registrationWrapper.registration.exclusions.maxByOption(_.effectiveDate)
+    if (lastExclusion.isEmpty || lastExclusion.exists(_.exclusionReason == Reversal)) {
+      f
+    } else {
+      Future.successful(BadRequest("Here"))
+    }
   }
 }

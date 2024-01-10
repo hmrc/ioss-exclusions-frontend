@@ -19,7 +19,9 @@ package controllers
 import base.SpecBase
 import config.FrontendAppConfig
 import forms.CancelLeaveSchemeFormProvider
-import models.UserAnswers
+import models.etmp.EtmpExclusion
+import models.etmp.EtmpExclusionReason.NoLongerSupplies
+import models.{RegistrationWrapper, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -30,6 +32,7 @@ import play.api.test.Helpers._
 import services.RegistrationService
 import views.html.CancelLeaveSchemeView
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
@@ -41,11 +44,23 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
 
   val mockRegistrationService: RegistrationService = mock[RegistrationService]
 
+  val noLongerSuppliesExclusion = EtmpExclusion(
+    NoLongerSupplies,
+    LocalDate.now(stubClock).plusDays(2),
+    LocalDate.now(stubClock).minusDays(1),
+    false
+  )
+
+  val registrationNoLongerSuppliesExclusion: RegistrationWrapper =
+    registrationWrapper.copy(registration = registrationWrapper.registration.copy(exclusions = Seq(noLongerSuppliesExclusion)))
+
   "CancelLeaveScheme Controller" - {
 
     "must return OK and the correct view for a GET" in {
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswers),
+        registration = registrationNoLongerSuppliesExclusion
+      ).build()
 
       running(application) {
         val request = FakeRequest(GET, cancelLeaveSchemeRoute)
@@ -63,7 +78,10 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
 
       val userAnswers = UserAnswers(userAnswersId).set(CancelLeaveSchemePage, true).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(
+        userAnswers = Some(userAnswers),
+        registration = registrationNoLongerSuppliesExclusion
+      ).build()
 
       running(application) {
         val request = FakeRequest(GET, cancelLeaveSchemeRoute)
@@ -79,9 +97,10 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to CancelLeaveSchemeCompletePage when the user submits true and is cancelling their request to leave the scheme" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
-        .build()
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswers),
+        registration = registrationNoLongerSuppliesExclusion
+      ).overrides(bind[RegistrationService].toInstance(mockRegistrationService)).build()
 
       when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn Future.successful(Right(()))
 
@@ -96,7 +115,10 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must redirect to /your-account when the user submits false and is not cancelling their request to leave the scheme" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswers),
+        registration = registrationNoLongerSuppliesExclusion
+      ).build()
 
       running(application) {
         val request = FakeRequest(POST, cancelLeaveSchemeRoute).withFormUrlEncodedBody(("value", "false"))
@@ -112,7 +134,10 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswers),
+        registration = registrationNoLongerSuppliesExclusion
+      ).build()
 
       running(application) {
         val request = FakeRequest(POST, cancelLeaveSchemeRoute).withFormUrlEncodedBody(("value", ""))
@@ -128,9 +153,38 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+
+    "must return a Bad Request and errors when a trader tries to reverse their exclusion and the effective date has passed" in {
+
+      val noLongerSuppliesExclusion = EtmpExclusion(
+        NoLongerSupplies,
+        LocalDate.now(stubClock),
+        LocalDate.now(stubClock).minusDays(1),
+        false
+      )
+
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswers),
+        registration = registrationWrapper.copy(registration = registrationWrapper.registration.copy(exclusions = Seq(noLongerSuppliesExclusion)))
+      ).build()
+
+      running(application) {
+
+        val request = FakeRequest(GET, cancelLeaveSchemeRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual BAD_REQUEST
+        //contentAsString(result) mustEqual view(form, emptyWaypoints)(request, messages(application)).toString
+      }
+    }
+
     "must return OK with default data if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(
+        userAnswers = None,
+        registration = registrationNoLongerSuppliesExclusion
+      ).build()
 
       running(application) {
         val request = FakeRequest(GET, cancelLeaveSchemeRoute)
