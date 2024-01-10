@@ -18,9 +18,9 @@ package services
 
 import connectors.RegistrationConnector
 import connectors.RegistrationHttpParser.AmendRegistrationResultResponse
-import models.{RegistrationWrapper, UserAnswers}
 import models.etmp._
 import models.requests.{EtmpAmendRegistrationRequest, EtmpExclusionDetails, EtmpNewMemberState}
+import models.{RegistrationWrapper, UserAnswers}
 import pages.{EuCountryPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage, TaxNumberPage}
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.HeaderCarrier
@@ -80,6 +80,7 @@ class RegistrationService @Inject()(
       case EtmpExclusionReason.TransferringMSID => getExclusionDetailsForTransferringMSID(answers)
       case EtmpExclusionReason.NoLongerSupplies => getExclusionDetailsForNoLongerSupplies(answers)
       case EtmpExclusionReason.VoluntarilyLeaves => getExclusionDetailsForVoluntarilyLeaves(answers)
+      case EtmpExclusionReason.Reversal => getExclusionDetailsForReversal()
       case _ => throw new Exception("Exclusion reason not valid")
     }
   }
@@ -124,6 +125,17 @@ class RegistrationService @Inject()(
       revertExclusion = false,
       noLongerSupplyGoods = false,
       exclusionRequestDate = Some(stoppedUsingServiceDate),
+      identificationValidityDate = None,
+      intExclusionRequestDate = Some(LocalDate.now(clock)),
+      newMemberState = None
+    )
+  }
+
+  private def getExclusionDetailsForReversal(): EtmpExclusionDetails = {
+    EtmpExclusionDetails(
+      revertExclusion = true,
+      noLongerSupplyGoods = false,
+      exclusionRequestDate = Some(LocalDate.now(clock)),
       identificationValidityDate = None,
       intExclusionRequestDate = Some(LocalDate.now(clock)),
       newMemberState = None
