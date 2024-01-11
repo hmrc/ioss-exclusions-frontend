@@ -21,8 +21,7 @@ import controllers.actions._
 import forms.CancelLeaveSchemeFormProvider
 import logging.Logging
 import models.UserAnswers
-import models.etmp.EtmpExclusionReason.{NoLongerSupplies, TransferringMSID, VoluntarilyLeaves}
-import models.etmp.{EtmpExclusion, EtmpExclusionReason}
+import models.etmp.EtmpExclusionReason
 import models.requests.OptionalDataRequest
 import pages.{CancelLeaveSchemeCompletePage, CancelLeaveSchemePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -32,7 +31,6 @@ import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.CancelLeaveSchemeView
 
-import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -41,9 +39,9 @@ class CancelLeaveSchemeController @Inject()(
                                              sessionRepository: SessionRepository,
                                              identify: IdentifierAction,
                                              getData: DataRetrievalAction,
+                                             checkExclusion: CheckExclusionFilter,
                                              formProvider: CancelLeaveSchemeFormProvider,
                                              config: FrontendAppConfig,
-                                             clock: Clock,
                                              val controllerComponents: MessagesControllerComponents,
                                              view: CancelLeaveSchemeView,
                                              registrationService: RegistrationService
@@ -51,45 +49,30 @@ class CancelLeaveSchemeController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen checkExclusion).async {
     implicit request =>
-      onValidExclusion {
-        val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(CancelLeaveSchemePage) match {
-          case None => form
-          case Some(value) => form.fill(value)
+      val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(CancelLeaveSchemePage) match {
+        case None => form
+        case Some(value) => form.fill(value)
+      }
+      Future.successful(Ok(view(preparedForm, waypoints)))
+  }
+
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen checkExclusion).async {
+    implicit request =>
+      form.bindFromRequest().fold(
+        formWithErrors =>
+          Future.successful(BadRequest(view(formWithErrors, waypoints))),
+
+        hasCancelled => {
+          val originalAnswers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+          for {
+            updatedAnswers <- Future.fromTry(originalAnswers.set(CancelLeaveSchemePage, hasCancelled))
+            _ <- sessionRepository.set(updatedAnswers)
+            result <- amendRegistration(waypoints, hasCancelled, updatedAnswers)
+          } yield result
         }
-        Future.successful(Ok(view(preparedForm, waypoints)))
-      }
-  }
-
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData).async {
-    implicit request =>
-      onValidExclusion {
-        form.bindFromRequest().fold(
-          formWithErrors =>
-            Future.successful(BadRequest(view(formWithErrors, waypoints))),
-
-          hasCancelled => {
-            val originalAnswers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
-            for {
-              updatedAnswers <- Future.fromTry(originalAnswers.set(CancelLeaveSchemePage, hasCancelled))
-              _ <- sessionRepository.set(updatedAnswers)
-              result <- amendRegistration(waypoints, hasCancelled, updatedAnswers)
-            } yield result
-          }
-        )
-      }
-  }
-
-  private def onValidExclusion(f: => Future[Result])(implicit request: OptionalDataRequest[AnyContent]): Future[Result] = {
-    val lastExclusion: Option[EtmpExclusion] = request.registrationWrapper.registration.exclusions.maxByOption(_.effectiveDate)
-    lastExclusion match {
-      case Some(exclusion) if Seq(NoLongerSupplies, VoluntarilyLeaves, TransferringMSID).contains(exclusion.exclusionReason) &&
-        LocalDate.now(clock).isBefore(exclusion.effectiveDate) =>
-        f
-      case _ => // Ok(view(preparedForm, waypoints)) // should show an error page here
-        Future.successful(BadRequest("Here"))
-    }
+      )
   }
 
   private def amendRegistration(waypoints: Waypoints, hasCancelled: Boolean, updatedAnswers: UserAnswers)
