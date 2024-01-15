@@ -63,6 +63,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           contentAsString(result) mustEqual view(
             config.iossYourAccountUrl,
             leaveDate,
+            maxMoveDate,
             Some(messages(application)("applicationComplete.moving.text", country.name)),
             Some(messages(application)("applicationComplete.next.info.bullet0", country.name, maxMoveDate))
           )(request, messages(application)).toString
@@ -100,6 +101,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           contentAsString(result) mustEqual view(
             config.iossYourAccountUrl,
             leaveDate,
+            leaveDate,
             Some(messages(application)("applicationComplete.stopSellingGoods.text"))
           )(request, messages(application)).toString
         }
@@ -134,6 +136,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           contentAsString(result) mustEqual view(
             config.iossYourAccountUrl,
             leaveDate,
+            leaveDate,
             Some(messages(application)("applicationComplete.stopSellingGoods.text"))
           )(request, messages(application)).toString
         }
@@ -166,7 +169,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
 
           status(result) mustEqual OK
           val leaveDate = "1 February 2024"
-          contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate, leaveDate)(request, messages(application)).toString
         }
       }
 
@@ -195,7 +198,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
 
           status(result) mustEqual OK
           val leaveDate = "1 March 2024"
-          contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate, leaveDate)(request, messages(application)).toString
         }
       }
     }

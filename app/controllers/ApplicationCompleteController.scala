@@ -69,6 +69,7 @@ class ApplicationCompleteController @Inject()(
       Ok(view(
         config.iossYourAccountUrl,
         dates.formatter.format(leaveDate),
+        dates.formatter.format(maxChangeDate),
         Some(messages("applicationComplete.moving.text", country.name)),
         Some(messages("applicationComplete.next.info.bullet0", country.name, dates.formatter.format(maxChangeDate)))
       ))
@@ -80,9 +81,11 @@ class ApplicationCompleteController @Inject()(
     val messages: Messages = implicitly[Messages]
 
     request.userAnswers.get(StoppedSellingGoodsDatePage).map { stoppedSellingGoodsDate =>
+      val leaveDate = dates.formatter.format(dates.getLeaveDateWhenStopUsingServiceOrSellingGoods(stoppedSellingGoodsDate))
       Ok(view(
         config.iossYourAccountUrl,
-        dates.formatter.format(dates.getLeaveDateWhenStopUsingServiceOrSellingGoods(stoppedSellingGoodsDate)),
+        leaveDate,
+        leaveDate,
         Some(messages("applicationComplete.stopSellingGoods.text"))
       ))
     }
@@ -90,9 +93,11 @@ class ApplicationCompleteController @Inject()(
 
   private def onStopUsingService()(implicit request: DataRequest[_]): Option[Result] = {
     request.userAnswers.get(StoppedUsingServiceDatePage).map { stoppedUsingServiceDate =>
+      val leaveDate = dates.formatter.format(dates.getLeaveDateWhenStopUsingServiceOrSellingGoods(stoppedUsingServiceDate))
       Ok(view(
         config.iossYourAccountUrl,
-        dates.formatter.format(dates.getLeaveDateWhenStopUsingServiceOrSellingGoods(stoppedUsingServiceDate))
+        leaveDate,
+        leaveDate
       ))
     }
   }
