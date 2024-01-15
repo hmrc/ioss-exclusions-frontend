@@ -39,7 +39,7 @@ class Dates @Inject()(val today: Today) {
   val maxMoveDate: LocalDate =
     today.date.plusMonths(1).withDayOfMonth(MoveDayOfMonthSplit)
 
-  def getLeaveDateWhenStopUsingServiceOrSellingGoods(exclusionDate: LocalDate): LocalDate = {
+  def getLeaveDateWhenStoppedUsingService(exclusionDate: LocalDate): LocalDate = {
     val lastDayOfTheMonth = today.date.`with`(lastDayOfMonth())
     val firstDayOfTheNextMonth = today.date.`with`(firstDayOfNextMonth())
 
@@ -48,6 +48,9 @@ class Dates @Inject()(val today: Today) {
     } else {
       firstDayOfTheNextMonth.plusMonths(1)
     }
+  }
+  def getLeaveDateWhenStoppedSellingGoods: LocalDate = {
+    today.date.`with`(firstDayOfNextMonth())
   }
 }
 

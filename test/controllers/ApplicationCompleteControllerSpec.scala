@@ -72,7 +72,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
     }
 
     "when someone stops selling goods" - {
-      "must return OK with the leave date being 1st day of next month (1st Feb) " +
+      "must return OK with the leave date being end of the month (31st Jan) " +
         "when stopping at least 15 days prior to the end of the month (16th Jan)" in {
 
         val stoppedSellingGoodsDate = LocalDate.of(2024, 1, 16)
@@ -96,42 +96,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           val config = application.injector.instanceOf[FrontendAppConfig]
 
           status(result) mustEqual OK
-          val leaveDate = "1 February 2024"
-
-          contentAsString(result) mustEqual view(
-            config.iossYourAccountUrl,
-            leaveDate,
-            leaveDate,
-            Some(messages(application)("applicationComplete.stopSellingGoods.text"))
-          )(request, messages(application)).toString
-        }
-      }
-
-      "must return OK with the leave date being 1st day of the following month (1st March) " +
-        "when stopping less than 15 days prior to the end of the month (17th Jan)" in {
-
-        val stoppedSellingGoodsDate = LocalDate.of(2024, 1, 17)
-
-        val userAnswers = emptyUserAnswers
-          .set(MoveCountryPage, false).success.get
-          .set(StopSellingGoodsPage, true).success.get
-          .set(StoppedSellingGoodsDatePage, stoppedSellingGoodsDate).success.get
-
-        val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(bind[Today].toInstance(mockToday))
-          .build()
-
-        running(application) {
-          val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[ApplicationCompleteView]
-
-          val config = application.injector.instanceOf[FrontendAppConfig]
-
-          status(result) mustEqual OK
-          val leaveDate = "1 March 2024"
+          val leaveDate = "31 January 2024"
 
           contentAsString(result) mustEqual view(
             config.iossYourAccountUrl,
