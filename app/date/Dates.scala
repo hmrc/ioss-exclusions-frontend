@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 class Dates @Inject()(val today: Today) {
 
-  private val MoveDayOfMonthSplit: Int = 10
+  val MoveDayOfMonthSplit: Int = 10
   private val StopDayOfMonthSplit: Int = 15
 
   val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")

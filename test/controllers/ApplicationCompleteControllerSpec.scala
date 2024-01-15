@@ -20,7 +20,7 @@ import base.SpecBase
 import config.FrontendAppConfig
 import date.Today
 import org.mockito.MockitoSugar.when
-import pages.{EuCountryPage, MoveCountryPage, StopSellingGoodsPage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
+import pages.{EuCountryPage, MoveCountryPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage, StopSellingGoodsPage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -41,6 +41,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
         val userAnswers = emptyUserAnswers
           .set(MoveCountryPage, true).success.get
           .set(EuCountryPage, country).success.get
+          .set(MoveDatePage, today).success.get
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[Today].toInstance(mockToday))
@@ -56,13 +57,14 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           val config = application.injector.instanceOf[FrontendAppConfig]
 
           status(result) mustEqual OK
-          val leaveDate = "10 February 2024"
+          val leaveDate = "25 January 2024"
+          val maxMoveDate = "10 February 2024"
 
           contentAsString(result) mustEqual view(
             config.iossYourAccountUrl,
             leaveDate,
             Some(messages(application)("applicationComplete.moving.text", country.name)),
-            Some(messages(application)("applicationComplete.next.info.bullet0", country.name, leaveDate))
+            Some(messages(application)("applicationComplete.next.info.bullet0", country.name, maxMoveDate))
           )(request, messages(application)).toString
         }
       }
