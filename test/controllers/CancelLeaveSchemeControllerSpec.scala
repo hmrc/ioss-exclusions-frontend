@@ -174,8 +174,8 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual BAD_REQUEST
-        //contentAsString(result) mustEqual view(form, emptyWaypoints)(request, messages(application)).toString
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CancelLeaveSchemeErrorController.onPageLoad().url
       }
     }
 

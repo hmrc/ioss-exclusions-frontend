@@ -120,7 +120,7 @@ class MoveCountryControllerSpec extends SpecBase {
       }
     }
 
-    "must return a Bad Request and errors when a trader is already excluded" in {
+    "must redirect to Already Left Scheme Error when a trader is already excluded" in {
 
       val noLongerSuppliesExclusion = EtmpExclusion(
         NoLongerSupplies,
@@ -140,10 +140,8 @@ class MoveCountryControllerSpec extends SpecBase {
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[MoveCountryView]
-
-        status(result) mustEqual BAD_REQUEST
-        //contentAsString(result) mustEqual view(form, emptyWaypoints)(request, messages(application)).toString
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.AlreadyLeftSchemeErrorController.onPageLoad().url
       }
     }
 

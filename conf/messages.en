@@ -146,6 +146,14 @@ cancelLeaveSchemeComplete.heading = You have cancelled your request to leave
 cancelLeaveSchemeComplete.next.info.top = You can continue using this service.
 cancelLeaveSchemeComplete.next.info.returnToAccount = Return to your account
 
+cancelLeaveSchemeError.title = You can no longer cancel your request to leave the Import One Stop Shop scheme
+cancelLeaveSchemeError.heading = You can no longer cancel your request to leave the Import One Stop Shop scheme
+cancelLeaveSchemeError.returnToAccount = Return to your account
+
+alreadyLeftSchemeError.title = You have already left the Import One Stop Shop scheme
+alreadyLeftSchemeError.heading = You have already left the Import One Stop Shop scheme
+alreadyLeftSchemeError.returnToAccount = Return to your account
+
 submissionFailure.title = We have a problem with our service right now
 submissionFailure.heading = We have not received your request to leave
 submissionFailure.tryAgainLater = Please try again later.

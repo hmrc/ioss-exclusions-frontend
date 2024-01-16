@@ -18,28 +18,26 @@ package controllers.actions
 
 import logging.Logging
 import models.etmp.EtmpExclusion
-import models.etmp.EtmpExclusionReason.{NoLongerSupplies, TransferringMSID, VoluntarilyLeaves}
+import models.etmp.EtmpExclusionReason.Reversal
 import models.requests.OptionalDataRequest
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 
-import java.time.{Clock, LocalDate}
+import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CheckExclusionFilterImpl @Inject()(clock: Clock)(implicit val executionContext: ExecutionContext)
-  extends CheckExclusionFilter with Logging {
+class CheckNoExclusionFilterImpl @Inject()(clock: Clock)(implicit val executionContext: ExecutionContext)
+  extends CheckNoExclusionFilter with Logging {
 
   override protected def filter[A](request: OptionalDataRequest[A]): Future[Option[Result]] = {
     val lastExclusion: Option[EtmpExclusion] = request.registrationWrapper.registration.exclusions.maxByOption(_.effectiveDate)
-    lastExclusion match {
-      case Some(exclusion) if Seq(NoLongerSupplies, VoluntarilyLeaves, TransferringMSID).contains(exclusion.exclusionReason) &&
-        LocalDate.now(clock).isBefore(exclusion.effectiveDate) =>
-        Future.successful(None)
-      case _ =>
-        Future.successful(Some(Redirect(controllers.routes.CancelLeaveSchemeErrorController.onPageLoad().url)))
+    if (lastExclusion.isEmpty || lastExclusion.exists(_.exclusionReason == Reversal)) {
+      Future.successful(None)
+    } else {
+      Future.successful(Some(Redirect(controllers.routes.AlreadyLeftSchemeErrorController.onPageLoad().url)))
     }
   }
 }
 
-trait CheckExclusionFilter extends ActionFilter[OptionalDataRequest]
+trait CheckNoExclusionFilter extends ActionFilter[OptionalDataRequest]

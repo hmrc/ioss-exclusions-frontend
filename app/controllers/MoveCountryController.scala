@@ -19,12 +19,9 @@ package controllers
 import controllers.actions._
 import forms.MoveCountryFormProvider
 import models.UserAnswers
-import models.etmp.EtmpExclusion
-import models.etmp.EtmpExclusionReason.Reversal
-import models.requests.OptionalDataRequest
 import pages.{MoveCountryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
@@ -38,6 +35,7 @@ class MoveCountryController @Inject()(
                                        sessionRepository: SessionRepository,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
+                                       checkNoExclusion: CheckNoExclusionFilter,
                                        formProvider: MoveCountryFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: MoveCountryView
@@ -45,41 +43,28 @@ class MoveCountryController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen checkNoExclusion).async {
     implicit request =>
-      onValidExclusion {
-        val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(MoveCountryPage) match {
-          case None => form
-          case Some(value) => form.fill(value)
+      val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(MoveCountryPage) match {
+        case None => form
+        case Some(value) => form.fill(value)
+      }
+      Future.successful(Ok(view(preparedForm, waypoints)))
+  }
+
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen checkNoExclusion).async {
+    implicit request =>
+      form.bindFromRequest().fold(
+        formWithErrors =>
+          BadRequest(view(formWithErrors, waypoints)).toFuture,
+
+        value => {
+          val originalAnswers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+          for {
+            updatedAnswers <- Future.fromTry(originalAnswers.set(MoveCountryPage, value))
+            _ <- sessionRepository.set(updatedAnswers)
+          } yield Redirect(MoveCountryPage.navigate(waypoints, originalAnswers, updatedAnswers).route)
         }
-        Future.successful(Ok(view(preparedForm, waypoints)))
-      }
-  }
-
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData).async {
-    implicit request =>
-      onValidExclusion {
-        form.bindFromRequest().fold(
-          formWithErrors =>
-            BadRequest(view(formWithErrors, waypoints)).toFuture,
-
-          value => {
-            val originalAnswers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
-            for {
-              updatedAnswers <- Future.fromTry(originalAnswers.set(MoveCountryPage, value))
-              _ <- sessionRepository.set(updatedAnswers)
-            } yield Redirect(MoveCountryPage.navigate(waypoints, originalAnswers, updatedAnswers).route)
-          }
-        )
-      }
-  }
-
-  private def onValidExclusion(f: => Future[Result])(implicit request: OptionalDataRequest[AnyContent]): Future[Result] = {
-    val lastExclusion: Option[EtmpExclusion] = request.registrationWrapper.registration.exclusions.maxByOption(_.effectiveDate)
-    if (lastExclusion.isEmpty || lastExclusion.exists(_.exclusionReason == Reversal)) {
-      f
-    } else {
-      Future.successful(BadRequest("Here"))
-    }
+      )
   }
 }
