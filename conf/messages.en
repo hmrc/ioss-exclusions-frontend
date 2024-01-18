@@ -135,9 +135,27 @@ leaveScheme.checkYourAnswersLabel = leave scheme
 leaveScheme.error.required = Select yes if you want to leave the Import One Stop Shop scheme
 leaveScheme.change.hidden = leave scheme
 
+cancelLeaveScheme.title = Do you want to cancel your request to leave the Import One Stop Shop scheme?
+cancelLeaveScheme.heading = Do you want to cancel your request to leave the Import One Stop Shop scheme?
+cancelLeaveScheme.checkYourAnswersLabel = cancel leave scheme
+cancelLeaveScheme.error.required = Select yes if you want to cancel your request to leave the Import One Stop Shop scheme
+cancelLeaveScheme.change.hidden = cancel leave scheme
+
+cancelLeaveSchemeComplete.title = You have cancelled your request to leave
+cancelLeaveSchemeComplete.heading = You have cancelled your request to leave
+cancelLeaveSchemeComplete.next.info.top = You can continue using this service.
+cancelLeaveSchemeComplete.next.info.returnToAccount = Return to your account
+
+cancelLeaveSchemeError.title = You can no longer cancel your request to leave the Import One Stop Shop scheme
+cancelLeaveSchemeError.heading = You can no longer cancel your request to leave the Import One Stop Shop scheme
+cancelLeaveSchemeError.returnToAccount = Return to your account
+
+alreadyLeftSchemeError.title = You have already left the Import One Stop Shop scheme
+alreadyLeftSchemeError.heading = You have already left the Import One Stop Shop scheme
+alreadyLeftSchemeError.returnToAccount = Return to your account
+
 submissionFailure.title = We have a problem with our service right now
 submissionFailure.heading = We have not received your request to leave
 submissionFailure.tryAgainLater = Please try again later.
 submissionFailure.contactUs = If the problem continues, you can email us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
 submissionFailure.next.info.returnToAccount = Back to your account
-

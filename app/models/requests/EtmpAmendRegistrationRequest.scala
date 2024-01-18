@@ -17,12 +17,7 @@
 package models.requests
 
 import models.etmp._
-import models.UserAnswers
-import pages.{EuCountryPage, MoveDatePage, TaxNumberPage}
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.domain.Vrn
-
-import java.time.LocalDate
 
 case class EtmpAmendRegistrationRequest(
                                          administration: EtmpAdministration,
@@ -36,7 +31,4 @@ case class EtmpAmendRegistrationRequest(
 
 object EtmpAmendRegistrationRequest {
   implicit val format: OFormat[EtmpAmendRegistrationRequest] = Json.format[EtmpAmendRegistrationRequest]
-
-
-
 }

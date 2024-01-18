@@ -19,8 +19,8 @@ package controllers
 import base.SpecBase
 import date.Dates
 import forms.StoppedUsingServiceDateFormProvider
-import models.{RegistrationWrapper, UserAnswers}
 import models.responses.UnexpectedResponseStatus
+import models.{RegistrationWrapper, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import org.scalacheck.Arbitrary

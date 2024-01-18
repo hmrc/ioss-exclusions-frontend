@@ -31,31 +31,29 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class MoveCountryController @Inject()(
-                                                    override val messagesApi: MessagesApi,
-                                                    sessionRepository: SessionRepository,
-                                                    identify: IdentifierAction,
-                                                    getData: DataRetrievalAction,
-                                                    formProvider: MoveCountryFormProvider,
-                                                    val controllerComponents: MessagesControllerComponents,
-                                                    view: MoveCountryView
-                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                       override val messagesApi: MessagesApi,
+                                       sessionRepository: SessionRepository,
+                                       identify: IdentifierAction,
+                                       getData: DataRetrievalAction,
+                                       checkNoExclusion: CheckNoExclusionFilter,
+                                       formProvider: MoveCountryFormProvider,
+                                       val controllerComponents: MessagesControllerComponents,
+                                       view: MoveCountryView
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen checkNoExclusion).async {
     implicit request =>
-
       val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(MoveCountryPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
-
-      Ok(view(preparedForm, waypoints))
+      Future.successful(Ok(view(preparedForm, waypoints)))
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen checkNoExclusion).async {
     implicit request =>
-
       form.bindFromRequest().fold(
         formWithErrors =>
           BadRequest(view(formWithErrors, waypoints)).toFuture,
