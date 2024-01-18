@@ -153,8 +153,7 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-
-    "must return a Bad Request and errors when a trader tries to reverse their exclusion and the effective date has passed" in {
+    "must redirect to Cancel Leave Scheme Error when a trader tries to reverse their exclusion and the effective date has passed" in {
 
       val noLongerSuppliesExclusion = EtmpExclusion(
         NoLongerSupplies,
