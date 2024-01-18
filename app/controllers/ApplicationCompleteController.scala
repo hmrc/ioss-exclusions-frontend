@@ -21,7 +21,7 @@ import config.FrontendAppConfig
 import controllers.actions._
 import date.Dates
 import models.requests.DataRequest
-import pages.{EuCountryPage, MoveCountryPage, StopSellingGoodsPage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
+import pages.{EuCountryPage, MoveCountryPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage, StopSellingGoodsPage}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -60,14 +60,18 @@ class ApplicationCompleteController @Inject()(
   private def onMovingBusiness()(implicit request: DataRequest[AnyContent]): Option[Result] = {
     val messages: Messages = implicitly[Messages]
 
-    request.userAnswers.get(EuCountryPage).map {country =>
-      val leaveDate = dates.formatter.format(dates.maxMoveDate)
+    for {
+      country <- request.userAnswers.get(EuCountryPage)
+      leaveDate <- request.userAnswers.get(MoveDatePage)
+    } yield {
+      val maxChangeDate = leaveDate.plusMonths(1).withDayOfMonth(dates.MoveDayOfMonthSplit)
 
       Ok(view(
         config.iossYourAccountUrl,
-        leaveDate,
+        dates.formatter.format(leaveDate),
+        dates.formatter.format(maxChangeDate),
         Some(messages("applicationComplete.moving.text", country.name)),
-        Some(messages("applicationComplete.next.info.bullet0", country.name, leaveDate))
+        Some(messages("applicationComplete.next.info.bullet0", country.name, dates.formatter.format(maxChangeDate)))
       ))
     }
   }
@@ -76,10 +80,12 @@ class ApplicationCompleteController @Inject()(
   private def onStopSellingGoods()(implicit request: DataRequest[_]): Option[Result] = {
     val messages: Messages = implicitly[Messages]
 
-    request.userAnswers.get(StoppedSellingGoodsDatePage).map { stoppedSellingGoodsDate =>
+    request.userAnswers.get(StoppedSellingGoodsDatePage).map { _ =>
+      val leaveDate = dates.getLeaveDateWhenStoppedSellingGoods
       Ok(view(
         config.iossYourAccountUrl,
-        dates.formatter.format(dates.getLeaveDateWhenStopUsingServiceOrSellingGoods(stoppedSellingGoodsDate)),
+        dates.formatter.format(leaveDate),
+        dates.formatter.format(leaveDate.minusDays(1)),
         Some(messages("applicationComplete.stopSellingGoods.text"))
       ))
     }
@@ -87,9 +93,11 @@ class ApplicationCompleteController @Inject()(
 
   private def onStopUsingService()(implicit request: DataRequest[_]): Option[Result] = {
     request.userAnswers.get(StoppedUsingServiceDatePage).map { stoppedUsingServiceDate =>
+      val leaveDate = dates.getLeaveDateWhenStoppedUsingService(stoppedUsingServiceDate)
       Ok(view(
         config.iossYourAccountUrl,
-        dates.formatter.format(dates.getLeaveDateWhenStopUsingServiceOrSellingGoods(stoppedUsingServiceDate))
+        dates.formatter.format(leaveDate),
+        dates.formatter.format(leaveDate.minusDays(1))
       ))
     }
   }
