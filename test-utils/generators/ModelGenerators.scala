@@ -17,7 +17,7 @@
 package generators
 
 import models._
-import models.etmp.{DesAddress, EtmpAdministration, EtmpAdminUse, EtmpBankDetails, EtmpCustomerIdentification, EtmpDisplayRegistration, EtmpEuRegistrationDetails, EtmpExclusion, EtmpExclusionReason, EtmpMessageType, EtmpPreviousEuRegistrationDetails, EtmpSchemeDetails, EtmpTradingName, EtmpWebsite, NonCompliantDetails, SchemeType, VatCustomerInfo, VatNumberTraderId}
+import models.etmp._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Gen.option
@@ -79,18 +79,11 @@ trait ModelGenerators {
     )
   }
 
-  implicit lazy val arbitraryVatNumberTraderId: Arbitrary[VatNumberTraderId] =
-    Arbitrary {
-      for {
-        vatNumber <- Gen.alphaNumStr
-      } yield VatNumberTraderId(vatNumber)
-    }
-
-  implicit val arbitraryEtmpEuRegistrationDetails: Arbitrary[EtmpEuRegistrationDetails] = {
+  implicit val arbitraryEtmpEuRegistrationDetails: Arbitrary[EtmpDisplayEuRegistrationDetails] = {
     Arbitrary {
       for {
         countryOfRegistration <- Gen.listOfN(2, Gen.alphaChar).map(_.mkString.toUpperCase)
-        traderId <- arbitrary[VatNumberTraderId]
+        traderId <- arbitrary[String]
         tradingName <- arbitrary[String]
         fixedEstablishmentAddressLine1 <- arbitrary[String]
         fixedEstablishmentAddressLine2 <- Gen.option(arbitrary[String])
@@ -98,9 +91,10 @@ trait ModelGenerators {
         regionOrState <- Gen.option(arbitrary[String])
         postcode <- Gen.option(arbitrary[String])
       } yield {
-        EtmpEuRegistrationDetails(
+        EtmpDisplayEuRegistrationDetails(
           countryOfRegistration,
-          traderId,
+          Some(traderId),
+          None,
           tradingName,
           fixedEstablishmentAddressLine1,
           fixedEstablishmentAddressLine2,
@@ -152,6 +146,7 @@ trait ModelGenerators {
           contactName,
           businessTelephoneNumber,
           businessEmailId,
+          unusableStatus = false,
           nonCompliantReturns,
           nonCompliantPayments
         )

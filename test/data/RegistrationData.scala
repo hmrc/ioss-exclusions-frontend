@@ -28,16 +28,7 @@ import java.time.{LocalDate, LocalDateTime}
 trait RegistrationData {
   self: SpecBase =>
 
-  val etmpEuRegistrationDetails: EtmpEuRegistrationDetails = EtmpEuRegistrationDetails(
-    countryOfRegistration = arbitrary[Country].sample.value.code,
-    traderId = arbitraryVatNumberTraderId.arbitrary.sample.value,
-    tradingName = arbitraryEtmpTradingName.arbitrary.sample.value.tradingName,
-    fixedEstablishmentAddressLine1 = arbitrary[String].sample.value,
-    fixedEstablishmentAddressLine2 = Some(arbitrary[String].sample.value),
-    townOrCity = arbitrary[String].sample.value,
-    regionOrState = Some(arbitrary[String].sample.value),
-    postcode = Some(arbitrary[String].sample.value)
-  )
+  val etmpEuRegistrationDetails: EtmpDisplayEuRegistrationDetails = arbitrary[EtmpDisplayEuRegistrationDetails].sample.value
 
   val etmpEuPreviousRegistrationDetails: EtmpPreviousEuRegistrationDetails = EtmpPreviousEuRegistrationDetails(
     issuedBy = arbitrary[Country].sample.value.code,
@@ -54,6 +45,7 @@ trait RegistrationData {
     contactName = arbitrary[String].sample.value,
     businessTelephoneNumber = arbitrary[String].sample.value,
     businessEmailId = arbitrary[String].sample.value,
+    unusableStatus = false,
     nonCompliantReturns = Some(arbitraryNonCompliantDetails.arbitrary.sample.value.nonCompliantReturns.toString),
     nonCompliantPayments = Some(arbitraryNonCompliantDetails.arbitrary.sample.value.nonCompliantPayments.toString)
   )

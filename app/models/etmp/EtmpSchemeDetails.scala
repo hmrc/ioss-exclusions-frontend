@@ -32,60 +32,24 @@
 
 package models.etmp
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json.{Json, OFormat, Reads, __}
+import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
 case class EtmpSchemeDetails(
                               commencementDate: LocalDate,
-                              euRegistrationDetails: Seq[EtmpEuRegistrationDetails],
+                              euRegistrationDetails: Seq[EtmpDisplayEuRegistrationDetails],
                               previousEURegistrationDetails: Seq[EtmpPreviousEuRegistrationDetails],
                               websites: Seq[EtmpWebsite],
                               contactName: String,
                               businessTelephoneNumber: String,
                               businessEmailId: String,
+                              unusableStatus: Boolean,
                               nonCompliantReturns: Option[String],
                               nonCompliantPayments: Option[String]
                             )
 
 object EtmpSchemeDetails {
-
-  private def fromDisplayRegistrationPayload(
-                                              commencementDate: LocalDate,
-                                              euRegistrationDetails: Option[Seq[EtmpEuRegistrationDetails]],
-                                              previousEURegistrationDetails: Option[Seq[EtmpPreviousEuRegistrationDetails]],
-                                              websites: Seq[EtmpWebsite],
-                                              contactNameOrBusinessAddress: String,
-                                              businessTelephoneNumber: String,
-                                              businessEmailAddress: String,
-                                              nonCompliantReturns: Option[String],
-                                              nonCompliantPayments: Option[String]
-                                            ): EtmpSchemeDetails =
-    EtmpSchemeDetails(
-      commencementDate = commencementDate,
-      euRegistrationDetails = euRegistrationDetails.fold(Seq.empty[EtmpEuRegistrationDetails])(a => a),
-      previousEURegistrationDetails = previousEURegistrationDetails.fold(Seq.empty[EtmpPreviousEuRegistrationDetails])(a => a),
-      websites = websites,
-      contactName = contactNameOrBusinessAddress,
-      businessTelephoneNumber = businessTelephoneNumber,
-      businessEmailId = businessEmailAddress,
-      nonCompliantReturns = nonCompliantReturns,
-      nonCompliantPayments = nonCompliantPayments
-    )
-
-  val displayReads: Reads[EtmpSchemeDetails] =
-    (
-      (__ \ "commencementDate").read[LocalDate] and
-        (__ \ "euRegistrationDetails").readNullable[Seq[EtmpEuRegistrationDetails]] and
-        (__ \ "previousEURegistrationDetails").readNullable[Seq[EtmpPreviousEuRegistrationDetails]] and
-        (__ \ "websites").read[Seq[EtmpWebsite]] and
-        (__ \ "contactDetails" \ "contactNameOrBusinessAddress").read[String] and
-        (__ \ "contactDetails" \ "businessTelephoneNumber").read[String] and
-        (__ \ "contactDetails" \ "businessEmailAddress").read[String] and
-        (__ \ "nonCompliantReturns").readNullable[String] and
-        (__ \ "nonCompliantPayments").readNullable[String]
-      )(EtmpSchemeDetails.fromDisplayRegistrationPayload _)
 
   implicit val format: OFormat[EtmpSchemeDetails] =
     Json.format[EtmpSchemeDetails]
