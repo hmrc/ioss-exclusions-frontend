@@ -120,7 +120,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
       val etmpSchemeDetails = registrationWrapper.registration.schemeDetails
       val validDateWrapper = registrationWrapper.copy(
         registration = registrationWrapper.registration.copy(
-          schemeDetails = etmpSchemeDetails.copy(commencementDate = LocalDate.now()))
+          schemeDetails = etmpSchemeDetails.copy(commencementDate = LocalDate.now().toString))
       )
 
       when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn Future.successful(Right(()))
@@ -146,7 +146,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
       val etmpSchemeDetails = registrationWrapper.registration.schemeDetails
       val validDateWrapper = registrationWrapper.copy(
         registration = registrationWrapper.registration.copy(
-          schemeDetails = etmpSchemeDetails.copy(commencementDate = LocalDate.now()))
+          schemeDetails = etmpSchemeDetails.copy(commencementDate = LocalDate.now().toString))
       )
 
       when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn

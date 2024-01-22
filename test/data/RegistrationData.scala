@@ -28,7 +28,9 @@ import java.time.{LocalDate, LocalDateTime}
 trait RegistrationData {
   self: SpecBase =>
 
-  val etmpEuRegistrationDetails: EtmpDisplayEuRegistrationDetails = arbitrary[EtmpDisplayEuRegistrationDetails].sample.value
+  val etmpEuRegistrationDetails: EtmpEuRegistrationDetails = arbitrary[EtmpEuRegistrationDetails].sample.value
+
+  val etmpDisplayEuRegistrationDetails: EtmpDisplayEuRegistrationDetails = arbitrary[EtmpDisplayEuRegistrationDetails].sample.value
 
   val etmpEuPreviousRegistrationDetails: EtmpPreviousEuRegistrationDetails = EtmpPreviousEuRegistrationDetails(
     issuedBy = arbitrary[Country].sample.value.code,
@@ -40,6 +42,18 @@ trait RegistrationData {
   val etmpSchemeDetails: EtmpSchemeDetails = EtmpSchemeDetails(
     commencementDate = LocalDate.now,
     euRegistrationDetails = Seq(etmpEuRegistrationDetails),
+    previousEURegistrationDetails = Seq(etmpEuPreviousRegistrationDetails),
+    websites = Seq(arbitrary[EtmpWebsite].sample.value),
+    contactName = arbitrary[String].sample.value,
+    businessTelephoneNumber = arbitrary[String].sample.value,
+    businessEmailId = arbitrary[String].sample.value,
+    nonCompliantReturns = Some(arbitraryNonCompliantDetails.arbitrary.sample.value.nonCompliantReturns.toString),
+    nonCompliantPayments = Some(arbitraryNonCompliantDetails.arbitrary.sample.value.nonCompliantPayments.toString)
+  )
+
+  val etmpDisplaySchemeDetails: EtmpDisplaySchemeDetails = EtmpDisplaySchemeDetails(
+    commencementDate = LocalDate.now.toString,
+    euRegistrationDetails = Seq(etmpDisplayEuRegistrationDetails),
     previousEURegistrationDetails = Seq(etmpEuPreviousRegistrationDetails),
     websites = Seq(arbitrary[EtmpWebsite].sample.value),
     contactName = arbitrary[String].sample.value,
@@ -62,7 +76,7 @@ trait RegistrationData {
 
   val etmpDisplayRegistration: EtmpDisplayRegistration = EtmpDisplayRegistration(
     tradingNames = Gen.listOfN(10, arbitraryEtmpTradingName.arbitrary).sample.value,
-    schemeDetails = etmpSchemeDetails,
+    schemeDetails = etmpDisplaySchemeDetails,
     bankDetails = genBankDetails,
     exclusions = Gen.listOfN(3, arbitrary[EtmpExclusion]).sample.value,
     adminUse = etmpAdminUse

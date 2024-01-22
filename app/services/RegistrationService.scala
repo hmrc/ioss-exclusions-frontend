@@ -70,9 +70,44 @@ class RegistrationService @Inject()(
       exclusionDetails = exclusionReason.map(getExclusionDetailsForType(_, answers)),
       customerIdentification = EtmpCustomerIdentification(vrn),
       tradingNames = registration.tradingNames,
-      schemeDetails = registration.schemeDetails,
+      schemeDetails = buildSchemeDetailsFromDisplay(registration.schemeDetails),
       bankDetails = registration.bankDetails
     )
+  }
+
+  private def buildSchemeDetailsFromDisplay(etmpDisplaySchemeDetails: EtmpDisplaySchemeDetails): EtmpSchemeDetails = {
+    EtmpSchemeDetails(
+      commencementDate = LocalDate.parse(etmpDisplaySchemeDetails.commencementDate),
+      euRegistrationDetails = etmpDisplaySchemeDetails.euRegistrationDetails.map(buildEuRegistrationDetails),
+      previousEURegistrationDetails = etmpDisplaySchemeDetails.previousEURegistrationDetails,
+      websites = etmpDisplaySchemeDetails.websites,
+      contactName = etmpDisplaySchemeDetails.contactName,
+      businessTelephoneNumber = etmpDisplaySchemeDetails.businessTelephoneNumber,
+      businessEmailId = etmpDisplaySchemeDetails.businessEmailId,
+      nonCompliantReturns = etmpDisplaySchemeDetails.nonCompliantReturns,
+      nonCompliantPayments = etmpDisplaySchemeDetails.nonCompliantPayments
+    )
+  }
+
+  private def buildEuRegistrationDetails(euDisplayRegistrationDetails: EtmpDisplayEuRegistrationDetails): EtmpEuRegistrationDetails = {
+    EtmpEuRegistrationDetails(
+      countryOfRegistration = euDisplayRegistrationDetails.issuedBy,
+      traderId = buildTraderId(euDisplayRegistrationDetails.vatNumber, euDisplayRegistrationDetails.taxIdentificationNumber),
+      tradingName = euDisplayRegistrationDetails.fixedEstablishmentTradingName,
+      fixedEstablishmentAddressLine1 = euDisplayRegistrationDetails.fixedEstablishmentAddressLine1,
+      fixedEstablishmentAddressLine2 = euDisplayRegistrationDetails.fixedEstablishmentAddressLine2,
+      townOrCity = euDisplayRegistrationDetails.townOrCity,
+      regionOrState = euDisplayRegistrationDetails.regionOrState,
+      postcode = euDisplayRegistrationDetails.postcode
+    )
+  }
+
+  private def buildTraderId(maybeVatNumber: Option[String], maybeTaxIdentificationNumber: Option[String]): TraderId = {
+    (maybeVatNumber, maybeTaxIdentificationNumber) match {
+      case (Some(vatNumber), _) => VatNumberTraderId(vatNumber)
+      case (_, Some(taxIdentificationNumber)) => TaxRefTraderID(taxIdentificationNumber)
+      case _ => throw new IllegalStateException("Neither vat number nor tax id were provided")
+    }
   }
 
   private def getExclusionDetailsForType(exclusionReason: EtmpExclusionReason, answers: UserAnswers): EtmpExclusionDetails = {

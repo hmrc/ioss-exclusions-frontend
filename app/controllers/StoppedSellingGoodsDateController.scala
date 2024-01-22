@@ -30,6 +30,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.StoppedSellingGoodsDateView
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -48,7 +49,7 @@ class StoppedSellingGoodsDateController @Inject()(
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      val commencementDate = request.registrationWrapper.registration.schemeDetails.commencementDate
+      val commencementDate = LocalDate.parse(request.registrationWrapper.registration.schemeDetails.commencementDate)
       val form = formProvider(dates.today.date, commencementDate)
 
       val preparedForm = request.userAnswers.get(StoppedSellingGoodsDatePage) match {
@@ -61,7 +62,7 @@ class StoppedSellingGoodsDateController @Inject()(
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val commencementDate = request.registrationWrapper.registration.schemeDetails.commencementDate
+      val commencementDate = LocalDate.parse(request.registrationWrapper.registration.schemeDetails.commencementDate)
       val form = formProvider.apply(dates.today.date, commencementDate)
 
       form.bindFromRequest().fold(
