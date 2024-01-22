@@ -82,6 +82,7 @@ class CancelLeaveSchemeController @Inject()(
         updatedAnswers,
         Some(EtmpExclusionReason.Reversal),
         request.vrn,
+        request.iossNumber,
         request.registrationWrapper
       ).map {
         case Right(_) => Redirect(CancelLeaveSchemeCompletePage.route(waypoints).url)

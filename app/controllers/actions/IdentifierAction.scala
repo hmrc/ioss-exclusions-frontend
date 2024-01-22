@@ -83,10 +83,10 @@ class AuthenticatedIdentifierAction @Inject()(
     val maybeIossNumber = findIossFromEnrolments(enrolments)
 
     (maybeVrn, maybeIossNumber) match {
-      case (Some(vrn), Some(_)) =>
+      case (Some(vrn), Some(iossNumber)) =>
         registrationConnector.get()
           .flatMap { registrationWrapper =>
-            block(IdentifierRequest(request, internalId, vrn, registrationWrapper))
+            block(IdentifierRequest(request, internalId, vrn, iossNumber, registrationWrapper))
           }
           .recover {
             case e: Exception => throw new UnauthorizedException(s"No registration found ${e.getMessage}")

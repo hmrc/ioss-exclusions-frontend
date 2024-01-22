@@ -77,6 +77,7 @@ class StoppedUsingServiceDateController @Inject()(
               updatedAnswers,
               Some(EtmpExclusionReason.VoluntarilyLeaves),
               request.vrn,
+              request.iossNumber,
               request.registrationWrapper
             ) map {
               case Right(_) => Redirect(StoppedUsingServiceDatePage.navigate(waypoints, request.userAnswers, updatedAnswers).url)

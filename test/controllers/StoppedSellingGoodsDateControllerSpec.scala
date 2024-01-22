@@ -123,7 +123,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
           schemeDetails = etmpSchemeDetails.copy(commencementDate = LocalDate.now().toString))
       )
 
-      when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn Future.successful(Right(()))
+      when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn Future.successful(Right(()))
 
       val userAnswers = UserAnswers(userAnswersId).set(StoppedSellingGoodsDatePage, validAnswer).success.value
 
@@ -149,7 +149,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
           schemeDetails = etmpSchemeDetails.copy(commencementDate = LocalDate.now().toString))
       )
 
-      when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn
+      when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn
         Future.successful(Left(UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "Error occurred")))
 
       val userAnswers = UserAnswers(userAnswersId).set(StoppedSellingGoodsDatePage, validAnswer).success.value

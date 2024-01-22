@@ -21,10 +21,11 @@ import date.Dates
 import generators.Generators
 import models.{CheckMode, Country, RegistrationWrapper, UserAnswers}
 import org.scalacheck.Arbitrary
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalatest.{OptionValues, TryValues}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.{OptionValues, TryValues}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, MoveCountryPage, MoveDatePage, TaxNumberPage, Waypoint, Waypoints}
 import play.api.Application
@@ -34,7 +35,6 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.BodyParsers
 import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Vrn
-import org.scalacheck.Arbitrary.arbitrary
 
 import java.time.{Clock, LocalDate, ZoneId}
 
@@ -61,6 +61,8 @@ trait SpecBase
   val moveDate: LocalDate = LocalDate.now(Dates.clock)
   val taxNumber: String = "333333333"
 
+  val iossNumber: String = "IM9001234567"
+
   val stubClock: Clock = Clock.fixed(LocalDate.now.atStartOfDay(ZoneId.systemDefault).toInstant, ZoneId.systemDefault)
 
   def completeUserAnswers: UserAnswers =
@@ -81,8 +83,8 @@ trait SpecBase
     application
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(bodyParsers, vrn, registration)),
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers, vrn, registration))
+        bind[IdentifierAction].toInstance(new FakeIdentifierAction(bodyParsers, vrn, iossNumber, registration)),
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers, vrn, iossNumber, registration))
       )
   }
 }
