@@ -72,7 +72,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
       "must redirect to the correct page when the validation passes" in {
 
-        when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn
+        when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn
           Future.successful(Right(()))
 
         val application = applicationBuilder(userAnswers = Some(completeUserAnswers))
@@ -91,7 +91,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
       "must redirect to the failure page when the validation passes but amend call failures" in {
 
-        when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn
+        when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn
           Future.successful(Left(UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "Error occurred")))
 
         val application = applicationBuilder(userAnswers = Some(completeUserAnswers))

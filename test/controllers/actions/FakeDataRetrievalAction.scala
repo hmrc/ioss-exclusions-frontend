@@ -22,10 +22,15 @@ import uk.gov.hmrc.domain.Vrn
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class FakeDataRetrievalAction(dataToReturn: Option[UserAnswers], vrn: Vrn, registrationWrapper: RegistrationWrapper) extends DataRetrievalAction {
+class FakeDataRetrievalAction(
+                               dataToReturn: Option[UserAnswers],
+                               vrn: Vrn,
+                               iossNumber: String,
+                               registrationWrapper: RegistrationWrapper
+                             ) extends DataRetrievalAction {
 
   override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
-    Future(OptionalDataRequest(request.request, request.userId, dataToReturn, vrn, registrationWrapper))
+    Future(OptionalDataRequest(request.request, request.userId, dataToReturn, vrn, iossNumber, registrationWrapper))
 
   override protected implicit val executionContext: ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global

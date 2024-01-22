@@ -25,6 +25,7 @@ case class OptionalDataRequest[A](
                                    userId: String,
                                    userAnswers: Option[UserAnswers],
                                    vrn: Vrn,
+                                   iossNumber: String,
                                    registrationWrapper: RegistrationWrapper
                                  ) extends WrappedRequest[A](request)
 
@@ -33,5 +34,6 @@ case class DataRequest[A](
                            userId: String,
                            userAnswers: UserAnswers,
                            vrn: Vrn,
+                           iossNumber: String,
                            registrationWrapper: RegistrationWrapper
                          ) extends WrappedRequest[A](request)

@@ -24,10 +24,15 @@ import uk.gov.hmrc.domain.Vrn
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class FakeIdentifierAction @Inject()(bodyParsers: BodyParsers.Default, vrn: Vrn, registrationWrapper: RegistrationWrapper) extends IdentifierAction {
+class FakeIdentifierAction @Inject()(
+                                      bodyParsers: BodyParsers.Default,
+                                      vrn: Vrn,
+                                      iossNumber: String,
+                                      registrationWrapper: RegistrationWrapper
+                                    ) extends IdentifierAction {
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] =
-    block(IdentifierRequest(request, "id", vrn, registrationWrapper))
+    block(IdentifierRequest(request, "id", vrn, iossNumber,registrationWrapper))
 
   override def parser: BodyParser[AnyContent] =
     bodyParsers

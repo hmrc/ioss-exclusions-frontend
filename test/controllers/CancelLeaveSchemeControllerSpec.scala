@@ -19,9 +19,9 @@ package controllers
 import base.SpecBase
 import config.FrontendAppConfig
 import forms.CancelLeaveSchemeFormProvider
+import models.{RegistrationWrapper, UserAnswers}
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
-import models.{RegistrationWrapper, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -102,7 +102,7 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
         registration = registrationNoLongerSuppliesExclusion
       ).overrides(bind[RegistrationService].toInstance(mockRegistrationService)).build()
 
-      when(mockRegistrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn Future.successful(Right(()))
+      when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn Future.successful(Right(()))
 
       running(application) {
         val request = FakeRequest(POST, cancelLeaveSchemeRoute).withFormUrlEncodedBody(("value", "true"))

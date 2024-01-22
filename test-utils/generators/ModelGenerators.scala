@@ -328,11 +328,11 @@ trait ModelGenerators {
       } yield EtmpAdministration(messageType, "IOSS")
     }
 
-  implicit lazy val arbitraryEtmpCustomerIdentification: Arbitrary[EtmpCustomerIdentification] =
+  implicit lazy val arbitraryEtmpCustomerIdentification: Arbitrary[EtmpAmendCustomerIdentification] =
     Arbitrary {
       for {
         vrn <- arbitraryVrn.arbitrary
-      } yield EtmpCustomerIdentification(vrn)
+      } yield EtmpAmendCustomerIdentification(s"IM9$vrn")
     }
 
   implicit lazy val arbitrarySchemeType: Arbitrary[SchemeType] =

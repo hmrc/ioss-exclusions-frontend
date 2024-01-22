@@ -19,7 +19,7 @@ package services
 import base.SpecBase
 import connectors.RegistrationConnector
 import data.RegistrationData
-import models.etmp.{EtmpAmendRegistrationChangeLog, EtmpCustomerIdentification, EtmpDisplayEuRegistrationDetails, EtmpDisplaySchemeDetails, EtmpEuRegistrationDetails, EtmpExclusionReason, EtmpSchemeDetails, TaxRefTraderID, TraderId, VatNumberTraderId}
+import models.etmp._
 import models.requests.{EtmpExclusionDetails, EtmpNewMemberState}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
@@ -48,7 +48,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
     etmpAmendRegistrationRequest.copy(
       changeLog = etmpChangeLog,
       exclusionDetails = Some(etmpExclusionsDetails),
-      customerIdentification = EtmpCustomerIdentification(vrn),
+      customerIdentification = EtmpAmendCustomerIdentification(iossNumber),
       tradingNames = registrationWrapper.registration.tradingNames,
       schemeDetails = buildSchemeDetailsFromDisplay(registrationWrapper.registration.schemeDetails),
       bankDetails = registrationWrapper.registration.bankDetails
@@ -136,6 +136,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
             completeUserAnswers,
             Some(EtmpExclusionReason.TransferringMSID),
             vrn,
+            iossNumber,
             registrationWrapper
           ).futureValue mustBe amendRegistrationResponse
           verify(mockRegistrationConnector, times(1)).amend(eqTo(exceptedAmendRegistrationRequest))(any())
@@ -185,6 +186,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
             userAnswers,
             Some(EtmpExclusionReason.NoLongerSupplies),
             vrn,
+            iossNumber,
             registrationWrapper
           ).futureValue mustBe amendRegistrationResponse
           verify(mockRegistrationConnector, times(1)).amend(eqTo(exceptedAmendRegistrationRequest))(any())
@@ -234,6 +236,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
             userAnswers,
             Some(EtmpExclusionReason.VoluntarilyLeaves),
             vrn,
+            iossNumber,
             registrationWrapper
           ).futureValue mustBe amendRegistrationResponse
           verify(mockRegistrationConnector, times(1)).amend(eqTo(exceptedAmendRegistrationRequest))(any())

@@ -38,6 +38,7 @@ class RegistrationService @Inject()(
                          answers: UserAnswers,
                          exclusionReason: Option[EtmpExclusionReason],
                          vrn: Vrn,
+                         iossNumber: String,
                          registrationWrapper: RegistrationWrapper
                        )(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
     for {
@@ -45,7 +46,8 @@ class RegistrationService @Inject()(
         answers,
         exclusionReason,
         registrationWrapper.registration,
-        vrn
+        vrn,
+        iossNumber
       ))
     } yield amend
 
@@ -55,7 +57,8 @@ class RegistrationService @Inject()(
                                          answers: UserAnswers,
                                          exclusionReason: Option[EtmpExclusionReason],
                                          registration: EtmpDisplayRegistration,
-                                         vrn: Vrn
+                                         vrn: Vrn,
+                                         iossNumber: String,
                                        ): EtmpAmendRegistrationRequest = {
 
     EtmpAmendRegistrationRequest(
@@ -68,7 +71,7 @@ class RegistrationService @Inject()(
         reRegistration = exclusionReason.isEmpty
       ),
       exclusionDetails = exclusionReason.map(getExclusionDetailsForType(_, answers)),
-      customerIdentification = EtmpCustomerIdentification(vrn),
+      customerIdentification = EtmpAmendCustomerIdentification(iossNumber),
       tradingNames = registration.tradingNames,
       schemeDetails = buildSchemeDetailsFromDisplay(registration.schemeDetails),
       bankDetails = registration.bankDetails

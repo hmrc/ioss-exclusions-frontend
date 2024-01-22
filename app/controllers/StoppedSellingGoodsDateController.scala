@@ -77,6 +77,7 @@ class StoppedSellingGoodsDateController @Inject()(
               updatedAnswers,
               Some(EtmpExclusionReason.NoLongerSupplies),
               request.vrn,
+              request.iossNumber,
               request.registrationWrapper
             ).map {
               case Right(_) => Redirect(StoppedSellingGoodsDatePage.navigate(waypoints, updatedAnswers, updatedAnswers).url)

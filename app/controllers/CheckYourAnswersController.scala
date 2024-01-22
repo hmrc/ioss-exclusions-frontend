@@ -83,6 +83,7 @@ class CheckYourAnswersController @Inject()(
             request.userAnswers,
             Some(EtmpExclusionReason.TransferringMSID),
             request.vrn,
+            request.iossNumber,
             request.registrationWrapper
           ).map {
             case Right(_) =>

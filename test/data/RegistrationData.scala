@@ -91,7 +91,7 @@ trait RegistrationData {
       bankDetails = true,
       reRegistration = false
     ),
-    customerIdentification = arbitrary[EtmpCustomerIdentification].sample.value,
+    customerIdentification = arbitrary[EtmpAmendCustomerIdentification].sample.value,
     tradingNames = Seq(arbitrary[EtmpTradingName].sample.value),
     schemeDetails = etmpSchemeDetails,
     bankDetails = genBankDetails,

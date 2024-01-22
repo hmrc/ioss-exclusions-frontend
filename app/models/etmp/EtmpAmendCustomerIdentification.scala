@@ -17,11 +17,10 @@
 package models.etmp
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.domain.Vrn
 
-case class EtmpCustomerIdentification(vrn: Vrn)
+case class EtmpAmendCustomerIdentification(iossNumber: String)
 
-object EtmpCustomerIdentification {
+object EtmpAmendCustomerIdentification {
 
-  implicit val format: OFormat[EtmpCustomerIdentification] = Json.format[EtmpCustomerIdentification]
+  implicit val format: OFormat[EtmpAmendCustomerIdentification] = Json.format[EtmpAmendCustomerIdentification]
 }
