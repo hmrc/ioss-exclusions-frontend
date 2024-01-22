@@ -19,7 +19,7 @@ package services
 import base.SpecBase
 import connectors.RegistrationConnector
 import data.RegistrationData
-import models.etmp.{EtmpAmendRegistrationChangeLog, EtmpCustomerIdentification, EtmpExclusionReason}
+import models.etmp.{EtmpAmendRegistrationChangeLog, EtmpCustomerIdentification, EtmpDisplayEuRegistrationDetails, EtmpDisplaySchemeDetails, EtmpEuRegistrationDetails, EtmpExclusionReason, EtmpSchemeDetails, TaxRefTraderID, TraderId, VatNumberTraderId}
 import models.requests.{EtmpExclusionDetails, EtmpNewMemberState}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
@@ -50,9 +50,44 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
       exclusionDetails = Some(etmpExclusionsDetails),
       customerIdentification = EtmpCustomerIdentification(vrn),
       tradingNames = registrationWrapper.registration.tradingNames,
-      schemeDetails = registrationWrapper.registration.schemeDetails,
+      schemeDetails = buildSchemeDetailsFromDisplay(registrationWrapper.registration.schemeDetails),
       bankDetails = registrationWrapper.registration.bankDetails
     )
+  }
+
+  private def buildSchemeDetailsFromDisplay(etmpDisplaySchemeDetails: EtmpDisplaySchemeDetails): EtmpSchemeDetails = {
+    EtmpSchemeDetails(
+      commencementDate = LocalDate.parse(etmpDisplaySchemeDetails.commencementDate),
+      euRegistrationDetails = etmpDisplaySchemeDetails.euRegistrationDetails.map(buildEuRegistrationDetails),
+      previousEURegistrationDetails = etmpDisplaySchemeDetails.previousEURegistrationDetails,
+      websites = etmpDisplaySchemeDetails.websites,
+      contactName = etmpDisplaySchemeDetails.contactName,
+      businessTelephoneNumber = etmpDisplaySchemeDetails.businessTelephoneNumber,
+      businessEmailId = etmpDisplaySchemeDetails.businessEmailId,
+      nonCompliantReturns = etmpDisplaySchemeDetails.nonCompliantReturns,
+      nonCompliantPayments = etmpDisplaySchemeDetails.nonCompliantPayments
+    )
+  }
+
+  private def buildEuRegistrationDetails(euDisplayRegistrationDetails: EtmpDisplayEuRegistrationDetails): EtmpEuRegistrationDetails = {
+    EtmpEuRegistrationDetails(
+      countryOfRegistration = euDisplayRegistrationDetails.issuedBy,
+      traderId = buildTraderId(euDisplayRegistrationDetails.vatNumber, euDisplayRegistrationDetails.taxIdentificationNumber),
+      tradingName = euDisplayRegistrationDetails.fixedEstablishmentTradingName,
+      fixedEstablishmentAddressLine1 = euDisplayRegistrationDetails.fixedEstablishmentAddressLine1,
+      fixedEstablishmentAddressLine2 = euDisplayRegistrationDetails.fixedEstablishmentAddressLine2,
+      townOrCity = euDisplayRegistrationDetails.townOrCity,
+      regionOrState = euDisplayRegistrationDetails.regionOrState,
+      postcode = euDisplayRegistrationDetails.postcode
+    )
+  }
+
+  private def buildTraderId(maybeVatNumber: Option[String], maybeTaxIdentificationNumber: Option[String]): TraderId = {
+    (maybeVatNumber, maybeTaxIdentificationNumber) match {
+      case (Some(vatNumber), _) => VatNumberTraderId(vatNumber)
+      case (_, Some(taxIdentificationNumber)) => TaxRefTraderID(taxIdentificationNumber)
+      case _ => throw new IllegalStateException("Neither vat number nor tax id were provided")
+    }
   }
 
   ".amendRegistration" - {
