@@ -35,7 +35,7 @@ case object EuCountryPage extends QuestionPage[Country] {
 
   override def nextPageCheckMode(waypoints: NonEmptyWaypoints, originalAnswers: UserAnswers, updatedAnswers: UserAnswers): Page = {
     if (originalAnswers.get(this) != updatedAnswers.get(this)) {
-      TaxNumberPage
+      EuVatNumberPage
     } else {
       super.nextPageCheckMode(waypoints, originalAnswers, updatedAnswers)
     }

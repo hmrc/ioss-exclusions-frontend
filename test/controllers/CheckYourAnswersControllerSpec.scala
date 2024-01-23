@@ -22,7 +22,7 @@ import models.responses.UnexpectedResponseStatus
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
-import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, MoveDatePage, TaxNumberPage, Waypoint, Waypoints}
+import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, MoveDatePage, EuVatNumberPage, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -143,7 +143,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           }
 
           "to the Tax Number page when the tax number is missing" in {
-            val answers = completeUserAnswers.remove(TaxNumberPage).success.value
+            val answers = completeUserAnswers.remove(EuVatNumberPage).success.value
 
             val application = applicationBuilder(userAnswers = Some(answers))
               .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
@@ -154,7 +154,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
               val result = route(application, request).value
 
               status(result) mustBe SEE_OTHER
-              redirectLocation(result).value mustBe controllers.routes.TaxNumberController.onPageLoad(waypoints).url
+              redirectLocation(result).value mustBe controllers.routes.EuVatNumberController.onPageLoad(waypoints).url
             }
           }
         }

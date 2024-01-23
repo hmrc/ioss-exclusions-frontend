@@ -29,7 +29,7 @@ import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
 import utils.FutureSyntax.FutureOps
-import viewmodels.checkAnswers.{EuCountrySummary, MoveDateSummary, TaxNumberSummary}
+import viewmodels.checkAnswers.{EuCountrySummary, MoveDateSummary, EuVatNumberSummary}
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
 
@@ -55,13 +55,13 @@ class CheckYourAnswersController @Inject()(
 
       val euCountrySummaryRow = EuCountrySummary.rowNewCountry(request.userAnswers, waypoints, thisPage)
       val moveDateSummaryRow = MoveDateSummary.rowMoveDate(request.userAnswers, waypoints, thisPage, dates)
-      val taxNumberSummaryRow = TaxNumberSummary.rowTaxNumber(request.userAnswers, waypoints, thisPage)
+      val euVatNumberSummaryRow = EuVatNumberSummary.rowEuVatNumber(request.userAnswers, waypoints, thisPage)
 
       val list = SummaryListViewModel(
         rows = Seq(
           euCountrySummaryRow,
           moveDateSummaryRow,
-          taxNumberSummaryRow
+          euVatNumberSummaryRow
         ).flatten
       )
 

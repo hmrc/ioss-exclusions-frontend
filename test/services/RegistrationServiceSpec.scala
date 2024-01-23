@@ -119,7 +119,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
             ceaseFixedEstDate = None,
             movePOBDate = moveDate,
             issuedBy = country.code,
-            vatNumber = taxNumber
+            vatNumber = euVatNumber
           ))
         )
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import pages.TaxNumberPage
+@import pages.EuVatNumberPage
 @import viewmodels.InputWidth._
 @import views.html.components.ButtonGroup
 
@@ -26,11 +26,11 @@
     button: ButtonGroup
 )
 
-@(form: Form[_], country: Country, waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], countryWithValidationDetails: CountryWithValidationDetails, waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("taxNumber.title", country.name))) {
+@layout(pageTitle = title(form, messages("euVatNumber.title", countryWithValidationDetails.country.name))) {
 
-    @formHelper(action = routes.TaxNumberController.onSubmit(waypoints)) {
+    @formHelper(action = routes.EuVatNumberController.onSubmit(waypoints)) {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
@@ -39,11 +39,18 @@
         @govukInput(
             InputViewModel(
                 field = form("value"),
-                label = LabelViewModel(messages("taxNumber.heading", country.name)).withCssClass("govuk-label--l").asPageHeading()
+                label = LabelViewModel(messages("euVatNumber.heading", countryWithValidationDetails.country.name)).withCssClass("govuk-label--l").asPageHeading()
             )
             .withWidth(Fixed20)
+            .withHint(HintViewModel(HtmlContent(Html(
+                messages(
+                    "euVatNumber.hint",
+                    countryWithValidationDetails.country.code,
+                    countryWithValidationDetails.exampleVrn
+                )
+            ))))
         )
 
-        @button("site.continue", TaxNumberPage.route(waypoints).url, waypoints)
+        @button("site.continue", EuVatNumberPage.route(waypoints).url, waypoints)
     }
 }

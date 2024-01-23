@@ -352,5 +352,4 @@ trait ModelGenerators {
         )
       }
     }
-
 }

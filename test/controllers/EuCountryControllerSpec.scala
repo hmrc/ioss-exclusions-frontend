@@ -20,7 +20,7 @@ import base.SpecBase
 import forms.EuCountryFormProvider
 import models.Country._
 import models.UserAnswers
-import pages.{EuCountryPage, TaxNumberPage}
+import pages.{EuCountryPage, EuVatNumberPage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.EuCountryView
@@ -96,7 +96,7 @@ class EuCountryControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual TaxNumberPage.route(checkModeWaypoints).url
+        redirectLocation(result).value mustEqual EuVatNumberPage.route(checkModeWaypoints).url
       }
     }
 

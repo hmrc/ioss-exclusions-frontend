@@ -21,7 +21,7 @@ import connectors.RegistrationHttpParser.AmendRegistrationResultResponse
 import models.etmp._
 import models.requests.{EtmpAmendRegistrationRequest, EtmpExclusionDetails, EtmpNewMemberState}
 import models.{RegistrationWrapper, UserAnswers}
-import pages.{EuCountryPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage, TaxNumberPage}
+import pages.{EuCountryPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage, EuVatNumberPage}
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -126,7 +126,7 @@ class RegistrationService @Inject()(
   private def getExclusionDetailsForTransferringMSID(answers: UserAnswers): EtmpExclusionDetails = {
     val country = answers.get(EuCountryPage).getOrElse(throw new Exception("No country provided"))
     val moveDate = answers.get(MoveDatePage).getOrElse(throw new Exception("No move date provided"))
-    val taxNumber = answers.get(TaxNumberPage).getOrElse(throw new Exception("No tax number provided"))
+    val euVatNumber = answers.get(EuVatNumberPage).getOrElse(throw new Exception("No tax number provided"))
 
     EtmpExclusionDetails(
       revertExclusion = false,
@@ -140,7 +140,7 @@ class RegistrationService @Inject()(
         ceaseFixedEstDate = None,
         movePOBDate = moveDate,
         issuedBy = country.code,
-        vatNumber = taxNumber
+        vatNumber = euVatNumber
       ))
     )
   }

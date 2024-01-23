@@ -25,7 +25,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.errors.CancelLeaveSchemeErrorView
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class CancelLeaveSchemeErrorController @Inject()(
                                              override val messagesApi: MessagesApi,
@@ -34,7 +34,7 @@ class CancelLeaveSchemeErrorController @Inject()(
                                              getData: DataRetrievalAction,
                                              val controllerComponents: MessagesControllerComponents,
                                              view: CancelLeaveSchemeErrorView
-                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                           ) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData).async {
     implicit request =>

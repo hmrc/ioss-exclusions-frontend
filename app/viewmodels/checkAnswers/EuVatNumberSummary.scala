@@ -17,7 +17,7 @@
 package viewmodels.checkAnswers
 
 import models.UserAnswers
-import pages.{CheckAnswersPage, TaxNumberPage, Waypoints}
+import pages.{CheckAnswersPage, EuVatNumberPage, Waypoints}
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
@@ -25,22 +25,22 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object TaxNumberSummary {
+object EuVatNumberSummary {
 
-    def rowTaxNumber(answers: UserAnswers,
+    def rowEuVatNumber(answers: UserAnswers,
                      waypoints: Waypoints,
                      sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(TaxNumberPage).map {
-      taxNumber =>
-        val value = HtmlFormat.escape(taxNumber).toString
+    answers.get(EuVatNumberPage).map {
+      euVatNumber =>
+        val value = HtmlFormat.escape(euVatNumber).toString
 
-        val taxNumberPageChangeUrl = TaxNumberPage.changeLink(waypoints, sourcePage).url
+        val euVatNumberPageChangeUrl = EuVatNumberPage.changeLink(waypoints, sourcePage).url
         SummaryListRowViewModel(
-          key = "taxNumber.checkYourAnswersLabel",
+          key = "euVatNumber.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
           actions = Seq(
-            ActionItemViewModel("site.change", taxNumberPageChangeUrl)
-              .withVisuallyHiddenText(messages("taxNumber.change.hidden"))
+            ActionItemViewModel("site.change", euVatNumberPageChangeUrl)
+              .withVisuallyHiddenText(messages("euVatNumber.change.hidden"))
           )
         )
     }

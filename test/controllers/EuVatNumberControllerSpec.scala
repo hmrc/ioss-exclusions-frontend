@@ -17,54 +17,54 @@
 package controllers
 
 import base.SpecBase
-import forms.TaxNumberFormProvider
-import pages.{EuCountryPage, TaxNumberPage}
+import forms.EuVatNumberFormProvider
+import pages.{EuCountryPage, EuVatNumberPage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.TaxNumberView
+import views.html.EuVatNumberView
 
-class TaxNumberControllerSpec extends SpecBase {
+class EuVatNumberControllerSpec extends SpecBase {
 
-  val formProvider = new TaxNumberFormProvider()
-  val form = formProvider()
+  val formProvider = new EuVatNumberFormProvider()
+  val form = formProvider(country)
 
-  lazy val taxNumberRoute = routes.TaxNumberController.onPageLoad(emptyWaypoints).url
+  lazy val euVatNumberRoute = routes.EuVatNumberController.onPageLoad(emptyWaypoints).url
 
   val userAnswersWithCountry = emptyUserAnswers.set(EuCountryPage, country).success.value
 
-  "TaxNumber Controller" - {
+  "EuVatNumber Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithCountry)).build()
 
       running(application) {
-        val request = FakeRequest(GET, taxNumberRoute)
+        val request = FakeRequest(GET, euVatNumberRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[TaxNumberView]
+        val view = application.injector.instanceOf[EuVatNumberView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, country, emptyWaypoints)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, countryWithValidationDetails, emptyWaypoints)(request, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = userAnswersWithCountry.set(TaxNumberPage, "answer").success.value
+      val userAnswers = userAnswersWithCountry.set(EuVatNumberPage, "answer").success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, taxNumberRoute)
+        val request = FakeRequest(GET, euVatNumberRoute)
 
-        val view = application.injector.instanceOf[TaxNumberView]
+        val view = application.injector.instanceOf[EuVatNumberView]
 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill("answer"), country, emptyWaypoints)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill("answer"), countryWithValidationDetails, emptyWaypoints)(request, messages(application)).toString
       }
     }
 
@@ -73,12 +73,12 @@ class TaxNumberControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(userAnswersWithCountry)).build()
 
       running(application) {
-        val request = FakeRequest(POST, taxNumberRoute).withFormUrlEncodedBody(("value", "answer"))
+        val request = FakeRequest(POST, euVatNumberRoute).withFormUrlEncodedBody(("value", euVatNumber))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual TaxNumberPage.navigate(emptyWaypoints, userAnswersWithCountry, userAnswersWithCountry).url
+        redirectLocation(result).value mustEqual EuVatNumberPage.navigate(emptyWaypoints, userAnswersWithCountry, userAnswersWithCountry).url
       }
     }
 
@@ -87,16 +87,16 @@ class TaxNumberControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(userAnswersWithCountry)).build()
 
       running(application) {
-        val request = FakeRequest(POST, taxNumberRoute).withFormUrlEncodedBody(("value", ""))
+        val request = FakeRequest(POST, euVatNumberRoute).withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[TaxNumberView]
+        val view = application.injector.instanceOf[EuVatNumberView]
 
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, country, emptyWaypoints)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, countryWithValidationDetails, emptyWaypoints)(request, messages(application)).toString
       }
     }
 
@@ -105,7 +105,7 @@ class TaxNumberControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, taxNumberRoute)
+        val request = FakeRequest(GET, euVatNumberRoute)
 
         val result = route(application, request).value
 
@@ -119,7 +119,7 @@ class TaxNumberControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(POST, taxNumberRoute).withFormUrlEncodedBody(("value", "answer"))
+        val request = FakeRequest(POST, euVatNumberRoute).withFormUrlEncodedBody(("value", "answer"))
 
         val result = route(application, request).value
 
