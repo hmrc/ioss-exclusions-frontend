@@ -31,8 +31,9 @@ class CheckNoExclusionFilterImpl @Inject()(clock: Clock)(implicit val executionC
   extends CheckNoExclusionFilter with Logging {
 
   override protected def filter[A](request: OptionalDataRequest[A]): Future[Option[Result]] = {
-    val lastExclusion: Option[EtmpExclusion] = request.registrationWrapper.registration.exclusions.maxByOption(_.effectiveDate)
-    if (lastExclusion.isEmpty || lastExclusion.exists(_.exclusionReason == Reversal)) {
+    val maybeExclusion: Option[EtmpExclusion] = request.registrationWrapper.registration.exclusions.lastOption
+
+    if (maybeExclusion.isEmpty || maybeExclusion.exists(_.exclusionReason == Reversal)) {
       Future.successful(None)
     } else {
       Future.successful(Some(Redirect(controllers.routes.AlreadyLeftSchemeErrorController.onPageLoad().url)))

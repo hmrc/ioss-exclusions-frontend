@@ -31,8 +31,9 @@ class CheckExclusionFilterImpl @Inject()(clock: Clock)(implicit val executionCon
   extends CheckExclusionFilter with Logging {
 
   override protected def filter[A](request: OptionalDataRequest[A]): Future[Option[Result]] = {
-    val lastExclusion: Option[EtmpExclusion] = request.registrationWrapper.registration.exclusions.maxByOption(_.effectiveDate)
-    lastExclusion match {
+    val maybeExclusion: Option[EtmpExclusion] = request.registrationWrapper.registration.exclusions.lastOption
+
+    maybeExclusion match {
       case Some(exclusion) if Seq(NoLongerSupplies, VoluntarilyLeaves, TransferringMSID).contains(exclusion.exclusionReason) &&
         LocalDate.now(clock).isBefore(exclusion.effectiveDate) =>
         Future.successful(None)
