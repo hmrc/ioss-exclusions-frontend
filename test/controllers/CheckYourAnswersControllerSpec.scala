@@ -142,7 +142,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             }
           }
 
-          "to the Tax Number page when the tax number is missing" in {
+          "to the EU VAT Number page when the VAT number is missing" in {
             val answers = completeUserAnswers.remove(EuVatNumberPage).success.value
 
             val application = applicationBuilder(userAnswers = Some(answers))

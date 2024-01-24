@@ -84,7 +84,7 @@ class EuCountryControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to the tax number page when the user changes the country in check mode" in {
+    "must redirect to the EU VAT number page when the user changes the country in check mode" in {
 
       val euCountryCheckModeRoute = routes.EuCountryController.onPageLoad(checkModeWaypoints).url
 
