@@ -21,14 +21,14 @@ import models.UserAnswers
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
-case object TaxNumberPage extends QuestionPage[String] {
+case object EuVatNumberPage extends QuestionPage[String] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "taxNumber"
+  override def toString: String = "euVatNumber"
 
   override def route(waypoints: Waypoints): Call =
-    routes.TaxNumberController.onPageLoad(waypoints)
+    routes.EuVatNumberController.onPageLoad(waypoints)
 
   override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     CheckYourAnswersPage

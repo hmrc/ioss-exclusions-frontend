@@ -19,6 +19,7 @@ package services
 import base.SpecBase
 import connectors.RegistrationConnector
 import data.RegistrationData
+import models.CountryWithValidationDetails
 import models.etmp._
 import models.requests.{EtmpExclusionDetails, EtmpNewMemberState}
 import org.mockito.ArgumentMatchers.any
@@ -107,6 +108,8 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
           reRegistration = false
         )
 
+        val convertedVatNumber = CountryWithValidationDetails.convertTaxIdentifierForTransfer(euVatNumber, country.code)
+
         val expectedExclusionDetails = EtmpExclusionDetails(
           revertExclusion = false,
           noLongerSupplyGoods = false,
@@ -119,7 +122,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
             ceaseFixedEstDate = None,
             movePOBDate = moveDate,
             issuedBy = country.code,
-            vatNumber = taxNumber
+            vatNumber = convertedVatNumber
           ))
         )
 

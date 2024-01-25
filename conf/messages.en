@@ -75,12 +75,13 @@ euCountry.checkYourAnswersLabel = New country
 euCountry.error.required = Select the country your business is moving to
 euCountry.change.hidden = EU Country
 
-taxNumber.title = What is your tax number in {0}?
-taxNumber.heading = What is your tax number in {0}?
-taxNumber.checkYourAnswersLabel = Tax number
-taxNumber.error.required = Enter tax number
-taxNumber.error.length = Tax Number must be 100 characters or less
-taxNumber.change.hidden = Tax Number
+euVatNumber.title = What is your VAT registration number for {0}?
+euVatNumber.heading = What is your VAT registration number for {0}?
+euVatNumber.hint = This will start with {0}, for example {0}{1}
+euVatNumber.checkYourAnswersLabel = VAT number
+euVatNumber.error.required = Enter your VAT registration number for {0}
+euVatNumber.error.invalid = Enter a registration number in the correct format
+euVatNumber.change.hidden = VAT registration number
 
 moveDate.title = When did or when will your business move to {0}?
 moveDate.heading = When did or when will your business move to {0}?

@@ -33,5 +33,5 @@ case object MoveDatePage extends QuestionPage[LocalDate] {
     routes.MoveDateController.onPageLoad(waypoints)
 
   override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    TaxNumberPage
+    EuVatNumberPage
 }

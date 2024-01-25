@@ -16,16 +16,18 @@
 
 package forms
 
-import javax.inject.Inject
-
-import forms.mappings.Mappings
+import forms.mappings.{EuVatNumberConstraints, Mappings}
+import models.Country
 import play.api.data.Form
 
-class TaxNumberFormProvider @Inject() extends Mappings {
+import javax.inject.Inject
 
-  def apply(): Form[String] =
+class EuVatNumberFormProvider @Inject() extends Mappings with EuVatNumberConstraints {
+
+  def apply(country: Country): Form[String] =
     Form(
-      "value" -> text("taxNumber.error.required")
-        .verifying(maxLength(100, "taxNumber.error.length"))
+      "value" -> text("euVatNumber.error.required", args = Seq(country.name))
+        .transform[String](_.trim.replaceAll("\\s", "").toUpperCase, value => value)
+        .verifying(validateEuVatNumber(country.code, "euVatNumber.error.invalid"))
     )
 }

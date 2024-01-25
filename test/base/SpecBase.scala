@@ -19,15 +19,16 @@ package base
 import controllers.actions._
 import date.Dates
 import generators.Generators
-import models.{CheckMode, Country, RegistrationWrapper, UserAnswers}
-import org.scalacheck.Arbitrary
+import models.CountryWithValidationDetails.euCountriesWithVRNValidationRules
+import models.{CheckMode, Country, CountryWithValidationDetails, RegistrationWrapper, UserAnswers}
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalatest.{OptionValues, TryValues}
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
+import org.scalatest.{OptionValues, TryValues}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, MoveCountryPage, MoveDatePage, TaxNumberPage, Waypoint, Waypoints}
+import pages.{CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, EuVatNumberPage, MoveCountryPage, MoveDatePage, Waypoint, Waypoints}
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
@@ -45,21 +46,26 @@ trait SpecBase
     with OptionValues
     with ScalaFutures
     with MockitoSugar
-    with IntegrationPatience with Generators {
+    with IntegrationPatience
+    with Generators {
 
   val emptyWaypoints: Waypoints = EmptyWaypoints
   val checkModeWaypoints: Waypoints = emptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
 
   val userAnswersId: String = "id"
-  val vrn: Vrn = Vrn("123456789")
 
   val registrationWrapper: RegistrationWrapper = arbitrary[RegistrationWrapper].sample.value
 
-  val country: Country = Country("IT", "Italy")
-  val anotherCountry: Country = Country("ES", "Spain")
+  val country: Country = arbitraryCountry.arbitrary.sample.value
+  val anotherCountry: Country = Gen.oneOf(Country.euCountries.filterNot(_ == country)).sample.value
+
+  val countryWithValidationDetails: CountryWithValidationDetails =
+    euCountriesWithVRNValidationRules.find(_.country == country).value
+
+  val vrn: Vrn = Vrn(countryWithValidationDetails.exampleVrn)
 
   val moveDate: LocalDate = LocalDate.now(Dates.clock)
-  val taxNumber: String = "333333333"
+  val euVatNumber: String = getEuVatNumber(country.code)
 
   val iossNumber: String = "IM9001234567"
 
@@ -70,7 +76,7 @@ trait SpecBase
       .set(MoveCountryPage, true).success.value
       .set(EuCountryPage, country).success.value
       .set(MoveDatePage, moveDate).success.value
-      .set(TaxNumberPage, taxNumber).success.value
+      .set(EuVatNumberPage, euVatNumber).success.value
 
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 
@@ -87,4 +93,9 @@ trait SpecBase
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers, vrn, iossNumber, registration))
       )
   }
+
+  def getEuVatNumber(countryCode: String): String =
+    CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == countryCode).map { matchedCountryRule =>
+      s"$countryCode${matchedCountryRule.exampleVrn}"
+    }.value
 }
