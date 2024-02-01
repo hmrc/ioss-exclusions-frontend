@@ -30,13 +30,13 @@ class Dates @Inject()(val today: Today) {
 
   private val digitsFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MM yyyy")
 
-  val dateHint: String = digitsFormatter.format(today.date)
+  def dateHint: String = digitsFormatter.format(today.date)
 
-  val minMoveDate: LocalDate =
+  def minMoveDate: LocalDate =
     (if (today.date.getDayOfMonth <= MoveDayOfMonthSplit) today.date.minusMonths(1) else today.date)
       .withDayOfMonth(1)
 
-  val maxMoveDate: LocalDate =
+  def maxMoveDate: LocalDate =
     today.date.plusMonths(1).withDayOfMonth(MoveDayOfMonthSplit)
 
   def getLeaveDateWhenStoppedUsingService(exclusionDate: LocalDate): LocalDate = {
