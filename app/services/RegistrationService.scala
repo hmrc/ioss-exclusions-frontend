@@ -20,7 +20,7 @@ import connectors.RegistrationConnector
 import connectors.RegistrationHttpParser.AmendRegistrationResultResponse
 import models.etmp._
 import models.requests.{EtmpAmendRegistrationRequest, EtmpExclusionDetails, EtmpNewMemberState}
-import models.{Country, CountryWithValidationDetails, RegistrationWrapper, UserAnswers}
+import models.{CountryWithValidationDetails, RegistrationWrapper, UserAnswers}
 import pages.{EuCountryPage, EuVatNumberPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.HeaderCarrier

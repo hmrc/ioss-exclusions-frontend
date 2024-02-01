@@ -20,7 +20,7 @@ import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 
 class TodayImpl @Inject() (val clock: Clock) extends Today {
-  override val date: LocalDate = LocalDate.now(clock)
+  override def date: LocalDate = LocalDate.now(clock)
 }
 
 trait Today {
