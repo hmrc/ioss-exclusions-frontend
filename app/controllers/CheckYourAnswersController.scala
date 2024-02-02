@@ -21,15 +21,16 @@ import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierA
 import date.Dates
 import logging.Logging
 import models.CheckMode
+import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
 import models.etmp.EtmpExclusionReason
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.RegistrationService
+import services.{AuditService, RegistrationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
 import utils.FutureSyntax.FutureOps
-import viewmodels.checkAnswers.{EuCountrySummary, MoveDateSummary, EuVatNumberSummary}
+import viewmodels.checkAnswers.{EuCountrySummary, EuVatNumberSummary, MoveDateSummary}
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
 
@@ -42,6 +43,7 @@ class CheckYourAnswersController @Inject()(
                                             requireData: DataRequiredAction,
                                             dates: Dates,
                                             val controllerComponents: MessagesControllerComponents,
+                                            auditService: AuditService,
                                             view: CheckYourAnswersView,
                                             registrationService: RegistrationService
                                           )(implicit ec: ExecutionContext)
@@ -87,8 +89,14 @@ class CheckYourAnswersController @Inject()(
             request.registrationWrapper
           ).map {
             case Right(_) =>
+              auditService.audit(RegistrationAuditModel.build(
+                RegistrationAuditType.AmendRegistration, request.userAnswers, SubmissionResult.Success)
+              )
               Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, request.userAnswers).route)
             case Left(e) =>
+              auditService.audit(RegistrationAuditModel.build(
+                RegistrationAuditType.AmendRegistration, request.userAnswers, SubmissionResult.Failure)
+              )
               logger.error(s"Failure to submit self exclusion ${e.body}")
               Redirect(routes.SubmissionFailureController.onPageLoad())
           }
