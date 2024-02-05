@@ -18,15 +18,18 @@ package controllers
 
 import base.SpecBase
 import models.CheckMode
+import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
+import models.requests.DataRequest
 import models.responses.UnexpectedResponseStatus
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, when}
+import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
-import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, MoveDatePage, EuVatNumberPage, Waypoint, Waypoints}
+import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, EuVatNumberPage, MoveDatePage, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.RegistrationService
+import services.{AuditService, RegistrationService}
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
@@ -36,10 +39,12 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
   val waypoints: Waypoints = EmptyWaypoints
 
+  private val mockAuditService: AuditService = mock[AuditService]
   private val mockRegistrationService = mock[RegistrationService]
 
   override protected def beforeEach(): Unit = {
     reset(mockRegistrationService)
+    reset(mockAuditService)
   }
 
   "Check Your Answers Controller" - {
@@ -70,13 +75,15 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
     ".onSubmit" - {
 
-      "must redirect to the correct page when the validation passes" in {
+      "must redirect to the correct page and audit a success event when the validation passes" in {
 
         when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn
           Future.successful(Right(()))
 
-        val application = applicationBuilder(userAnswers = Some(completeUserAnswers))
+        val userAnswers = completeUserAnswers
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .overrides(bind[AuditService].toInstance(mockAuditService))
           .build()
 
         running(application) {
@@ -84,18 +91,28 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
           val result = route(application, request).value
 
+          implicit val dataRequest: DataRequest[_] =
+            DataRequest(request, userAnswersId, userAnswers, vrn, "", registrationWrapper)
+
+          val expectedAuditEvent = RegistrationAuditModel.build(
+            RegistrationAuditType.AmendRegistration, userAnswers, SubmissionResult.Success
+          )
+
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe ApplicationCompletePage.route(waypoints).url
+          verify(mockAuditService, times(1)).audit(eqTo(expectedAuditEvent))(any(), any())
         }
       }
 
-      "must redirect to the failure page when the validation passes but amend call failures" in {
+      "must redirect to the failure page and audit a failure event when the validation passes but amend call failures" in {
 
         when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn
           Future.successful(Left(UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "Error occurred")))
 
-        val application = applicationBuilder(userAnswers = Some(completeUserAnswers))
+        val userAnswers = completeUserAnswers
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .overrides(bind[AuditService].toInstance(mockAuditService))
           .build()
 
         running(application) {
@@ -103,8 +120,16 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
           val result = route(application, request).value
 
+          implicit val dataRequest: DataRequest[_] =
+            DataRequest(request, userAnswersId, userAnswers, vrn, "", registrationWrapper)
+
+          val expectedAuditEvent = RegistrationAuditModel.build(
+            RegistrationAuditType.AmendRegistration, userAnswers, SubmissionResult.Failure
+          )
+
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.SubmissionFailureController.onPageLoad().url
+          verify(mockAuditService, times(1)).audit(eqTo(expectedAuditEvent))(any(), any())
         }
       }
 
