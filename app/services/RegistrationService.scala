@@ -18,48 +18,82 @@ package services
 
 import connectors.RegistrationConnector
 import connectors.RegistrationHttpParser.AmendRegistrationResultResponse
+import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
 import models.etmp._
-import models.requests.{EtmpAmendRegistrationRequest, EtmpExclusionDetails, EtmpNewMemberState}
+import models.requests.{DataRequest, EtmpAmendRegistrationRequest, EtmpExclusionDetails, EtmpNewMemberState}
 import models.{CountryWithValidationDetails, RegistrationWrapper, UserAnswers}
 import pages.{EuCountryPage, EuVatNumberPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
+import play.api.mvc.Request
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Success
 
 class RegistrationService @Inject()(
                                      clock: Clock,
-                                     registrationConnector: RegistrationConnector
+                                     registrationConnector: RegistrationConnector,
+                                     auditService: AuditService
                                    )(implicit ec: ExecutionContext) {
 
-  def amendRegistration(
-                         answers: UserAnswers,
-                         exclusionReason: Option[EtmpExclusionReason],
-                         vrn: Vrn,
-                         iossNumber: String,
-                         registrationWrapper: RegistrationWrapper
-                       )(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
-    for {
-      amend <- registrationConnector.amend(buildEtmpAmendRegistrationRequest(
-        answers,
-        exclusionReason,
-        registrationWrapper.registration,
-        vrn,
-        iossNumber
-      ))
-    } yield amend
+  def amendRegistrationAndAudit(
+                                 userId: String,
+                                 vrn: Vrn,
+                                 iossNumber: String,
+                                 answers: UserAnswers,
+                                 registration: EtmpDisplayRegistration,
+                                 exclusionReason: Option[EtmpExclusionReason]
+                               )(implicit hc: HeaderCarrier, request: Request[_]): Future[AmendRegistrationResultResponse] = {
 
+    val amendFuture: Future[AmendRegistrationResultResponse] =
+      amendRegistration(answers, exclusionReason, vrn, iossNumber, registration)
+
+    val success: RegistrationAuditModel = RegistrationAuditModel(
+      registrationAuditType = RegistrationAuditType.AmendRegistration,
+      userId = userId,
+      userAgent = request.headers.get("user-agent").getOrElse(""),
+      vrn = vrn.vrn,
+      iossNumber = iossNumber,
+      userAnswers = answers,
+      registration = registration,
+      exclusionReason = exclusionReason,
+      submissionResult = SubmissionResult.Success
+    )
+    val failure: RegistrationAuditModel = success.copy(submissionResult = SubmissionResult.Failure)
+
+    amendFuture.onComplete {
+      case Success(Right(_)) => auditService.audit(success)(hc, request)
+      case _ => auditService.audit(failure)(hc, request)
+    }
+
+    amendFuture
   }
 
-  def buildEtmpAmendRegistrationRequest(
-                                         answers: UserAnswers,
-                                         exclusionReason: Option[EtmpExclusionReason],
-                                         registration: EtmpDisplayRegistration,
-                                         vrn: Vrn,
-                                         iossNumber: String,
-                                       ): EtmpAmendRegistrationRequest = {
+  private def amendRegistration(
+                                 answers: UserAnswers,
+                                 exclusionReason: Option[EtmpExclusionReason],
+                                 vrn: Vrn,
+                                 iossNumber: String,
+                                 registration: EtmpDisplayRegistration
+                               )(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
+    registrationConnector.amend(buildEtmpAmendRegistrationRequest(
+      answers,
+      exclusionReason,
+      registration,
+      vrn,
+      iossNumber
+    ))
+  }
+
+  private def buildEtmpAmendRegistrationRequest(
+                                                 answers: UserAnswers,
+                                                 exclusionReason: Option[EtmpExclusionReason],
+                                                 registration: EtmpDisplayRegistration,
+                                                 vrn: Vrn,
+                                                 iossNumber: String,
+                                               ): EtmpAmendRegistrationRequest = {
 
     EtmpAmendRegistrationRequest(
       administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionAmend),

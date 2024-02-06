@@ -91,11 +91,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
           val result = route(application, request).value
 
-          implicit val dataRequest: DataRequest[_] =
+          val dataRequest: DataRequest[_] =
             DataRequest(request, userAnswersId, userAnswers, vrn, "", registrationWrapper)
 
           val expectedAuditEvent = RegistrationAuditModel.build(
-            RegistrationAuditType.AmendRegistration, userAnswers, SubmissionResult.Success
+            RegistrationAuditType.AmendRegistration, dataRequest, userAnswers, SubmissionResult.Success
           )
 
           status(result) mustBe SEE_OTHER
@@ -120,11 +120,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
           val result = route(application, request).value
 
-          implicit val dataRequest: DataRequest[_] =
+          val dataRequest: DataRequest[_] =
             DataRequest(request, userAnswersId, userAnswers, vrn, "", registrationWrapper)
 
           val expectedAuditEvent = RegistrationAuditModel.build(
-            RegistrationAuditType.AmendRegistration, userAnswers, SubmissionResult.Failure
+            RegistrationAuditType.AmendRegistration, dataRequest, userAnswers, SubmissionResult.Failure
           )
 
           status(result) mustBe SEE_OTHER

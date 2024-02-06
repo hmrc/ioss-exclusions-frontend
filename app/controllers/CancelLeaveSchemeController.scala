@@ -27,7 +27,7 @@ import pages.{CancelLeaveSchemeCompletePage, CancelLeaveSchemePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
-import services.RegistrationService
+import services.{AuditService, RegistrationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.CancelLeaveSchemeView
 
@@ -43,6 +43,7 @@ class CancelLeaveSchemeController @Inject()(
                                              formProvider: CancelLeaveSchemeFormProvider,
                                              config: FrontendAppConfig,
                                              val controllerComponents: MessagesControllerComponents,
+                                             auditService: AuditService,
                                              view: CancelLeaveSchemeView,
                                              registrationService: RegistrationService
                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
@@ -78,14 +79,16 @@ class CancelLeaveSchemeController @Inject()(
   private def amendRegistration(waypoints: Waypoints, hasCancelled: Boolean, updatedAnswers: UserAnswers)
                                (implicit request: OptionalDataRequest[AnyContent]): Future[Result] = {
     if (hasCancelled) {
-      registrationService.amendRegistration(
-        updatedAnswers,
-        Some(EtmpExclusionReason.Reversal),
+      registrationService.amendRegistrationAndAudit(
+        request.userId,
         request.vrn,
         request.iossNumber,
-        request.registrationWrapper
+        updatedAnswers,
+        request.registrationWrapper.registration,
+        Some(EtmpExclusionReason.Reversal)
       ).map {
-        case Right(_) => Redirect(CancelLeaveSchemeCompletePage.route(waypoints).url)
+        case Right(_) =>
+          Redirect(CancelLeaveSchemeCompletePage.route(waypoints).url)
         case Left(e) =>
           logger.error(s"Failure to submit self exclusion ${e.body}")
           Redirect(routes.SubmissionFailureController.onPageLoad())

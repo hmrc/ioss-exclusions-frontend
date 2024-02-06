@@ -73,13 +73,14 @@ class StoppedUsingServiceDateController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(StoppedUsingServiceDatePage, value))
             _ <- sessionRepository.set(updatedAnswers)
-            result <- registrationService.amendRegistration(
-              updatedAnswers,
-              Some(EtmpExclusionReason.VoluntarilyLeaves),
+            result <- registrationService.amendRegistrationAndAudit(
+              request.userId,
               request.vrn,
               request.iossNumber,
-              request.registrationWrapper
-            ) map {
+              updatedAnswers,
+              request.registrationWrapper.registration,
+              Some(EtmpExclusionReason.VoluntarilyLeaves)
+            ).map {
               case Right(_) => Redirect(StoppedUsingServiceDatePage.navigate(waypoints, request.userAnswers, updatedAnswers).url)
               case Left(e) =>
                 logger.error(s"Failure to submit self exclusion ${e.body}")

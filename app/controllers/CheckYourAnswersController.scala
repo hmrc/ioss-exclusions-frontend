@@ -21,7 +21,6 @@ import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierA
 import date.Dates
 import logging.Logging
 import models.CheckMode
-import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
 import models.etmp.EtmpExclusionReason
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -79,24 +78,18 @@ class CheckYourAnswersController @Inject()(
         } else {
           Redirect(routes.CheckYourAnswersController.onPageLoad()).toFuture
         }
-
         case None =>
-          registrationService.amendRegistration(
-            request.userAnswers,
-            Some(EtmpExclusionReason.TransferringMSID),
+          registrationService.amendRegistrationAndAudit(
+            request.userId,
             request.vrn,
             request.iossNumber,
-            request.registrationWrapper
+            request.userAnswers,
+            request.registrationWrapper.registration,
+            Some(EtmpExclusionReason.TransferringMSID)
           ).map {
             case Right(_) =>
-              auditService.audit(RegistrationAuditModel.build(
-                RegistrationAuditType.AmendRegistration, request.userAnswers, SubmissionResult.Success)
-              )
               Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, request.userAnswers).route)
             case Left(e) =>
-              auditService.audit(RegistrationAuditModel.build(
-                RegistrationAuditType.AmendRegistration, request.userAnswers, SubmissionResult.Failure)
-              )
               logger.error(s"Failure to submit self exclusion ${e.body}")
               Redirect(routes.SubmissionFailureController.onPageLoad())
           }
