@@ -22,7 +22,7 @@ import generators.Generators
 import models.CountryWithValidationDetails.euCountriesWithVRNValidationRules
 import models.{CheckMode, Country, CountryWithValidationDetails, RegistrationWrapper, UserAnswers}
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Gen
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -83,7 +83,7 @@ trait SpecBase
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
 
   protected def applicationBuilder(userAnswers: Option[UserAnswers] = None,
-                                   registration: RegistrationWrapper = Arbitrary.arbitrary[RegistrationWrapper].sample.value): GuiceApplicationBuilder = {
+                                   registration: RegistrationWrapper = registrationWrapper): GuiceApplicationBuilder = {
     val application = new GuiceApplicationBuilder()
     val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
     application

@@ -18,31 +18,36 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
+import connectors.RegistrationConnector
 import forms.CancelLeaveSchemeFormProvider
-import models.{RegistrationWrapper, UserAnswers}
-import models.etmp.EtmpExclusion
+import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
+import models.etmp.{EtmpExclusion, EtmpExclusionReason}
+import models.{RegistrationWrapper, UserAnswers}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.Mockito.{reset, times, verify, when}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{CancelLeaveSchemeCompletePage, CancelLeaveSchemePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.RegistrationService
+import services.AuditService
 import views.html.CancelLeaveSchemeView
 
 import java.time.LocalDate
 import scala.concurrent.Future
 
-class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
+class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
   val formProvider = new CancelLeaveSchemeFormProvider()
   val form = formProvider()
 
   lazy val cancelLeaveSchemeRoute = routes.CancelLeaveSchemeController.onPageLoad(emptyWaypoints).url
 
-  val mockRegistrationService: RegistrationService = mock[RegistrationService]
+  val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
+  val mockAuditService: AuditService = mock[AuditService]
 
   val noLongerSuppliesExclusion = EtmpExclusion(
     NoLongerSupplies,
@@ -53,6 +58,11 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
 
   val registrationNoLongerSuppliesExclusion: RegistrationWrapper =
     registrationWrapper.copy(registration = registrationWrapper.registration.copy(exclusions = Seq(noLongerSuppliesExclusion)))
+
+  override protected def beforeEach(): Unit = {
+    reset(mockRegistrationConnector)
+    reset(mockAuditService)
+  }
 
   "CancelLeaveScheme Controller" - {
 
@@ -95,22 +105,39 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to CancelLeaveSchemeCompletePage when the user submits true and is cancelling their request to leave the scheme" in {
+    "must redirect to CancelLeaveSchemeCompletePage and audit a success when the user submits true and is cancelling their request to leave the scheme" in {
 
+      when(mockRegistrationConnector.amend(any())(any())) thenReturn Future.successful(Right(()))
+
+      val userAnswers = emptyUserAnswers
       val application = applicationBuilder(
-        userAnswers = Some(emptyUserAnswers),
+        userAnswers = Some(userAnswers),
         registration = registrationNoLongerSuppliesExclusion
-      ).overrides(bind[RegistrationService].toInstance(mockRegistrationService)).build()
-
-      when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn Future.successful(Right(()))
+      ).overrides(
+        bind[RegistrationConnector].toInstance(mockRegistrationConnector),
+        bind[AuditService].toInstance(mockAuditService)
+      ).build()
 
       running(application) {
         val request = FakeRequest(POST, cancelLeaveSchemeRoute).withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
 
+        val expectedAuditEvent = RegistrationAuditModel(
+          RegistrationAuditType.AmendRegistration,
+          userAnswersId,
+          "",
+          vrn.vrn,
+          iossNumber,
+          userAnswers.set(CancelLeaveSchemePage, true).success.value,
+          registrationNoLongerSuppliesExclusion.registration,
+          Some(EtmpExclusionReason.Reversal),
+          SubmissionResult.Success
+        )
+
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual CancelLeaveSchemeCompletePage.route(emptyWaypoints).url
+        verify(mockAuditService, times(1)).audit(eqTo(expectedAuditEvent))(any(), any())
       }
     }
 

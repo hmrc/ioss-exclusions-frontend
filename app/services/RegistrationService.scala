@@ -20,8 +20,8 @@ import connectors.RegistrationConnector
 import connectors.RegistrationHttpParser.AmendRegistrationResultResponse
 import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
 import models.etmp._
-import models.requests.{DataRequest, EtmpAmendRegistrationRequest, EtmpExclusionDetails, EtmpNewMemberState}
-import models.{CountryWithValidationDetails, RegistrationWrapper, UserAnswers}
+import models.requests.{EtmpAmendRegistrationRequest, EtmpExclusionDetails, EtmpNewMemberState}
+import models.{CountryWithValidationDetails, UserAnswers}
 import pages.{EuCountryPage, EuVatNumberPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
 import play.api.mvc.Request
 import uk.gov.hmrc.domain.Vrn
@@ -47,9 +47,6 @@ class RegistrationService @Inject()(
                                  exclusionReason: Option[EtmpExclusionReason]
                                )(implicit hc: HeaderCarrier, request: Request[_]): Future[AmendRegistrationResultResponse] = {
 
-    val amendFuture: Future[AmendRegistrationResultResponse] =
-      amendRegistration(answers, exclusionReason, vrn, iossNumber, registration)
-
     val success: RegistrationAuditModel = RegistrationAuditModel(
       registrationAuditType = RegistrationAuditType.AmendRegistration,
       userId = userId,
@@ -63,12 +60,10 @@ class RegistrationService @Inject()(
     )
     val failure: RegistrationAuditModel = success.copy(submissionResult = SubmissionResult.Failure)
 
-    amendFuture.onComplete {
+    amendRegistration(answers, exclusionReason, vrn, iossNumber, registration).andThen {
       case Success(Right(_)) => auditService.audit(success)(hc, request)
       case _ => auditService.audit(failure)(hc, request)
     }
-
-    amendFuture
   }
 
   private def amendRegistration(

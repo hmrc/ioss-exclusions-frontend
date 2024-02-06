@@ -25,7 +25,7 @@ import models.etmp.EtmpExclusionReason
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.{AuditService, RegistrationService}
+import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
 import utils.FutureSyntax.FutureOps
@@ -42,7 +42,6 @@ class CheckYourAnswersController @Inject()(
                                             requireData: DataRequiredAction,
                                             dates: Dates,
                                             val controllerComponents: MessagesControllerComponents,
-                                            auditService: AuditService,
                                             view: CheckYourAnswersView,
                                             registrationService: RegistrationService
                                           )(implicit ec: ExecutionContext)

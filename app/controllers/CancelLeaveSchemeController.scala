@@ -27,7 +27,7 @@ import pages.{CancelLeaveSchemeCompletePage, CancelLeaveSchemePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
-import services.{AuditService, RegistrationService}
+import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.CancelLeaveSchemeView
 
@@ -43,7 +43,6 @@ class CancelLeaveSchemeController @Inject()(
                                              formProvider: CancelLeaveSchemeFormProvider,
                                              config: FrontendAppConfig,
                                              val controllerComponents: MessagesControllerComponents,
-                                             auditService: AuditService,
                                              view: CancelLeaveSchemeView,
                                              registrationService: RegistrationService
                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {

@@ -18,9 +18,7 @@ package models.audit
 
 import models.UserAnswers
 import models.etmp.{EtmpDisplayRegistration, EtmpExclusionReason}
-import models.requests.{DataRequest, OptionalDataRequest}
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.domain.Vrn
 
 case class RegistrationAuditModel(
                                    registrationAuditType: RegistrationAuditType,
@@ -48,68 +46,4 @@ case class RegistrationAuditModel(
     "exclusionReason" -> Json.toJson(exclusionReason),
     "submissionResult" -> submissionResult
   )
-}
-
-object RegistrationAuditModel {
-
-  def build(
-             registrationAuditType: RegistrationAuditType,
-           userId: String,
-             userAgent: String,
-             vrn: Vrn,
-             iossNumber: String,
-           answers: UserAnswers,
-           registration: EtmpDisplayRegistration,
-             exclusionReason: Option[EtmpExclusionReason],
-             submissionResult: SubmissionResult
-           ): RegistrationAuditModel =
-    RegistrationAuditModel(
-      registrationAuditType = registrationAuditType,
-      userId = userId,
-      userAgent = userAgent,
-      vrn = vrn.vrn,
-      iossNumber = iossNumber,
-      userAnswers = answers,
-      registration = registration,
-      exclusionReason = exclusionReason,
-      submissionResult = submissionResult
-    )
-
-  def build(
-             registrationAuditType: RegistrationAuditType,
-             request: DataRequest[_],
-             answers: UserAnswers,
-             exclusionReason: Option[EtmpExclusionReason],
-             submissionResult: SubmissionResult
-           ): RegistrationAuditModel =
-    RegistrationAuditModel(
-      registrationAuditType = registrationAuditType,
-      userId = request.userId,
-      userAgent = request.headers.get("user-agent").getOrElse(""),
-      vrn = request.vrn.vrn,
-      iossNumber = request.iossNumber,
-      userAnswers = answers,
-      registration = request.registrationWrapper.registration,
-      exclusionReason = exclusionReason,
-      submissionResult = submissionResult
-    )
-
-  def build(
-             registrationAuditType: RegistrationAuditType,
-             request: OptionalDataRequest[_],
-             answers: UserAnswers,
-             exclusionReason: Option[EtmpExclusionReason],
-             submissionResult: SubmissionResult
-           ): RegistrationAuditModel =
-    RegistrationAuditModel(
-      registrationAuditType = registrationAuditType,
-      userId = request.userId,
-      userAgent = request.headers.get("user-agent").getOrElse(""),
-      vrn = request.vrn.vrn,
-      iossNumber = request.iossNumber,
-      userAnswers = answers,
-      registration = request.registrationWrapper.registration,
-      exclusionReason = exclusionReason,
-      submissionResult = submissionResult
-    )
 }

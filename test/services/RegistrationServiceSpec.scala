@@ -27,6 +27,7 @@ import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import pages.{StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
+import play.api.test.FakeRequest
 import play.api.test.Helpers.running
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.FutureSyntax.FutureOps
@@ -39,10 +40,12 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
   implicit private lazy val hc: HeaderCarrier = HeaderCarrier()
 
   private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
-  private val registrationService = new RegistrationService(stubClock, mockRegistrationConnector)
+  private val mockAuditService: AuditService = mock[AuditService]
+  private val registrationService = new RegistrationService(stubClock, mockRegistrationConnector, mockAuditService)
 
   override def beforeEach(): Unit = {
     reset(mockRegistrationConnector)
+    reset(mockAuditService)
   }
 
   private def buildExpectedAmendRequest(etmpChangeLog: EtmpAmendRegistrationChangeLog, etmpExclusionsDetails: EtmpExclusionDetails) = {
@@ -133,14 +136,17 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
         val app = applicationBuilder()
           .build()
 
+        implicit val request = FakeRequest()
+
         running(app) {
 
-          registrationService.amendRegistration(
-            completeUserAnswers,
-            Some(EtmpExclusionReason.TransferringMSID),
+          registrationService.amendRegistrationAndAudit(
+            userAnswersId,
             vrn,
             iossNumber,
-            registrationWrapper
+            completeUserAnswers,
+            registrationWrapper.registration,
+            Some(EtmpExclusionReason.TransferringMSID)
           ).futureValue mustBe amendRegistrationResponse
           verify(mockRegistrationConnector, times(1)).amend(eqTo(exceptedAmendRegistrationRequest))(any())
         }
@@ -183,14 +189,17 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
         val app = applicationBuilder()
           .build()
 
+        implicit val request = FakeRequest()
+
         running(app) {
 
-          registrationService.amendRegistration(
-            userAnswers,
-            Some(EtmpExclusionReason.NoLongerSupplies),
+          registrationService.amendRegistrationAndAudit(
+            userAnswersId,
             vrn,
             iossNumber,
-            registrationWrapper
+            userAnswers,
+            registrationWrapper.registration,
+            Some(EtmpExclusionReason.NoLongerSupplies)
           ).futureValue mustBe amendRegistrationResponse
           verify(mockRegistrationConnector, times(1)).amend(eqTo(exceptedAmendRegistrationRequest))(any())
         }
@@ -233,14 +242,17 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
         val app = applicationBuilder()
           .build()
 
+        implicit val request = FakeRequest()
+
         running(app) {
 
-          registrationService.amendRegistration(
-            userAnswers,
-            Some(EtmpExclusionReason.VoluntarilyLeaves),
+          registrationService.amendRegistrationAndAudit(
+            userAnswersId,
             vrn,
             iossNumber,
-            registrationWrapper
+            userAnswers,
+            registrationWrapper.registration,
+            Some(EtmpExclusionReason.VoluntarilyLeaves)
           ).futureValue mustBe amendRegistrationResponse
           verify(mockRegistrationConnector, times(1)).amend(eqTo(exceptedAmendRegistrationRequest))(any())
         }
