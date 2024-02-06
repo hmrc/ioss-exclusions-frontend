@@ -17,7 +17,7 @@
 package models.audit
 
 import models.UserAnswers
-import models.requests.DataRequest
+import models.etmp.{EtmpDisplayRegistration, EtmpExclusionReason}
 import play.api.libs.json.{JsValue, Json}
 
 case class RegistrationAuditModel(
@@ -25,7 +25,10 @@ case class RegistrationAuditModel(
                                    userId: String,
                                    userAgent: String,
                                    vrn: String,
+                                   iossNumber: String,
                                    userAnswers: UserAnswers,
+                                   registration: EtmpDisplayRegistration,
+                                   exclusionReason: Option[EtmpExclusionReason],
                                    submissionResult: SubmissionResult
                                  ) extends JsonAuditModel {
 
@@ -37,24 +40,10 @@ case class RegistrationAuditModel(
     "userId" -> userId,
     "browserUserAgent" -> userAgent,
     "requestersVrn" -> vrn,
+    "iossNumber" -> iossNumber,
     "userAnswersDetails" -> Json.toJson(userAnswers),
+    "registration" -> Json.toJson(registration),
+    "exclusionReason" -> Json.toJson(exclusionReason),
     "submissionResult" -> submissionResult
   )
-}
-
-object RegistrationAuditModel {
-
-  def build(
-             registrationAuditType: RegistrationAuditType,
-             userAnswers: UserAnswers,
-             submissionResult: SubmissionResult
-           )(implicit request: DataRequest[_]): RegistrationAuditModel =
-    RegistrationAuditModel(
-      registrationAuditType = registrationAuditType,
-      userId = request.userId,
-      userAgent = request.headers.get("user-agent").getOrElse(""),
-      vrn = request.vrn.vrn,
-      userAnswers = userAnswers,
-      submissionResult = submissionResult
-    )
 }

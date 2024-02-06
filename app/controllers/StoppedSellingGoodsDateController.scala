@@ -73,12 +73,13 @@ class StoppedSellingGoodsDateController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(StoppedSellingGoodsDatePage, value))
             _ <- sessionRepository.set(updatedAnswers)
-            result <- registrationService.amendRegistration(
-              updatedAnswers,
-              Some(EtmpExclusionReason.NoLongerSupplies),
+            result <- registrationService.amendRegistrationAndAudit(
+              request.userId,
               request.vrn,
               request.iossNumber,
-              request.registrationWrapper
+              updatedAnswers,
+              request.registrationWrapper.registration,
+              Some(EtmpExclusionReason.NoLongerSupplies)
             ).map {
               case Right(_) => Redirect(StoppedSellingGoodsDatePage.navigate(waypoints, updatedAnswers, updatedAnswers).url)
               case Left(e) =>

@@ -17,9 +17,10 @@
 package controllers
 
 import base.SpecBase
+import connectors.RegistrationConnector
 import models.CheckMode
 import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
-import models.requests.DataRequest
+import models.etmp.EtmpExclusionReason
 import models.responses.UnexpectedResponseStatus
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
@@ -29,7 +30,7 @@ import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, EuC
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.{AuditService, RegistrationService}
+import services.AuditService
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
@@ -40,10 +41,10 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
   val waypoints: Waypoints = EmptyWaypoints
 
   private val mockAuditService: AuditService = mock[AuditService]
-  private val mockRegistrationService = mock[RegistrationService]
+  private val mockRegistrationConnector = mock[RegistrationConnector]
 
   override protected def beforeEach(): Unit = {
-    reset(mockRegistrationService)
+    reset(mockRegistrationConnector)
     reset(mockAuditService)
   }
 
@@ -54,7 +55,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
       "must return OK and the correct view for a GET" in {
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
         running(application) {
@@ -77,25 +78,30 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
       "must redirect to the correct page and audit a success event when the validation passes" in {
 
-        when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn
+        when(mockRegistrationConnector.amend(any())(any())) thenReturn
           Future.successful(Right(()))
 
         val userAnswers = completeUserAnswers
         val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
-          .overrides(bind[AuditService].toInstance(mockAuditService))
-          .build()
+          .overrides(
+            bind[RegistrationConnector].toInstance(mockRegistrationConnector),
+            bind[AuditService].toInstance(mockAuditService)
+          ).build()
 
         running(application) {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = false).url)
-
           val result = route(application, request).value
 
-          implicit val dataRequest: DataRequest[_] =
-            DataRequest(request, userAnswersId, userAnswers, vrn, "", registrationWrapper)
-
-          val expectedAuditEvent = RegistrationAuditModel.build(
-            RegistrationAuditType.AmendRegistration, userAnswers, SubmissionResult.Success
+          val expectedAuditEvent = RegistrationAuditModel(
+            RegistrationAuditType.AmendRegistration,
+            userAnswersId,
+            "",
+            vrn.vrn,
+            iossNumber,
+            userAnswers,
+            registrationWrapper.registration,
+            Some(EtmpExclusionReason.TransferringMSID),
+            SubmissionResult.Success
           )
 
           status(result) mustBe SEE_OTHER
@@ -106,12 +112,12 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
       "must redirect to the failure page and audit a failure event when the validation passes but amend call failures" in {
 
-        when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn
+        when(mockRegistrationConnector.amend(any())(any())) thenReturn
           Future.successful(Left(UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "Error occurred")))
 
         val userAnswers = completeUserAnswers
         val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AuditService].toInstance(mockAuditService))
           .build()
 
@@ -120,11 +126,16 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
           val result = route(application, request).value
 
-          implicit val dataRequest: DataRequest[_] =
-            DataRequest(request, userAnswersId, userAnswers, vrn, "", registrationWrapper)
-
-          val expectedAuditEvent = RegistrationAuditModel.build(
-            RegistrationAuditType.AmendRegistration, userAnswers, SubmissionResult.Failure
+          val expectedAuditEvent = RegistrationAuditModel(
+            RegistrationAuditType.AmendRegistration,
+            userAnswersId,
+            "",
+            vrn.vrn,
+            iossNumber,
+            userAnswers,
+            registrationWrapper.registration,
+            Some(EtmpExclusionReason.TransferringMSID),
+            SubmissionResult.Failure
           )
 
           status(result) mustBe SEE_OTHER
@@ -139,7 +150,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             val answers = completeUserAnswers.remove(EuCountryPage).success.value
 
             val application = applicationBuilder(userAnswers = Some(answers))
-              .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+              .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
               .build()
 
             running(application) {
@@ -155,7 +166,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             val answers = completeUserAnswers.remove(MoveDatePage).success.value
 
             val application = applicationBuilder(userAnswers = Some(answers))
-              .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+              .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
               .build()
 
             running(application) {
@@ -171,7 +182,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             val answers = completeUserAnswers.remove(EuVatNumberPage).success.value
 
             val application = applicationBuilder(userAnswers = Some(answers))
-              .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+              .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
               .build()
 
             running(application) {
