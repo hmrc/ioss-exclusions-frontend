@@ -163,7 +163,7 @@ class RegistrationService @Inject()(
       noLongerSupplyGoods = false,
       exclusionRequestDate = Some(LocalDate.now(clock)),
       identificationValidityDate = None,
-      intExclusionRequestDate = Some(LocalDate.now(clock)),
+      intExclusionRequestDate = None,
       newMemberState = Some(EtmpNewMemberState(
         newMemberState = true,
         ceaseSpecialSchemeDate = None,

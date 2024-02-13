@@ -118,7 +118,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
           noLongerSupplyGoods = false,
           exclusionRequestDate = Some(LocalDate.now),
           identificationValidityDate = None,
-          intExclusionRequestDate = Some(LocalDate.now),
+          intExclusionRequestDate = None,
           newMemberState = Some(EtmpNewMemberState(
             newMemberState = true,
             ceaseSpecialSchemeDate = None,
