@@ -175,7 +175,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
           noLongerSupplyGoods = true,
           exclusionRequestDate = Some(stoppedSellingGoodsDate),
           identificationValidityDate = None,
-          intExclusionRequestDate = Some(LocalDate.now),
+          intExclusionRequestDate = None,
           newMemberState = None
         )
 
@@ -228,7 +228,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
           noLongerSupplyGoods = false,
           exclusionRequestDate = Some(stoppedUsingServiceDate),
           identificationValidityDate = None,
-          intExclusionRequestDate = Some(LocalDate.now),
+          intExclusionRequestDate = None,
           newMemberState = None
         )
 
