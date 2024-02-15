@@ -163,7 +163,7 @@ class RegistrationService @Inject()(
       noLongerSupplyGoods = false,
       exclusionRequestDate = Some(LocalDate.now(clock)),
       identificationValidityDate = None,
-      intExclusionRequestDate = Some(LocalDate.now(clock)),
+      intExclusionRequestDate = None,
       newMemberState = Some(EtmpNewMemberState(
         newMemberState = true,
         ceaseSpecialSchemeDate = None,
@@ -182,7 +182,7 @@ class RegistrationService @Inject()(
       noLongerSupplyGoods = true,
       exclusionRequestDate = Some(stoppedSellingGoodsDate),
       identificationValidityDate = None,
-      intExclusionRequestDate = Some(LocalDate.now(clock)),
+      intExclusionRequestDate = None,
       newMemberState = None
     )
   }
@@ -194,7 +194,7 @@ class RegistrationService @Inject()(
       noLongerSupplyGoods = false,
       exclusionRequestDate = Some(stoppedUsingServiceDate),
       identificationValidityDate = None,
-      intExclusionRequestDate = Some(LocalDate.now(clock)),
+      intExclusionRequestDate = None,
       newMemberState = None
     )
   }
@@ -205,7 +205,7 @@ class RegistrationService @Inject()(
       noLongerSupplyGoods = false,
       exclusionRequestDate = Some(LocalDate.now(clock)),
       identificationValidityDate = None,
-      intExclusionRequestDate = Some(LocalDate.now(clock)),
+      intExclusionRequestDate = None,
       newMemberState = None
     )
   }
