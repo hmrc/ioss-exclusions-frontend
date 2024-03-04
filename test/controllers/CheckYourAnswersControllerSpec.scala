@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import connectors.RegistrationConnector
 import models.CheckMode
-import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
+import models.audit.{ExclusionAuditModel, ExclusionAuditType, SubmissionResult}
 import models.etmp.EtmpExclusionReason
 import models.responses.UnexpectedResponseStatus
 import org.mockito.ArgumentMatchers.any
@@ -92,8 +92,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = false).url)
           val result = route(application, request).value
 
-          val expectedAuditEvent = RegistrationAuditModel(
-            RegistrationAuditType.AmendRegistration,
+          val expectedAuditEvent = ExclusionAuditModel(
+            ExclusionAuditType.ExclusionRequestSubmitted,
             userAnswersId,
             "",
             vrn.vrn,
@@ -126,8 +126,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
           val result = route(application, request).value
 
-          val expectedAuditEvent = RegistrationAuditModel(
-            RegistrationAuditType.AmendRegistration,
+          val expectedAuditEvent = ExclusionAuditModel(
+            ExclusionAuditType.ExclusionRequestSubmitted,
             userAnswersId,
             "",
             vrn.vrn,

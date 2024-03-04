@@ -18,23 +18,23 @@ package models.audit
 
 import models.UserAnswers
 import models.etmp.{EtmpDisplayRegistration, EtmpExclusionReason}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{Json, JsValue}
 
-case class RegistrationAuditModel(
-                                   registrationAuditType: RegistrationAuditType,
-                                   userId: String,
-                                   userAgent: String,
-                                   vrn: String,
-                                   iossNumber: String,
-                                   userAnswers: UserAnswers,
-                                   registration: EtmpDisplayRegistration,
-                                   exclusionReason: Option[EtmpExclusionReason],
-                                   submissionResult: SubmissionResult
+case class ExclusionAuditModel(
+                                exclusionAuditType: ExclusionAuditType,
+                                userId: String,
+                                userAgent: String,
+                                vrn: String,
+                                iossNumber: String,
+                                userAnswers: UserAnswers,
+                                registration: EtmpDisplayRegistration,
+                                exclusionReason: Option[EtmpExclusionReason],
+                                submissionResult: SubmissionResult
                                  ) extends JsonAuditModel {
 
-  override val auditType: String = registrationAuditType.auditType
+  override val auditType: String = exclusionAuditType.auditType
 
-  override val transactionName: String = registrationAuditType.transactionName
+  override val transactionName: String = exclusionAuditType.transactionName
 
   override val detail: JsValue = Json.obj(
     "userId" -> userId,

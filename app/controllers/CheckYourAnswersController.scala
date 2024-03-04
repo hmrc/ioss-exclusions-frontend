@@ -21,6 +21,7 @@ import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierA
 import date.Dates
 import logging.Logging
 import models.CheckMode
+import models.audit.ExclusionAuditType
 import models.etmp.EtmpExclusionReason
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -84,7 +85,8 @@ class CheckYourAnswersController @Inject()(
             request.iossNumber,
             request.userAnswers,
             request.registrationWrapper.registration,
-            Some(EtmpExclusionReason.TransferringMSID)
+            Some(EtmpExclusionReason.TransferringMSID),
+            ExclusionAuditType.ExclusionRequestSubmitted
           ).map {
             case Right(_) =>
               Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, request.userAnswers).route)

@@ -20,10 +20,10 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import forms.CancelLeaveSchemeFormProvider
-import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
-import models.etmp.EtmpExclusionReason.NoLongerSupplies
-import models.etmp.{EtmpExclusion, EtmpExclusionReason}
 import models.{RegistrationWrapper, UserAnswers}
+import models.audit.{ExclusionAuditModel, ExclusionAuditType, SubmissionResult}
+import models.etmp.{EtmpExclusion, EtmpExclusionReason}
+import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -123,8 +123,8 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar with Be
 
         val result = route(application, request).value
 
-        val expectedAuditEvent = RegistrationAuditModel(
-          RegistrationAuditType.AmendRegistration,
+        val expectedAuditEvent = ExclusionAuditModel(
+          ExclusionAuditType.ReversalRequestSubmitted,
           userAnswersId,
           "",
           vrn.vrn,

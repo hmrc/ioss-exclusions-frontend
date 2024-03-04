@@ -21,6 +21,7 @@ import controllers.actions._
 import forms.CancelLeaveSchemeFormProvider
 import logging.Logging
 import models.UserAnswers
+import models.audit.ExclusionAuditType
 import models.etmp.EtmpExclusionReason
 import models.requests.OptionalDataRequest
 import pages.{CancelLeaveSchemeCompletePage, CancelLeaveSchemePage, Waypoints}
@@ -84,7 +85,8 @@ class CancelLeaveSchemeController @Inject()(
         request.iossNumber,
         updatedAnswers,
         request.registrationWrapper.registration,
-        Some(EtmpExclusionReason.Reversal)
+        Some(EtmpExclusionReason.Reversal),
+        ExclusionAuditType.ReversalRequestSubmitted
       ).map {
         case Right(_) =>
           Redirect(CancelLeaveSchemeCompletePage.route(waypoints).url)

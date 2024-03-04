@@ -18,15 +18,20 @@ package models.audit
 
 import models.{Enumerable, WithName}
 
-sealed trait RegistrationAuditType {
+sealed trait ExclusionAuditType {
   def auditType: String
 
   def transactionName: String
 }
 
-object RegistrationAuditType extends Enumerable.Implicits {
-  case object AmendRegistration extends WithName("AmendRegistration") with RegistrationAuditType {
-    override val auditType: String = "EtmpAmendRegistration"
-    override val transactionName: String = "etmp-amend-registration"
+object ExclusionAuditType extends Enumerable.Implicits {
+  case object ExclusionRequestSubmitted extends WithName("ExclusionRequestSubmitted") with ExclusionAuditType {
+    override val auditType: String = "ExclusionRequestSubmitted"
+    override val transactionName: String = "exclusion-request-submitted"
+  }
+
+  case object ReversalRequestSubmitted extends WithName("ReversalRequestSubmitted") with ExclusionAuditType {
+    override val auditType: String = "ReversalRequestSubmitted"
+    override val transactionName: String = "reversal-request-submitted"
   }
 }
