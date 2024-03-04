@@ -20,6 +20,7 @@ import controllers.actions._
 import date.Dates
 import forms.StoppedUsingServiceDateFormProvider
 import logging.Logging
+import models.audit.ExclusionAuditType
 import models.etmp.EtmpExclusionReason
 import pages.{StoppedUsingServiceDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -79,7 +80,8 @@ class StoppedUsingServiceDateController @Inject()(
               request.iossNumber,
               updatedAnswers,
               request.registrationWrapper.registration,
-              Some(EtmpExclusionReason.VoluntarilyLeaves)
+              Some(EtmpExclusionReason.VoluntarilyLeaves),
+              ExclusionAuditType.ExclusionRequestSubmitted
             ).map {
               case Right(_) => Redirect(StoppedUsingServiceDatePage.navigate(waypoints, request.userAnswers, updatedAnswers).url)
               case Left(e) =>

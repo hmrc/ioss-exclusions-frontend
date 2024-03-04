@@ -18,10 +18,10 @@ package services
 
 import connectors.RegistrationConnector
 import connectors.RegistrationHttpParser.AmendRegistrationResultResponse
-import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
+import models.{CountryWithValidationDetails, UserAnswers}
+import models.audit.{ExclusionAuditModel, ExclusionAuditType, SubmissionResult}
 import models.etmp._
 import models.requests.{EtmpAmendRegistrationRequest, EtmpExclusionDetails, EtmpNewMemberState}
-import models.{CountryWithValidationDetails, UserAnswers}
 import pages.{EuCountryPage, EuVatNumberPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
 import play.api.mvc.Request
 import uk.gov.hmrc.domain.Vrn
@@ -44,11 +44,12 @@ class RegistrationService @Inject()(
                                  iossNumber: String,
                                  answers: UserAnswers,
                                  registration: EtmpDisplayRegistration,
-                                 exclusionReason: Option[EtmpExclusionReason]
+                                 exclusionReason: Option[EtmpExclusionReason],
+                                 exclusionAuditType: ExclusionAuditType
                                )(implicit hc: HeaderCarrier, request: Request[_]): Future[AmendRegistrationResultResponse] = {
 
-    val success: RegistrationAuditModel = RegistrationAuditModel(
-      registrationAuditType = RegistrationAuditType.AmendRegistration,
+    val success: ExclusionAuditModel = ExclusionAuditModel(
+      exclusionAuditType = exclusionAuditType,
       userId = userId,
       userAgent = request.headers.get("user-agent").getOrElse(""),
       vrn = vrn.vrn,
@@ -58,7 +59,7 @@ class RegistrationService @Inject()(
       exclusionReason = exclusionReason,
       submissionResult = SubmissionResult.Success
     )
-    val failure: RegistrationAuditModel = success.copy(submissionResult = SubmissionResult.Failure)
+    val failure: ExclusionAuditModel = success.copy(submissionResult = SubmissionResult.Failure)
 
     amendRegistration(answers, exclusionReason, vrn, iossNumber, registration).andThen {
       case Success(Right(_)) => auditService.audit(success)(hc, request)

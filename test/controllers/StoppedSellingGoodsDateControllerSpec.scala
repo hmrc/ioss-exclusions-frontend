@@ -20,10 +20,10 @@ import base.SpecBase
 import connectors.RegistrationConnector
 import date.Dates
 import forms.StoppedSellingGoodsDateFormProvider
-import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
+import models.{RegistrationWrapper, UserAnswers}
+import models.audit.{ExclusionAuditModel, ExclusionAuditType, SubmissionResult}
 import models.etmp.EtmpExclusionReason
 import models.responses.UnexpectedResponseStatus
-import models.{RegistrationWrapper, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -140,8 +140,8 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
       running(application) {
         val result = route(application, postRequest()).value
 
-        val expectedAuditEvent = RegistrationAuditModel(
-            RegistrationAuditType.AmendRegistration,
+        val expectedAuditEvent = ExclusionAuditModel(
+            ExclusionAuditType.ExclusionRequestSubmitted,
             userAnswersId,
             "",
             vrn.vrn,
@@ -180,8 +180,8 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
       running(application) {
         val result = route(application, postRequest()).value
 
-        val expectedAuditEvent = RegistrationAuditModel(
-            RegistrationAuditType.AmendRegistration,
+        val expectedAuditEvent = ExclusionAuditModel(
+            ExclusionAuditType.ExclusionRequestSubmitted,
             userAnswersId,
             "",
             vrn.vrn,
