@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.reversal
 
 import base.SpecBase
 import config.FrontendAppConfig

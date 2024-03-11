@@ -17,7 +17,7 @@
 package pages
 
 import play.api.mvc.Call
-import controllers.routes
+import controllers.reversal.routes
 
 object CancelLeaveSchemeCompletePage extends Page {
   override def route(waypoints: Waypoints): Call =

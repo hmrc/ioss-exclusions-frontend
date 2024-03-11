@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.reversal
 
 import config.FrontendAppConfig
 import controllers.actions._
@@ -92,7 +92,7 @@ class CancelLeaveSchemeController @Inject()(
           Redirect(CancelLeaveSchemeCompletePage.route(waypoints).url)
         case Left(e) =>
           logger.error(s"Failure to submit self exclusion ${e.body}")
-          Redirect(routes.SubmissionFailureController.onPageLoad())
+          Redirect(routes.CancelLeaveSchemeSubmissionFailureController.onPageLoad())
       }
     } else {
       Future.successful(Redirect(config.iossYourAccountUrl))
