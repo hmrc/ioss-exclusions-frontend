@@ -1,59 +1,61 @@
 # microservice specific routes
 
-->          /hmrc-frontend                               hmrcfrontend.Routes
+->          /hmrc-frontend                                 hmrcfrontend.Routes
 
-GET         /                                            controllers.IndexController.onPageLoad
+GET         /                                              controllers.IndexController.onPageLoad
 
-GET         /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                                  controllers.Assets.versioned(path="/public", file: Asset)
 
-GET         /language/:lang                              controllers.LanguageSwitchController.switchToLanguage(lang: String)
+GET         /language/:lang                                controllers.LanguageSwitchController.switchToLanguage(lang: String)
 
-GET         /refresh-session                             controllers.KeepAliveController.keepAlive
+GET         /refresh-session                               controllers.KeepAliveController.keepAlive
 
-GET         /there-is-a-problem                          controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
+GET         /there-is-a-problem                            controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-GET         /check-your-answers                          controllers.CheckYourAnswersController.onPageLoad()
-POST        /check-your-answers/:incompletePrompt        controllers.CheckYourAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
+GET         /check-your-answers                            controllers.CheckYourAnswersController.onPageLoad()
+POST        /check-your-answers/:incompletePrompt          controllers.CheckYourAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
 
-GET         /account/sign-out-survey                     controllers.auth.AuthController.signOut
-GET         /account/sign-out                            controllers.auth.AuthController.signOutNoSurvey
-GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad
+GET         /account/sign-out-survey                       controllers.auth.AuthController.signOut
+GET         /account/sign-out                              controllers.auth.AuthController.signOutNoSurvey
+GET         /account/signed-out                            controllers.auth.SignedOutController.onPageLoad
 
-GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad
+GET         /unauthorised                                  controllers.UnauthorisedController.onPageLoad
 
-GET         /move-country                                controllers.MoveCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /move-country                                controllers.MoveCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /move-country                                  controllers.MoveCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /move-country                                  controllers.MoveCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /eu-country                                  controllers.EuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /eu-country                                  controllers.EuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /eu-country                                    controllers.EuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /eu-country                                    controllers.EuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /eu-vat-number                               controllers.EuVatNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /eu-vat-number                               controllers.EuVatNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /eu-vat-number                                 controllers.EuVatNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /eu-vat-number                                 controllers.EuVatNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /move-date                                   controllers.MoveDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /move-date                                   controllers.MoveDateController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /move-date                                     controllers.MoveDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /move-date                                     controllers.MoveDateController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /stopped-using-service-date                  controllers.StoppedUsingServiceDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /stopped-using-service-date                  controllers.StoppedUsingServiceDateController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /stopped-using-service-date                    controllers.StoppedUsingServiceDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /stopped-using-service-date                    controllers.StoppedUsingServiceDateController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /stop-selling-goods                          controllers.StopSellingGoodsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /stop-selling-goods                          controllers.StopSellingGoodsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /stop-selling-goods                            controllers.StopSellingGoodsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /stop-selling-goods                            controllers.StopSellingGoodsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /leave-scheme                                controllers.LeaveSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /leave-scheme                                controllers.LeaveSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /leave-scheme                                  controllers.LeaveSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /leave-scheme                                  controllers.LeaveSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /stopped-selling-goods-date                  controllers.StoppedSellingGoodsDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /stopped-selling-goods-date                  controllers.StoppedSellingGoodsDateController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /stopped-selling-goods-date                    controllers.StoppedSellingGoodsDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /stopped-selling-goods-date                    controllers.StoppedSellingGoodsDateController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cancel-leave-scheme                         controllers.CancelLeaveSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /cancel-leave-scheme                         controllers.CancelLeaveSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cancel-leave-scheme                           controllers.reversal.CancelLeaveSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /cancel-leave-scheme                           controllers.reversal.CancelLeaveSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cancel-leave-scheme-complete                controllers.CancelLeaveSchemeCompleteController.onPageLoad()
+GET         /cancel-leave-scheme-complete                  controllers.reversal.CancelLeaveSchemeCompleteController.onPageLoad()
 
-GET         /cancel-leave-scheme-error                   controllers.CancelLeaveSchemeErrorController.onPageLoad()
+GET         /cancel-leave-scheme-error                     controllers.reversal.CancelLeaveSchemeErrorController.onPageLoad()
+GET         /cancel-leave-scheme-submission-failure        controllers.reversal.CancelLeaveSchemeSubmissionFailureController.onPageLoad()
 
-GET         /already-left-scheme-error                   controllers.AlreadyLeftSchemeErrorController.onPageLoad()
+GET         /already-left-scheme-error                     controllers.AlreadyLeftSchemeErrorController.onPageLoad()
 
-GET         /successful                                  controllers.ApplicationCompleteController.onPageLoad()
+GET         /successful                                    controllers.ApplicationCompleteController.onPageLoad()
 
-GET         /submission-failure                          controllers.SubmissionFailureController.onPageLoad()
+GET         /submission-failure                            controllers.SubmissionFailureController.onPageLoad()
+

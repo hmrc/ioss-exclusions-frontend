@@ -38,7 +38,7 @@ class CheckExclusionFilterImpl @Inject()(clock: Clock)(implicit val executionCon
         LocalDate.now(clock).isBefore(exclusion.effectiveDate) =>
         Future.successful(None)
       case _ =>
-        Future.successful(Some(Redirect(controllers.routes.CancelLeaveSchemeErrorController.onPageLoad().url)))
+        Future.successful(Some(Redirect(controllers.reversal.routes.CancelLeaveSchemeErrorController.onPageLoad().url)))
     }
   }
 }
