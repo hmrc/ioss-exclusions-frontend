@@ -16,7 +16,7 @@
 
 package pages
 
-import controllers.routes
+import controllers.reversal.routes
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
