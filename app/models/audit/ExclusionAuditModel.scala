@@ -16,7 +16,7 @@
 
 package models.audit
 
-import models.UserAnswers
+import models.UserAnswersForAudit
 import models.etmp.{EtmpDisplayRegistration, EtmpExclusionReason}
 import play.api.libs.json.{Json, JsValue}
 
@@ -26,7 +26,7 @@ case class ExclusionAuditModel(
                                 userAgent: String,
                                 vrn: String,
                                 iossNumber: String,
-                                userAnswers: UserAnswers,
+                                userAnswers: UserAnswersForAudit,
                                 registration: EtmpDisplayRegistration,
                                 exclusionReason: Option[EtmpExclusionReason],
                                 submissionResult: SubmissionResult

@@ -54,7 +54,7 @@ class RegistrationService @Inject()(
       userAgent = request.headers.get("user-agent").getOrElse(""),
       vrn = vrn.vrn,
       iossNumber = iossNumber,
-      userAnswers = answers,
+      userAnswers = answers.toUserAnswersForAudit,
       registration = registration,
       exclusionReason = exclusionReason,
       submissionResult = SubmissionResult.Success
