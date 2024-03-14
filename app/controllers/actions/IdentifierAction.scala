@@ -23,6 +23,7 @@ import controllers.routes
 import models.requests.IdentifierRequest
 import play.api.mvc._
 import play.api.mvc.Results._
+import services.AccountService
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
@@ -30,6 +31,7 @@ import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,7 +41,8 @@ class AuthenticatedIdentifierAction @Inject()(
                                                override val authConnector: AuthConnector,
                                                config: FrontendAppConfig,
                                                val parser: BodyParsers.Default,
-                                               registrationConnector: RegistrationConnector
+                                               registrationConnector: RegistrationConnector,
+                                               accountService: AccountService
                                              )
                                              (implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
 
@@ -80,19 +83,22 @@ class AuthenticatedIdentifierAction @Inject()(
   private def getRegistrationAndBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result], internalId: String, enrolments: Enrolments)
                                         (implicit hc: HeaderCarrier): Future[Result] = {
     val maybeVrn = findVrnFromEnrolments(enrolments)
-    val maybeIossNumber = findIossFromEnrolments(enrolments)
+    val futureMaybeIossNumber = findIossFromEnrolments(enrolments)
 
-    (maybeVrn, maybeIossNumber) match {
-      case (Some(vrn), Some(iossNumber)) =>
-        registrationConnector.get()
-          .flatMap { registrationWrapper =>
-            block(IdentifierRequest(request, internalId, vrn, iossNumber, registrationWrapper))
-          }
-          .recover {
-            case e: Exception => throw new UnauthorizedException(s"No registration found ${e.getMessage}")
-          }
-      case _ =>
-        throw InsufficientEnrolments(s"VAT enrolment was $maybeVrn and IOSS enrolment was $maybeIossNumber")
+    futureMaybeIossNumber.flatMap { maybeIossNumber =>
+
+      (maybeVrn, maybeIossNumber) match {
+        case (Some(vrn), Some(iossNumber)) =>
+          registrationConnector.get()
+            .flatMap { registrationWrapper =>
+              block(IdentifierRequest(request, internalId, vrn, iossNumber, registrationWrapper))
+            }
+            .recover {
+              case e: Exception => throw new UnauthorizedException(s"No registration found ${e.getMessage}")
+            }
+        case _ =>
+          throw InsufficientEnrolments(s"VAT enrolment was $maybeVrn and IOSS enrolment was $maybeIossNumber")
+      }
     }
   }
 
@@ -107,10 +113,19 @@ class AuthenticatedIdentifierAction @Inject()(
           enrolment.identifiers.find(_.key == "VATRegNo").map(e => Vrn(e.value))
       }
 
-  private def findIossFromEnrolments(enrolments: Enrolments): Option[String] =
-    enrolments.enrolments.find(_.key == "HMRC-IOSS-ORG")
-      .flatMap {
-        enrolment =>
-          enrolment.identifiers.find(_.key == "IOSSNumber").map(_.value)
-      }
+  private def findIossFromEnrolments(enrolments: Enrolments)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    val filteredIossNumbers = enrolments
+      .enrolments
+      .filter(_.key == "HMRC-IOSS-ORG")
+      .flatMap(_.identifiers.filter(_.key == "IOSSNumber").map(_.value))
+      .toSeq
+
+    filteredIossNumbers match {
+      case firstEnrolment :: Nil => Some(firstEnrolment).toFuture
+      case multipleEnrolments if multipleEnrolments.nonEmpty =>
+        accountService.getLatestAccount().map(x => Some(x))
+      case _ => None.toFuture
+    }
+  }
+
 }
