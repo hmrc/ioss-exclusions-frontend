@@ -129,7 +129,7 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar with Be
           "",
           vrn.vrn,
           iossNumber,
-          userAnswers.set(CancelLeaveSchemePage, true).success.value,
+          userAnswers.set(CancelLeaveSchemePage, true).success.value.toUserAnswersForAudit,
           registrationNoLongerSuppliesExclusion.registration,
           Some(EtmpExclusionReason.Reversal),
           SubmissionResult.Success

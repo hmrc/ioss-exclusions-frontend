@@ -98,7 +98,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             "",
             vrn.vrn,
             iossNumber,
-            userAnswers,
+            userAnswers.toUserAnswersForAudit,
             registrationWrapper.registration,
             Some(EtmpExclusionReason.TransferringMSID),
             SubmissionResult.Success
@@ -132,7 +132,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             "",
             vrn.vrn,
             iossNumber,
-            userAnswers,
+            userAnswers.toUserAnswersForAudit,
             registrationWrapper.registration,
             Some(EtmpExclusionReason.TransferringMSID),
             SubmissionResult.Failure
