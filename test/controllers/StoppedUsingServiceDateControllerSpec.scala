@@ -152,7 +152,7 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with BeforeAndAfter
           "",
           vrn.vrn,
           iossNumber,
-          updatedUserAnswers,
+          updatedUserAnswers.toUserAnswersForAudit,
           validDateWrapper.registration,
           Some(EtmpExclusionReason.VoluntarilyLeaves),
           SubmissionResult.Success
@@ -194,7 +194,7 @@ class StoppedUsingServiceDateControllerSpec extends SpecBase with BeforeAndAfter
           "",
           vrn.vrn,
           iossNumber,
-          updatedUserAnswers,
+          updatedUserAnswers.toUserAnswersForAudit,
           validDateWrapper.registration,
           Some(EtmpExclusionReason.VoluntarilyLeaves),
           SubmissionResult.Failure

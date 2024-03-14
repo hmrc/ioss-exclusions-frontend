@@ -75,6 +75,9 @@ final case class UserAnswers(
         page.cleanup(None, updatedAnswers)
     }
   }
+
+  def toUserAnswersForAudit: UserAnswersForAudit =
+    UserAnswersForAudit(data)
 }
 
 object UserAnswers {
@@ -103,3 +106,11 @@ object UserAnswers {
 
   implicit val format: OFormat[UserAnswers] = OFormat(reads, writes)
 }
+
+case class UserAnswersForAudit(data: JsObject = Json.obj())
+
+object UserAnswersForAudit {
+
+  implicit val format: OFormat[UserAnswersForAudit] = Json.format[UserAnswersForAudit]
+}
+

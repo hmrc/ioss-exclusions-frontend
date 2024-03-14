@@ -146,7 +146,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
             "",
             vrn.vrn,
             iossNumber,
-            userAnswers,
+            userAnswers.toUserAnswersForAudit,
             validDateWrapper.registration,
             Some(EtmpExclusionReason.NoLongerSupplies),
             SubmissionResult.Success
@@ -186,7 +186,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
             "",
             vrn.vrn,
             iossNumber,
-            userAnswers,
+            userAnswers.toUserAnswersForAudit,
             validDateWrapper.registration,
             Some(EtmpExclusionReason.NoLongerSupplies),
             SubmissionResult.Failure
