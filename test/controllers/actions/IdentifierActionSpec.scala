@@ -20,17 +20,22 @@ import base.SpecBase
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
+import controllers.actions.TestAuthRetrievals._
 import controllers.routes
-import org.mockito.Mockito.reset
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{reset, times, verify, verifyNoInteractions, when}
 import org.scalatest.BeforeAndAfterEach
+import play.api.inject.bind
 import play.api.mvc.{BodyParsers, Results}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.AccountService
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.Retrieval
+import uk.gov.hmrc.auth.core.AffinityGroup.Individual
+import uk.gov.hmrc.auth.core.retrieve.{~, Retrieval}
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,14 +44,20 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
 
   private val mockRegistrationConnector = mock[RegistrationConnector]
   private val mockAccountService = mock[AccountService]
+  private val mockAuthConnector: AuthConnector = mock[AuthConnector]
+
+  private val vatAndIossEnrolment = Enrolments(Set(Enrolment("HMRC-MTD-VAT", Seq(EnrolmentIdentifier("VRN", "123456789")), "Activated"), Enrolment("HMRC-IOSS-ORG", Seq(EnrolmentIdentifier("IOSSNumber", "IM9001234567")), "Activated")))
 
   class Harness(authAction: IdentifierAction) {
     def onPageLoad() = authAction { _ => Results.Ok }
   }
 
+  private type RetrievalsType = Option[String] ~ Enrolments ~ Option[AffinityGroup] ~ ConfidenceLevel ~ Option[CredentialRole]
+
   override def beforeEach(): Unit = {
     reset(mockRegistrationConnector)
     reset(mockAccountService)
+    reset(mockAuthConnector)
   }
 
   "Auth Action" - {
@@ -230,6 +241,71 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad.url)
         }
+      }
+    }
+  }
+  "when the user is logged in as an individual without CL >=250" - {
+
+    "must succeed and retrieve an ETMP registration" in {
+
+      val application = applicationBuilder()
+        .configure(
+          "features.enrolment.ioss-enrolment-key" -> "HMRC-IOSS-ORG"
+        )
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .build()
+
+      running(application) {
+        val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
+
+        when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any()))
+          .thenReturn(Future.successful(Some("id") ~ vatAndIossEnrolment ~ Some(Individual) ~ ConfidenceLevel.L250 ~ None))
+        when(mockRegistrationConnector.get()(any())) thenReturn registrationWrapper.toFuture
+
+        val action = new AuthenticatedIdentifierAction(
+          mockAuthConnector,
+          application.injector.instanceOf[FrontendAppConfig],
+          bodyParsers,
+          mockRegistrationConnector,
+          mockAccountService
+        )
+        val controller = new Harness(action)
+        val result = controller.onPageLoad()(FakeRequest())
+
+        status(result) mustEqual OK
+        verify(mockRegistrationConnector, times(1)).get()(any())
+      }
+    }
+
+    "must return Unauthorized" in {
+
+      val application = applicationBuilder()
+        .configure(
+          "features.enrolment.ioss-enrolment-key" -> "HMRC-IOSS-ORG"
+        )
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .build()
+
+      running(application) {
+        val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
+
+        when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any()))
+          .thenReturn(Future.successful(Some("id") ~ vatAndIossEnrolment ~ Some(Individual) ~ ConfidenceLevel.L50 ~ None))
+        when(mockRegistrationConnector.get()(any())) thenReturn registrationWrapper.toFuture
+
+        val action = new AuthenticatedIdentifierAction(
+          mockAuthConnector,
+          application.injector.instanceOf[FrontendAppConfig],
+          bodyParsers,
+          mockRegistrationConnector,
+          mockAccountService
+        )
+        val controller = new Harness(action)
+        val result = controller.onPageLoad()(FakeRequest())
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+        verifyNoInteractions(mockRegistrationConnector)
       }
     }
   }
