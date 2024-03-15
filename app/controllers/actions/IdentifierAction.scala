@@ -62,7 +62,7 @@ class AuthenticatedIdentifierAction @Inject()(
         throw UnsupportedCredentialRole("Unsupported credential role")
 
       case Some(internalId) ~ enrolments ~ Some(Individual) ~ confidence ~ _ =>
-        if (confidence >= ConfidenceLevel.L200) {
+        if (confidence >= ConfidenceLevel.L250) {
           getRegistrationAndBlock(request, block, internalId, enrolments)
         } else {
           throw InsufficientConfidenceLevel("Insufficient confidence level")
