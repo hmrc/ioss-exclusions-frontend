@@ -1,4 +1,4 @@
-service.name = ioss-exclusions-frontend
+service.name = Leave the Import One Stop Shop service
 
 site.back = Back
 site.remove = Remove
