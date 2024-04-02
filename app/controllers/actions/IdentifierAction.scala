@@ -71,13 +71,11 @@ class AuthenticatedIdentifierAction @Inject()(
       case _ =>
         throw new UnauthorizedException("Unable to retrieve authorisation data")
     }
-
-
   } recover {
     case _: NoActiveSession =>
       Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
     case _: AuthorisationException =>
-      Redirect(routes.UnauthorisedController.onPageLoad)
+      Redirect(routes.NotRegisteredController.onPageLoad())
   }
 
   private def getRegistrationAndBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result], internalId: String, enrolments: Enrolments)
