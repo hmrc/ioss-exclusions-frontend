@@ -139,7 +139,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
+          redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad.url
         }
       }
     }
@@ -165,7 +165,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
+          redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad.url
         }
       }
     }
@@ -191,7 +191,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
+          redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad.url
         }
       }
     }
@@ -217,7 +217,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad.url)
+          redirectLocation(result) mustBe Some(routes.NotRegisteredController.onPageLoad.url)
         }
       }
     }
@@ -243,7 +243,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad.url)
+          redirectLocation(result) mustBe Some(routes.NotRegisteredController.onPageLoad.url)
         }
       }
     }
@@ -308,7 +308,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val result = controller.onPageLoad()(FakeRequest())
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad.url
         verifyNoInteractions(mockRegistrationConnector)
       }
     }
@@ -338,7 +338,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val result = controller.onPageLoad()(FakeRequest())
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad.url
       }
     }
   }
@@ -367,7 +367,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val result = controller.onPageLoad()(FakeRequest())
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad.url
       }
     }
   }
@@ -396,7 +396,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val result = controller.onPageLoad()(FakeRequest())
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad.url
       }
     }
   }
@@ -425,7 +425,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val result = controller.onPageLoad()(FakeRequest())
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
+        redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad.url
       }
     }
   }

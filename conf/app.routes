@@ -21,6 +21,8 @@ GET         /account/signed-out                            controllers.auth.Sign
 
 GET         /unauthorised                                  controllers.UnauthorisedController.onPageLoad
 
+GET         /cannot-use-not-registered                     controllers.NotRegisteredController.onPageLoad()
+
 GET         /move-country                                  controllers.MoveCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /move-country                                  controllers.MoveCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
