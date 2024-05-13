@@ -6,6 +6,7 @@ site.change = Change
 site.no = No
 site.yes = Yes
 site.continue = Continue
+site.submit = Submit
 site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
@@ -46,8 +47,9 @@ index.title = ioss-exclusions-frontend
 index.heading = ioss-exclusions-frontend
 index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
 
-checkYourAnswers.title = Check your answers before leaving the IOSS scheme
-checkYourAnswers.heading = Check your answers before leaving the IOSS scheme
+checkYourAnswers.title = Check your answers
+checkYourAnswers.heading = Check your answers
+checkYourAnswers.hint = I confirm I want to leave the IOSS scheme.
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
@@ -127,7 +129,7 @@ applicationComplete.next.info.top = You must:
 applicationComplete.next.info.bullet0 = register for the Import One Stop Shop scheme in {0} by {1} to continue using the scheme without a break
 applicationComplete.next.info.bullet1 = complete a VAT return for your final month
 applicationComplete.next.info.bullet2 = pay any VAT you still owe
-applicationComplete.next.info.bottom = If you change your mind, you have until {0} to cancel this request and stay on the service.
+applicationComplete.next.info.bottom = You have until {0} to cancel this request and stay on the service.
 applicationComplete.next.info.returnToAccount = Return to your account
 
 leaveScheme.title = Are you sure you want to leave the Import One Stop Shop scheme?
