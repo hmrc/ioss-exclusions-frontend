@@ -22,25 +22,24 @@ import models.RegistrationWrapper
 import models.enrolments.EACDEnrolments
 import models.requests.EtmpAmendRegistrationRequest
 import play.api.Configuration
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions}
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, StringContextOps}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpClient)
+class RegistrationConnector @Inject()(config: Configuration, httpClientV2: HttpClientV2)
                                      (implicit ec: ExecutionContext) extends HttpErrorFunctions {
 
   private val baseUrl = config.get[Service]("microservice.services.ioss-registration")
 
-  def get()(implicit hc: HeaderCarrier): Future[RegistrationWrapper] = {
-    httpClient.GET[RegistrationWrapper](s"$baseUrl/registration")
-  }
+  def get()(implicit hc: HeaderCarrier): Future[RegistrationWrapper] =
+    httpClientV2.get(url"$baseUrl/registration").execute[RegistrationWrapper]
 
-  def amend(registrationRequest: EtmpAmendRegistrationRequest)(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
-    httpClient.POST[EtmpAmendRegistrationRequest, AmendRegistrationResultResponse](s"$baseUrl/amend", registrationRequest)
-  }
+  def amend(registrationRequest: EtmpAmendRegistrationRequest)(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] =
+    httpClientV2.post(url"$baseUrl/amend").withBody(Json.toJson(registrationRequest)).execute[AmendRegistrationResultResponse]
 
   def getAccounts()(implicit hc: HeaderCarrier): Future[EACDEnrolments] =
-    httpClient.GET[EACDEnrolments](s"$baseUrl/accounts")
-
+    httpClientV2.get(url"$baseUrl/accounts").execute[EACDEnrolments]
 }
