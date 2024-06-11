@@ -23,22 +23,22 @@ import connectors.RegistrationConnector
 import controllers.actions.TestAuthRetrievals._
 import controllers.routes
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, times, verify, verifyNoInteractions, when}
+import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import play.api.inject.bind
-import play.api.mvc.{BodyParsers, DefaultActionBuilder, Results}
+import play.api.mvc.{Action, AnyContent, BodyParsers, Results}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.AccountService
+import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
-import uk.gov.hmrc.auth.core.retrieve.{~, Retrieval}
+import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.FutureSyntax.FutureOps
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
 
@@ -53,10 +53,10 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
   ))
 
   class Harness(authAction: IdentifierAction) {
-    def onPageLoad() = authAction { _ => Results.Ok }
+    def onPageLoad(): Action[AnyContent] = authAction { _ => Results.Ok }
   }
 
-  private type RetrievalsType = Option[String] ~ Enrolments ~ Option[AffinityGroup] ~ ConfidenceLevel ~ Option[CredentialRole]
+  private type RetrievalsType = Option[String] ~ Enrolments ~ Option[AffinityGroup] ~ ConfidenceLevel
 
   override def beforeEach(): Unit = {
     reset(mockRegistrationConnector)
@@ -139,7 +139,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad.url
+          redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad().url
         }
       }
     }
@@ -165,7 +165,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad.url
+          redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad().url
         }
       }
     }
@@ -191,7 +191,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad.url
+          redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad().url
         }
       }
     }
@@ -217,7 +217,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.NotRegisteredController.onPageLoad.url)
+          redirectLocation(result) mustBe Some(routes.NotRegisteredController.onPageLoad().url)
         }
       }
     }
@@ -243,7 +243,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.NotRegisteredController.onPageLoad.url)
+          redirectLocation(result) mustBe Some(routes.NotRegisteredController.onPageLoad().url)
         }
       }
     }
@@ -263,7 +263,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
 
         when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any()))
-          .thenReturn(Future.successful(Some("id") ~ vatAndIossEnrolment ~ Some(Individual) ~ ConfidenceLevel.L250 ~ None))
+          .thenReturn(Future.successful(Some("id") ~ vatAndIossEnrolment ~ Some(Individual) ~ ConfidenceLevel.L250))
         when(mockRegistrationConnector.get()(any())) thenReturn registrationWrapper.toFuture
 
         val action = new AuthenticatedIdentifierAction(
@@ -294,7 +294,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
 
         when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any()))
-          .thenReturn(Future.successful(Some("id") ~ vatAndIossEnrolment ~ Some(Individual) ~ ConfidenceLevel.L50 ~ None))
+          .thenReturn(Future.successful(Some("id") ~ vatAndIossEnrolment ~ Some(Individual) ~ ConfidenceLevel.L50))
         when(mockRegistrationConnector.get()(any())) thenReturn registrationWrapper.toFuture
 
         val action = new AuthenticatedIdentifierAction(
@@ -308,37 +308,8 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val result = controller.onPageLoad()(FakeRequest())
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad.url
+        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad().url
         verifyNoInteractions(mockRegistrationConnector)
-      }
-    }
-  }
-
-  "when the user has logged in as an Organisation Assistant with a VAT enrolment and strong credentials" - {
-
-    "must be redirected to the Not Registered page" in {
-
-      val application = applicationBuilder(None).build()
-
-      running(application) {
-        val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-        val appConfig = application.injector.instanceOf[FrontendAppConfig]
-
-        when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any()))
-          .thenReturn(Future.successful(Some("id") ~ vatEnrolmentWithNoIossEnrolment ~ Some(Organisation) ~ ConfidenceLevel.L50 ~ Some(Assistant)))
-
-        val action = new AuthenticatedIdentifierAction(
-          mockAuthConnector,
-          appConfig,
-          bodyParsers,
-          mockRegistrationConnector,
-          mockAccountService
-        )
-        val controller = new Harness(action)
-        val result = controller.onPageLoad()(FakeRequest())
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad.url
       }
     }
   }
@@ -354,7 +325,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
         when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any()))
-          .thenReturn(Future.successful(Some("id") ~ Enrolments(Set.empty) ~ Some(Organisation) ~ ConfidenceLevel.L50 ~ Some(User)))
+          .thenReturn(Future.successful(Some("id") ~ Enrolments(Set.empty) ~ Some(Organisation) ~ ConfidenceLevel.L50))
 
         val action = new AuthenticatedIdentifierAction(
           mockAuthConnector,
@@ -367,7 +338,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val result = controller.onPageLoad()(FakeRequest())
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad.url
+        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad().url
       }
     }
   }
@@ -383,7 +354,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
         when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any()))
-          .thenReturn(Future.successful(Some("id") ~ vatEnrolmentWithNoIossEnrolment ~ Some(Individual) ~ ConfidenceLevel.L50 ~ None))
+          .thenReturn(Future.successful(Some("id") ~ vatEnrolmentWithNoIossEnrolment ~ Some(Individual) ~ ConfidenceLevel.L50))
 
         val action = new AuthenticatedIdentifierAction(
           mockAuthConnector,
@@ -396,7 +367,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val result = controller.onPageLoad()(FakeRequest())
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad.url
+        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad().url
       }
     }
   }
@@ -412,7 +383,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
         when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any()))
-          .thenReturn(Future.successful(Some("id") ~ Enrolments(Set.empty) ~ Some(Individual) ~ ConfidenceLevel.L200 ~ None))
+          .thenReturn(Future.successful(Some("id") ~ Enrolments(Set.empty) ~ Some(Individual) ~ ConfidenceLevel.L200))
 
         val action = new AuthenticatedIdentifierAction(
           mockAuthConnector,
@@ -425,7 +396,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         val result = controller.onPageLoad()(FakeRequest())
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad.url
+        redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad().url
       }
     }
   }

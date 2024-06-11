@@ -21,12 +21,12 @@ import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.routes
 import models.requests.IdentifierRequest
-import play.api.mvc._
 import play.api.mvc.Results._
+import play.api.mvc._
 import services.AccountService
+import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
@@ -53,15 +53,12 @@ class AuthenticatedIdentifierAction @Inject()(
     authorised().retrieve(Retrievals.internalId and
       Retrievals.allEnrolments and
       Retrievals.affinityGroup and
-      Retrievals.confidenceLevel and
-      Retrievals.credentialRole) {
-      case Some(internalId) ~ enrolments ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == User =>
+      Retrievals.confidenceLevel
+    ) {
+      case Some(internalId) ~ enrolments ~ Some(Organisation) ~ _ =>
         getRegistrationAndBlock(request, block, internalId, enrolments)
 
-      case _ ~ _ ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == Assistant =>
-        throw UnsupportedCredentialRole("Unsupported credential role")
-
-      case Some(internalId) ~ enrolments ~ Some(Individual) ~ confidence ~ _ =>
+      case Some(internalId) ~ enrolments ~ Some(Individual) ~ confidence =>
         if (confidence >= ConfidenceLevel.L250) {
           getRegistrationAndBlock(request, block, internalId, enrolments)
         } else {
