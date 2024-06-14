@@ -18,15 +18,15 @@ package controllers
 
 import base.SpecBase
 import connectors.RegistrationConnector
-import models.CheckMode
 import models.audit.{ExclusionAuditModel, ExclusionAuditType, SubmissionResult}
 import models.etmp.EtmpExclusionReason
 import models.responses.UnexpectedResponseStatus
+import models.{CheckMode, RegistrationWrapper}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
-import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, EuVatNumberPage, MoveDatePage, Waypoint, Waypoints}
+import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, EuVatNumberPage, MoveCountryPage, MoveDatePage, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -43,6 +43,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
   private val mockAuditService: AuditService = mock[AuditService]
   private val mockRegistrationConnector = mock[RegistrationConnector]
 
+  private val registration: RegistrationWrapper = registrationWrapper.copy(registration =
+    registrationWrapper.registration
+      .copy(exclusions = Seq.empty)
+  )
+
   override protected def beforeEach(): Unit = {
     reset(mockRegistrationConnector)
     reset(mockAuditService)
@@ -52,9 +57,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
     ".onPageLoad" - {
 
-      "must return OK and the correct view for a GET" in {
+      "must return OK and the correct view for a GET when user answers Yes to Move Country Page" in {
 
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val answers = emptyUserAnswers.set(MoveCountryPage, true).success.value
+
+        val application = applicationBuilder(userAnswers = Some(answers), registration = registration)
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
@@ -72,6 +79,24 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           contentAsString(result) mustBe view(waypoints, list, isValid = false)(request, messages(application)).toString
         }
       }
+
+      "must redirect to Cannot Access Controller for a GET when user answers No to Move Country Page" in {
+
+        val answers = emptyUserAnswers.set(MoveCountryPage, false).success.value
+
+        val application = applicationBuilder(userAnswers = Some(answers), registration = registration)
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+
+          val result = route(application, request).value
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(routes.CannotAccessController.onPageLoad().url)
+        }
+      }
     }
 
     ".onSubmit" - {
@@ -82,7 +107,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           Future.successful(Right(()))
 
         val userAnswers = completeUserAnswers
-        val application = applicationBuilder(userAnswers = Some(userAnswers))
+        val application = applicationBuilder(userAnswers = Some(userAnswers), registration = registration)
           .overrides(
             bind[RegistrationConnector].toInstance(mockRegistrationConnector),
             bind[AuditService].toInstance(mockAuditService)
@@ -99,7 +124,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             vrn.vrn,
             iossNumber,
             userAnswers.toUserAnswersForAudit,
-            registrationWrapper.registration,
+            registration.registration,
             Some(EtmpExclusionReason.TransferringMSID),
             SubmissionResult.Success
           )
@@ -116,7 +141,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           Future.successful(Left(UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "Error occurred")))
 
         val userAnswers = completeUserAnswers
-        val application = applicationBuilder(userAnswers = Some(userAnswers))
+        val application = applicationBuilder(userAnswers = Some(userAnswers), registration = registration)
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AuditService].toInstance(mockAuditService))
           .build()
@@ -133,7 +158,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             vrn.vrn,
             iossNumber,
             userAnswers.toUserAnswersForAudit,
-            registrationWrapper.registration,
+            registration.registration,
             Some(EtmpExclusionReason.TransferringMSID),
             SubmissionResult.Failure
           )
@@ -149,7 +174,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           "to the Eu Country page when the EU country is missing" in {
             val answers = completeUserAnswers.remove(EuCountryPage).success.value
 
-            val application = applicationBuilder(userAnswers = Some(answers))
+            val application = applicationBuilder(userAnswers = Some(answers), registration = registration)
               .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
               .build()
 
@@ -165,7 +190,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           "to the Move Date page when the move date is missing" in {
             val answers = completeUserAnswers.remove(MoveDatePage).success.value
 
-            val application = applicationBuilder(userAnswers = Some(answers))
+            val application = applicationBuilder(userAnswers = Some(answers), registration = registration)
               .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
               .build()
 
@@ -181,7 +206,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           "to the EU VAT Number page when the VAT number is missing" in {
             val answers = completeUserAnswers.remove(EuVatNumberPage).success.value
 
-            val application = applicationBuilder(userAnswers = Some(answers))
+            val application = applicationBuilder(userAnswers = Some(answers), registration = registration)
               .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
               .build()
 

@@ -61,3 +61,4 @@ GET         /successful                                    controllers.Applicati
 
 GET         /submission-failure                            controllers.SubmissionFailureController.onPageLoad()
 
+GET         /cannot-access                                  controllers.CannotAccessController.onPageLoad()

@@ -174,3 +174,6 @@ notRegistered.heading = You cannot use this service
 notRegistered.label = To use this service, you must sign in with the same Government Gateway user ID you used when you registered for the VAT Import One Stop Shop.
 notRegistered.subHeading = If you have not registered
 notRegistered.registerLink = You can <a class="govuk-link" href="https://www.gov.uk/guidance/register-for-the-vat-import-one-stop-shop-scheme">register for the VAT Import One Stop Shop scheme</a>.
+
+cannotAccess.title = You cannot access this page
+cannotAccess.heading = You cannot access this page
