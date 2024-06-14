@@ -17,7 +17,7 @@
 package controllers
 
 import com.google.inject.Inject
-import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import controllers.actions.{CannotAccessFilterProvider, DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import date.Dates
 import logging.Logging
 import models.CheckMode
@@ -41,6 +41,7 @@ class CheckYourAnswersController @Inject()(
                                             identify: IdentifierAction,
                                             getData: DataRetrievalAction,
                                             requireData: DataRequiredAction,
+                                            cannotAccessFilter: CannotAccessFilterProvider,
                                             dates: Dates,
                                             val controllerComponents: MessagesControllerComponents,
                                             view: CheckYourAnswersView,
@@ -48,7 +49,7 @@ class CheckYourAnswersController @Inject()(
                                           )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen cannotAccessFilter() andThen requireData) {
     implicit request =>
 
       val thisPage = CheckYourAnswersPage
@@ -70,30 +71,31 @@ class CheckYourAnswersController @Inject()(
       Ok(view(waypoints, list, isValid))
   }
 
-  def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      getFirstValidationErrorRedirect(waypoints) match {
-        case Some(errorRedirect) => if (incompletePrompt) {
-          errorRedirect.toFuture
-        } else {
-          Redirect(routes.CheckYourAnswersController.onPageLoad()).toFuture
-        }
-        case None =>
-          registrationService.amendRegistrationAndAudit(
-            request.userId,
-            request.vrn,
-            request.iossNumber,
-            request.userAnswers,
-            request.registrationWrapper.registration,
-            Some(EtmpExclusionReason.TransferringMSID),
-            ExclusionAuditType.ExclusionRequestSubmitted
-          ).map {
-            case Right(_) =>
-              Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, request.userAnswers).route)
-            case Left(e) =>
-              logger.error(s"Failure to submit self exclusion ${e.body}")
-              Redirect(routes.SubmissionFailureController.onPageLoad())
+  def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] =
+    (identify andThen getData andThen cannotAccessFilter() andThen requireData).async {
+      implicit request =>
+        getFirstValidationErrorRedirect(waypoints) match {
+          case Some(errorRedirect) => if (incompletePrompt) {
+            errorRedirect.toFuture
+          } else {
+            Redirect(routes.CheckYourAnswersController.onPageLoad()).toFuture
           }
-      }
-  }
+          case None =>
+            registrationService.amendRegistrationAndAudit(
+              request.userId,
+              request.vrn,
+              request.iossNumber,
+              request.userAnswers,
+              request.registrationWrapper.registration,
+              Some(EtmpExclusionReason.TransferringMSID),
+              ExclusionAuditType.ExclusionRequestSubmitted
+            ).map {
+              case Right(_) =>
+                Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, request.userAnswers).route)
+              case Left(e) =>
+                logger.error(s"Failure to submit self exclusion ${e.body}")
+                Redirect(routes.SubmissionFailureController.onPageLoad())
+            }
+        }
+    }
 }
