@@ -25,11 +25,12 @@ import controllers.routes
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
+import play.api.Application
 import play.api.inject.bind
 import play.api.mvc.{Action, AnyContent, BodyParsers, Results}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.AccountService
+import services.{AccountService, UrlBuilderService}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
@@ -64,6 +65,9 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
     reset(mockAuthConnector)
   }
 
+  val urlBuilder: Application => UrlBuilderService =
+    (application: Application) => application.injector.instanceOf[UrlBuilderService]
+
   "Auth Action" - {
 
     "when the user hasn't logged in" - {
@@ -81,7 +85,8 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
             appConfig,
             bodyParsers,
             mockRegistrationConnector,
-            mockAccountService
+            mockAccountService,
+            urlBuilder(application)
           )
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
@@ -107,7 +112,8 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
             appConfig,
             bodyParsers,
             mockRegistrationConnector,
-            mockAccountService
+            mockAccountService,
+            urlBuilder(application)
           )
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
@@ -133,10 +139,11 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
             appConfig,
             bodyParsers,
             mockRegistrationConnector,
-            mockAccountService
+            mockAccountService,
+            urlBuilder(application)
           )
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result = controller.onPageLoad()(FakeRequest(GET, "/fake"))
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad().url
@@ -149,6 +156,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
       "must redirect the user to the unauthorised page" in {
 
         val application = applicationBuilder(userAnswers = None).build()
+        val config = application.injector.instanceOf[FrontendAppConfig]
 
         running(application) {
           val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
@@ -159,13 +167,14 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
             appConfig,
             bodyParsers,
             mockRegistrationConnector,
-            mockAccountService
+            mockAccountService,
+            urlBuilder(application)
           )
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result = controller.onPageLoad()(FakeRequest(GET, "/fake"))
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad().url
+          redirectLocation(result).value must startWith(s"${config.ivUpliftUrl}?origin=IOSS&confidenceLevel=250")
         }
       }
     }
@@ -185,7 +194,8 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
             appConfig,
             bodyParsers,
             mockRegistrationConnector,
-            mockAccountService
+            mockAccountService,
+            urlBuilder(application)
           )
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
@@ -211,7 +221,8 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
             appConfig,
             bodyParsers,
             mockRegistrationConnector,
-            mockAccountService
+            mockAccountService,
+            urlBuilder(application)
           )
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
@@ -237,7 +248,8 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
             appConfig,
             bodyParsers,
             mockRegistrationConnector,
-            mockAccountService
+            mockAccountService,
+            urlBuilder(application)
           )
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
@@ -271,7 +283,8 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           application.injector.instanceOf[FrontendAppConfig],
           bodyParsers,
           mockRegistrationConnector,
-          mockAccountService
+          mockAccountService,
+          urlBuilder(application)
         )
         val controller = new Harness(action)
         val result = controller.onPageLoad()(FakeRequest())
@@ -290,6 +303,8 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .build()
 
+      val config = application.injector.instanceOf[FrontendAppConfig]
+      
       running(application) {
         val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
 
@@ -302,13 +317,14 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           application.injector.instanceOf[FrontendAppConfig],
           bodyParsers,
           mockRegistrationConnector,
-          mockAccountService
+          mockAccountService,
+          urlBuilder(application)
         )
         val controller = new Harness(action)
-        val result = controller.onPageLoad()(FakeRequest())
+        val result = controller.onPageLoad()(FakeRequest(GET, "/fake"))
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad().url
+        redirectLocation(result).value must startWith(s"${config.ivUpliftUrl}?origin=IOSS&confidenceLevel=250")
         verifyNoInteractions(mockRegistrationConnector)
       }
     }
@@ -321,6 +337,8 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
 
       val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
 
+      val config = application.injector.instanceOf[FrontendAppConfig]
+
       running(application) {
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
@@ -332,7 +350,8 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           appConfig,
           bodyParsers,
           mockRegistrationConnector,
-          mockAccountService
+          mockAccountService,
+          urlBuilder(application)
         )
         val controller = new Harness(action)
         val result = controller.onPageLoad()(FakeRequest())
@@ -349,6 +368,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
       val application = applicationBuilder(None).build()
 
       val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
+      val config = application.injector.instanceOf[FrontendAppConfig]
 
       running(application) {
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
@@ -361,13 +381,14 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           appConfig,
           bodyParsers,
           mockRegistrationConnector,
-          mockAccountService
+          mockAccountService,
+          urlBuilder(application)
         )
         val controller = new Harness(action)
-        val result = controller.onPageLoad()(FakeRequest())
+        val result = controller.onPageLoad()(FakeRequest(GET, "/fake"))
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.NotRegisteredController.onPageLoad().url
+        redirectLocation(result).value must startWith(s"${config.ivUpliftUrl}?origin=IOSS&confidenceLevel=250")
       }
     }
   }
@@ -390,13 +411,14 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
           appConfig,
           bodyParsers,
           mockRegistrationConnector,
-          mockAccountService
+          mockAccountService,
+          urlBuilder(application)
         )
         val controller = new Harness(action)
-        val result = controller.onPageLoad()(FakeRequest())
+        val result = controller.onPageLoad()(FakeRequest(GET, "/fake"))
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustBe routes.NotRegisteredController.onPageLoad().url
+        redirectLocation(result).value must startWith(s"${appConfig.ivUpliftUrl}?origin=IOSS&confidenceLevel=250")
       }
     }
   }

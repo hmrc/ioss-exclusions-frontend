@@ -20,30 +20,32 @@ import com.google.inject.Inject
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.routes
-import models.requests.IdentifierRequest
+import models.requests.{AuthenticatedIdentifierRequest, IdentifierRequest}
 import play.api.mvc.Results._
 import play.api.mvc._
-import services.AccountService
+import services.{AccountService, UrlBuilderService}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
+import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, OnlyRelative}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
 
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
+
 trait IdentifierAction extends ActionBuilder[IdentifierRequest, AnyContent] with ActionFunction[Request, IdentifierRequest]
 
-class AuthenticatedIdentifierAction @Inject()(
-                                               override val authConnector: AuthConnector,
-                                               config: FrontendAppConfig,
-                                               val parser: BodyParsers.Default,
-                                               registrationConnector: RegistrationConnector,
-                                               accountService: AccountService
-                                             )
+class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthConnector,
+                                              config: FrontendAppConfig,
+                                              val parser: BodyParsers.Default,
+                                              registrationConnector: RegistrationConnector,
+                                              accountService: AccountService,
+                                              urlBuilderService: UrlBuilderService)
                                              (implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
@@ -71,6 +73,8 @@ class AuthenticatedIdentifierAction @Inject()(
   } recover {
     case _: NoActiveSession =>
       Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
+    case _: InsufficientConfidenceLevel =>
+      upliftConfidenceLevel(request)
     case _: AuthorisationException =>
       Redirect(routes.NotRegisteredController.onPageLoad())
   }
@@ -123,4 +127,16 @@ class AuthenticatedIdentifierAction @Inject()(
     }
   }
 
+  private def upliftConfidenceLevel[A](request: Request[A]): Result = {
+    val redirectPolicy = OnlyRelative | AbsoluteWithHostnameFromAllowlist(config.allowedRedirectUrls: _*)
+    Redirect(
+      config.ivUpliftUrl,
+      Map(
+        "origin" -> Seq(config.origin),
+        "confidenceLevel" -> Seq(ConfidenceLevel.L250.toString),
+        "completionURL" -> Seq(urlBuilderService.loginContinueUrl(request).get(redirectPolicy).url),
+        "failureURL" -> Seq(urlBuilderService.ivFailureUrl(request))
+      )
+    )
+  }
 }

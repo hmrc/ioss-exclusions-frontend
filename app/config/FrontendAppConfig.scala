@@ -21,6 +21,8 @@ import play.api.Configuration
 import play.api.i18n.Lang
 import play.api.mvc.RequestHeader
 
+import java.net.URI
+
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration) {
   val host: String    = configuration.get[String]("host")
@@ -35,12 +37,28 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val loginUrl: String         = configuration.get[String]("urls.login")
   val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
+  val loginContinueBase: String = configuration.get[String]("urls.loginContinueBase")
   val signOutUrl: String       = configuration.get[String]("urls.signOut")
   val iossYourAccountUrl: String = configuration.get[String]("urls.yourAccountUrl")
 
   private val exitSurveyBaseUrl: String = configuration.get[String]("microservice.services.feedback-frontend.host") +
     configuration.get[String]("microservice.services.feedback-frontend.basePath")
   val exitSurveyUrl: String             = s"${exitSurveyBaseUrl}/${origin.toLowerCase}"
+
+  val ivUpliftUrl: String = configuration.get[String]("urls.ivUplift")
+
+  val allowedRedirectUrls: Seq[String] = configuration.get[Seq[String]]("urls.allowedRedirects")
+
+  private val identityVerificationBaseUrl =
+    configuration.get[Service]("microservice.services.identity-verification").baseUrl
+
+  val ivEvidenceStatusUrl: String =
+    s"$identityVerificationBaseUrl/disabled-evidences?origin=$origin"
+
+  private val ivJourneyServiceUrl: String =
+    s"${configuration.get[Service]("microservice.services.identity-verification").baseUrl}/journey/"
+
+  def ivJourneyResultUrl(journeyId: String): String = new URI(s"$ivJourneyServiceUrl$journeyId").toString
 
   val languageTranslationEnabled: Boolean =
     configuration.get[Boolean]("features.welsh-translation")
