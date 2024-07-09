@@ -34,7 +34,7 @@ class UrlBuilderServiceSpec extends AnyFreeSpec with Matchers with MockitoSugar 
     "must add an existing session Id as a querystring parameter" in {
 
       val config: FrontendAppConfig = mock[FrontendAppConfig]
-      when(config.loginContinueUrl) thenReturn "http://localhost"
+      when(config.loginContinueBase) thenReturn "http://localhost"
 
       val service = new UrlBuilderService(config)
 
