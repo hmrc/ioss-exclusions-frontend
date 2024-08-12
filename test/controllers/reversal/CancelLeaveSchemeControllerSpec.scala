@@ -33,7 +33,8 @@ import pages.{CancelLeaveSchemeCompletePage, CancelLeaveSchemePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.AuditService
+import repositories.SessionRepository
+import services.{AuditService, RegistrationService}
 import views.html.CancelLeaveSchemeView
 
 import java.time.LocalDate
@@ -221,6 +222,31 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar with Be
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, emptyWaypoints)(request, messages(application)).toString
+      }
+    }
+
+    "must call sessionRepository.clear on a GET" in {
+
+      val mockSessionRepository: SessionRepository = mock[SessionRepository]
+      val mockRegistrationService: RegistrationService = mock[RegistrationService]
+
+      when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
+
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswers),
+        registration = registrationNoLongerSuppliesExclusion
+      ).overrides(
+        bind[SessionRepository].toInstance(mockSessionRepository),
+        bind[RegistrationService].toInstance(mockRegistrationService)
+      ).build()
+
+      running(application) {
+        val request = FakeRequest(GET, cancelLeaveSchemeRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+        verify(mockSessionRepository, times(1)).clear(any())
       }
     }
   }
