@@ -45,18 +45,21 @@ class CancelLeaveSchemeController @Inject()(
                                              config: FrontendAppConfig,
                                              val controllerComponents: MessagesControllerComponents,
                                              view: CancelLeaveSchemeView,
-                                             registrationService: RegistrationService
+                                             registrationService: RegistrationService,
                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen checkExclusion).async {
     implicit request =>
-      val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(CancelLeaveSchemePage) match {
-        case None => form
-        case Some(value) => form.fill(value)
+
+      sessionRepository.clear(request.userId).flatMap { _ =>
+        val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(CancelLeaveSchemePage) match {
+          case None => form
+          case Some(value) => form.fill(value)
+        }
+        Future.successful(Ok(view(preparedForm, waypoints)))
       }
-      Future.successful(Ok(view(preparedForm, waypoints)))
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen checkExclusion).async {
