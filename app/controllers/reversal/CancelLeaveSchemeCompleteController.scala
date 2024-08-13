@@ -20,10 +20,13 @@ import config.FrontendAppConfig
 import controllers.actions._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
 import views.html.CancelLeaveSchemeCompleteView
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class CancelLeaveSchemeCompleteController @Inject()(
                                                override val messagesApi: MessagesApi,
@@ -32,11 +35,14 @@ class CancelLeaveSchemeCompleteController @Inject()(
                                                identify: IdentifierAction,
                                                getData: DataRetrievalAction,
                                                requireData: DataRequiredAction,
+                                               sessionRepository: SessionRepository,
                                                val controllerComponents: MessagesControllerComponents
-                                             ) extends FrontendBaseController with I18nSupport {
+                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      Ok(view(config.iossYourAccountUrl))
+      sessionRepository.clear(request.userId).flatMap { _ =>
+        Ok(view(config.iossYourAccountUrl)).toFuture
+      }
   }
 }
