@@ -34,15 +34,20 @@ class CancelLeaveSchemeCompleteController @Inject()(
                                                view: CancelLeaveSchemeCompleteView,
                                                identify: IdentifierAction,
                                                getData: DataRetrievalAction,
-                                               requireData: DataRequiredAction,
                                                sessionRepository: SessionRepository,
                                                val controllerComponents: MessagesControllerComponents
                                              )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad: Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      sessionRepository.clear(request.userId).map { _ =>
-        Ok(view(config.iossYourAccountUrl))
+      request.userAnswers match {
+        case Some(userAnswers) =>
+          sessionRepository.clear(userAnswers.id).map { _ =>
+            Ok(view(config.iossYourAccountUrl))
+          }
+        case None =>
+          Ok(view(config.iossYourAccountUrl)).toFuture
+
       }
   }
 }
