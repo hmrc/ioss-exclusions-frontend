@@ -41,8 +41,8 @@ class CancelLeaveSchemeCompleteController @Inject()(
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      sessionRepository.clear(request.userId).flatMap { _ =>
-        Ok(view(config.iossYourAccountUrl)).toFuture
+      sessionRepository.clear(request.userId).map { _ =>
+        Ok(view(config.iossYourAccountUrl))
       }
   }
 }

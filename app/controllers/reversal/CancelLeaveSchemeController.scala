@@ -53,12 +53,12 @@ class CancelLeaveSchemeController @Inject()(
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen checkExclusion).async {
     implicit request =>
 
-      sessionRepository.clear(request.userId).flatMap { _ =>
+      sessionRepository.clear(request.userId).map { _ =>
         val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(CancelLeaveSchemePage) match {
           case None => form
           case Some(value) => form.fill(value)
         }
-        Future.successful(Ok(view(preparedForm, waypoints)))
+        Ok(view(preparedForm, waypoints))
       }
   }
 
