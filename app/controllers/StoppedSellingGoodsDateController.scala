@@ -20,13 +20,10 @@ import controllers.actions._
 import date.Dates
 import forms.StoppedSellingGoodsDateFormProvider
 import logging.Logging
-import models.audit.ExclusionAuditType
-import models.etmp.EtmpExclusionReason
 import pages.{StoppedSellingGoodsDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.StoppedSellingGoodsDateView
@@ -44,8 +41,7 @@ class StoppedSellingGoodsDateController @Inject()(
                                                    formProvider: StoppedSellingGoodsDateFormProvider,
                                                    dates: Dates,
                                                    val controllerComponents: MessagesControllerComponents,
-                                                   view: StoppedSellingGoodsDateView,
-                                                   registrationService: RegistrationService
+                                                   view: StoppedSellingGoodsDateView
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
@@ -74,21 +70,7 @@ class StoppedSellingGoodsDateController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(StoppedSellingGoodsDatePage, value))
             _ <- sessionRepository.set(updatedAnswers)
-            result <- registrationService.amendRegistrationAndAudit(
-              request.userId,
-              request.vrn,
-              request.iossNumber,
-              updatedAnswers,
-              request.registrationWrapper.registration,
-              Some(EtmpExclusionReason.NoLongerSupplies),
-              ExclusionAuditType.ExclusionRequestSubmitted
-            ).map {
-              case Right(_) => Redirect(StoppedSellingGoodsDatePage.navigate(waypoints, updatedAnswers, updatedAnswers).url)
-              case Left(e) =>
-                logger.error(s"Failure to submit self exclusion ${e.body}")
-                Redirect(routes.SubmissionFailureController.onPageLoad())
-            }
-          } yield result
+          } yield Redirect(StoppedSellingGoodsDatePage.navigate(waypoints, updatedAnswers, updatedAnswers).url)
       )
   }
 }

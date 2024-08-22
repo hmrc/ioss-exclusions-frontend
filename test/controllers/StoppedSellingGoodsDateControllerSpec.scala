@@ -21,12 +21,8 @@ import connectors.RegistrationConnector
 import date.Dates
 import forms.StoppedSellingGoodsDateFormProvider
 import models.{RegistrationWrapper, UserAnswers}
-import models.audit.{ExclusionAuditModel, ExclusionAuditType, SubmissionResult}
-import models.etmp.EtmpExclusionReason
-import models.responses.UnexpectedResponseStatus
 import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
-import org.mockito.Mockito.{reset, times, verify, when}
+import org.mockito.Mockito.{reset, when}
 import org.scalacheck.Arbitrary
 import org.scalatest.BeforeAndAfterEach
 import pages.{EmptyWaypoints, StoppedSellingGoodsDatePage}
@@ -36,7 +32,6 @@ import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.AuditService
 import views.html.StoppedSellingGoodsDateView
 
 import java.time.{LocalDate, ZoneOffset}
@@ -51,12 +46,11 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
   private def form(currentDate: LocalDate = LocalDate.now(), registrationDate: LocalDate = LocalDate.now()): Form[LocalDate] =
     formProvider.apply(currentDate, registrationDate)
 
-  val validAnswer = LocalDate.now(ZoneOffset.UTC)
+  val validAnswer: LocalDate = LocalDate.now(ZoneOffset.UTC)
 
-  lazy val stoppedSellingGoodsDateRoute = routes.StoppedSellingGoodsDateController.onPageLoad(EmptyWaypoints).url
+  lazy val stoppedSellingGoodsDateRoute: String = routes.StoppedSellingGoodsDateController.onPageLoad(EmptyWaypoints).url
 
   private val mockRegistrationConnector = mock[RegistrationConnector]
-  private val mockAuditService = mock[AuditService]
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, stoppedSellingGoodsDateRoute)
@@ -96,7 +90,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
         val dates = application.injector.instanceOf[Dates]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form(), dates.dateHint, emptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form(), dates.dateHint, emptyWaypoints)(getRequest(), messages(application)).toString
       }
     }
 
@@ -115,11 +109,11 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form().fill(validAnswer), dates.dateHint, emptyWaypoints)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form().fill(validAnswer), dates.dateHint, emptyWaypoints)(getRequest(), messages(application)).toString
       }
     }
 
-    "must redirect to the next page and audit a success when valid data is submitted" in {
+    "must redirect to the next page when valid data is submitted" in {
 
       when(mockRegistrationConnector.amend(any())(any())) thenReturn Future.successful(Right(()))
 
@@ -134,67 +128,13 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
 
       val application = applicationBuilder(userAnswers = Some(userAnswers), registration = validDateWrapper)
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
-        .overrides(bind[AuditService].toInstance(mockAuditService))
         .build()
 
       running(application) {
         val result = route(application, postRequest()).value
-
-        val expectedAuditEvent = ExclusionAuditModel(
-            ExclusionAuditType.ExclusionRequestSubmitted,
-            userAnswersId,
-            "",
-            vrn.vrn,
-            iossNumber,
-            userAnswers.toUserAnswersForAudit,
-            validDateWrapper.registration,
-            Some(EtmpExclusionReason.NoLongerSupplies),
-            SubmissionResult.Success
-        )
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual StoppedSellingGoodsDatePage.navigate(emptyWaypoints, emptyUserAnswers, userAnswers).url
-        verify(mockAuditService, times(1)).audit(eqTo(expectedAuditEvent))(any(), any())
-      }
-    }
-
-    "must redirect to the failure page when valid data is submitted but api returns failure" in {
-
-      val registrationWrapper = Arbitrary.arbitrary[RegistrationWrapper].sample.value
-      val etmpSchemeDetails = registrationWrapper.registration.schemeDetails
-      val validDateWrapper = registrationWrapper.copy(
-        registration = registrationWrapper.registration.copy(
-          schemeDetails = etmpSchemeDetails.copy(commencementDate = LocalDate.now().toString))
-      )
-
-      when(mockRegistrationConnector.amend(any())(any())) thenReturn
-        Future.successful(Left(UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "Error occurred")))
-
-      val userAnswers = UserAnswers(userAnswersId).set(StoppedSellingGoodsDatePage, validAnswer).success.value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers), registration = validDateWrapper)
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
-        .overrides(bind[AuditService].toInstance(mockAuditService))
-        .build()
-
-      running(application) {
-        val result = route(application, postRequest()).value
-
-        val expectedAuditEvent = ExclusionAuditModel(
-            ExclusionAuditType.ExclusionRequestSubmitted,
-            userAnswersId,
-            "",
-            vrn.vrn,
-            iossNumber,
-            userAnswers.toUserAnswersForAudit,
-            validDateWrapper.registration,
-            Some(EtmpExclusionReason.NoLongerSupplies),
-            SubmissionResult.Failure
-        )
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.SubmissionFailureController.onPageLoad().url
-        verify(mockAuditService, times(1)).audit(eqTo(expectedAuditEvent))(any(), any())
       }
     }
 
@@ -250,7 +190,7 @@ class StoppedSellingGoodsDateControllerSpec extends SpecBase with BeforeAndAfter
         .build()
 
       running(application) {
-        val result = route(application, getRequest).value
+        val result = route(application, getRequest()).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url

@@ -21,6 +21,8 @@ import models.UserAnswers
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
+import scala.util.Try
+
 case object StopSellingGoodsPage extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ toString
@@ -29,6 +31,16 @@ case object StopSellingGoodsPage extends QuestionPage[Boolean] {
 
   override def route(waypoints: Waypoints): Call =
     routes.StopSellingGoodsController.onPageLoad(waypoints)
+
+  override def cleanup(value: Option[Boolean], userAnswers: UserAnswers): Try[UserAnswers] =
+    value match {
+      case Some(true) => for {
+        leaveScheme <- userAnswers.remove(LeaveSchemePage)
+        updatedAnswers <- leaveScheme.remove(StoppedUsingServiceDatePage)
+      } yield updatedAnswers
+      case Some(false) => userAnswers.remove(StoppedSellingGoodsDatePage)
+      case _ => super.cleanup(value, userAnswers)
+    }
 
   override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     answers.get(this).map {

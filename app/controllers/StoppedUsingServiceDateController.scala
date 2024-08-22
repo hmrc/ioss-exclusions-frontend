@@ -20,13 +20,10 @@ import controllers.actions._
 import date.Dates
 import forms.StoppedUsingServiceDateFormProvider
 import logging.Logging
-import models.audit.ExclusionAuditType
-import models.etmp.EtmpExclusionReason
 import pages.{StoppedUsingServiceDatePage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.StoppedUsingServiceDateView
@@ -45,7 +42,6 @@ class StoppedUsingServiceDateController @Inject()(
                                                    dates: Dates,
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: StoppedUsingServiceDateView,
-                                                   registrationService: RegistrationService
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen requireData) {
@@ -74,21 +70,7 @@ class StoppedUsingServiceDateController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(StoppedUsingServiceDatePage, value))
             _ <- sessionRepository.set(updatedAnswers)
-            result <- registrationService.amendRegistrationAndAudit(
-              request.userId,
-              request.vrn,
-              request.iossNumber,
-              updatedAnswers,
-              request.registrationWrapper.registration,
-              Some(EtmpExclusionReason.VoluntarilyLeaves),
-              ExclusionAuditType.ExclusionRequestSubmitted
-            ).map {
-              case Right(_) => Redirect(StoppedUsingServiceDatePage.navigate(waypoints, request.userAnswers, updatedAnswers).url)
-              case Left(e) =>
-                logger.error(s"Failure to submit self exclusion ${e.body}")
-                Redirect(routes.SubmissionFailureController.onPageLoad())
-            }
-          } yield result
+          } yield Redirect(StoppedUsingServiceDatePage.navigate(waypoints, request.userAnswers, updatedAnswers).url)
       )
   }
 }

@@ -17,20 +17,21 @@
 package controllers
 
 import com.google.inject.Inject
-import controllers.actions.{CannotAccessFilterProvider, DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import config.FrontendAppConfig
+import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import date.Dates
 import logging.Logging
-import models.CheckMode
+import models.{CheckMode, UserAnswers}
 import models.audit.ExclusionAuditType
 import models.etmp.EtmpExclusionReason
-import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{CheckYourAnswersPage, EmptyWaypoints, MoveCountryPage, StopSellingGoodsPage, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
 import utils.FutureSyntax.FutureOps
-import viewmodels.checkAnswers.{EuCountrySummary, EuVatNumberSummary, MoveDateSummary}
+import viewmodels.checkAnswers._
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
 
@@ -41,15 +42,15 @@ class CheckYourAnswersController @Inject()(
                                             identify: IdentifierAction,
                                             getData: DataRetrievalAction,
                                             requireData: DataRequiredAction,
-                                            cannotAccessFilter: CannotAccessFilterProvider,
                                             dates: Dates,
                                             val controllerComponents: MessagesControllerComponents,
                                             view: CheckYourAnswersView,
-                                            registrationService: RegistrationService
+                                            registrationService: RegistrationService,
+                                            config: FrontendAppConfig
                                           )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen cannotAccessFilter() andThen requireData) {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
       val thisPage = CheckYourAnswersPage
@@ -58,21 +59,29 @@ class CheckYourAnswersController @Inject()(
       val euCountrySummaryRow = EuCountrySummary.rowNewCountry(request.userAnswers, waypoints, thisPage)
       val moveDateSummaryRow = MoveDateSummary.rowMoveDate(request.userAnswers, waypoints, thisPage, dates)
       val euVatNumberSummaryRow = EuVatNumberSummary.rowEuVatNumber(request.userAnswers, waypoints, thisPage)
+      val moveCountrySummaryRow = MoveCountrySummary.row(request.userAnswers, waypoints, thisPage)
+      val stopSellingGoodsSummaryRow = StopSellingGoodsSummary.row(request.userAnswers, waypoints, thisPage)
+      val stoppedSellingGoodsDateRow = StoppedSellingGoodsDateSummary.row(request.userAnswers, waypoints, thisPage, dates)
+      val stoppedUsingServiceDateRow = StoppedUsingServiceDateSummary.row(request.userAnswers, waypoints, thisPage, dates)
 
       val list = SummaryListViewModel(
         rows = Seq(
+          moveCountrySummaryRow,
+          stopSellingGoodsSummaryRow,
           euCountrySummaryRow,
           moveDateSummaryRow,
-          euVatNumberSummaryRow
+          euVatNumberSummaryRow,
+          stoppedSellingGoodsDateRow,
+          stoppedUsingServiceDateRow
         ).flatten
       )
 
       val isValid = validate()
-      Ok(view(waypoints, list, isValid))
+      Ok(view(waypoints, list, isValid, config.iossYourAccountUrl))
   }
 
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] =
-    (identify andThen getData andThen cannotAccessFilter() andThen requireData).async {
+    (identify andThen getData andThen requireData).async {
       implicit request =>
         getFirstValidationErrorRedirect(waypoints) match {
           case Some(errorRedirect) => if (incompletePrompt) {
@@ -81,13 +90,15 @@ class CheckYourAnswersController @Inject()(
             Redirect(routes.CheckYourAnswersController.onPageLoad()).toFuture
           }
           case None =>
+            val exclusionReason = determineExclusionReason(request.userAnswers)
+
             registrationService.amendRegistrationAndAudit(
               request.userId,
               request.vrn,
               request.iossNumber,
               request.userAnswers,
               request.registrationWrapper.registration,
-              Some(EtmpExclusionReason.TransferringMSID),
+              Some(exclusionReason),
               ExclusionAuditType.ExclusionRequestSubmitted
             ).map {
               case Right(_) =>
@@ -98,4 +109,23 @@ class CheckYourAnswersController @Inject()(
             }
         }
     }
+
+  private def determineExclusionReason(userAnswers: UserAnswers): EtmpExclusionReason = {
+    userAnswers.get(MoveCountryPage) match {
+      case Some(true) =>
+        EtmpExclusionReason.TransferringMSID
+      case Some(false) =>
+        userAnswers.get(StopSellingGoodsPage) match {
+          case Some(true) =>
+            EtmpExclusionReason.NoLongerSupplies
+          case Some(false) =>
+            EtmpExclusionReason.VoluntarilyLeaves
+          case _ =>
+            throw new Exception("Expected stop selling goods page")
+
+        }
+      case _ =>
+        throw new Exception("Expected move country page")
+    }
+  }
 }

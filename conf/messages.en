@@ -11,6 +11,8 @@ site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
+site.confirm = Confirm
+site.cancel = Cancel
 
 date.day = Day
 date.month = Month
@@ -49,7 +51,7 @@ index.guidance = Welcome to your new frontend. Please see the README file for a 
 
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
-checkYourAnswers.hint = I confirm I want to leave the IOSS scheme.
+checkYourAnswers.hint = I confirm I want to leave the IOSS service.
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
@@ -67,9 +69,9 @@ unauthorised.heading = You can’t access this service with this account
 
 moveCountry.title = Are you moving your business to an EU country?
 moveCountry.heading = Are you moving your business to an EU country?
-moveCountry.checkYourAnswersLabel = Moved to an EU country
-moveCountry.error.required = Select yes if you moved your business to an EU country
-moveCountry.change.hidden = if you moved to an EU country
+moveCountry.checkYourAnswersLabel = Moving business to an EU country
+moveCountry.error.required = Select yes if you are moving your business to an EU country
+moveCountry.change.hidden = if you moving your business to an EU country
 
 euCountry.title = Which country is your business moving to?
 euCountry.heading = Which country is your business moving to?
@@ -105,6 +107,8 @@ stoppedUsingServiceDate.error.required.two = The date you stopped using this ser
 stoppedUsingServiceDate.error.required = The date you stopped using this service must include {0}
 stoppedUsingServiceDate.error.invalid = Give a correct date
 stoppedUsingServiceDate.error.invalidDateRage = The date must be between {0} and {1} inclusively
+stoppedUsingServiceDate.checkYourAnswersLabel = Leaving date
+stoppedUsingServiceDate.change.hidden = leaving date
 
 stoppedSellingGoodsDate.title = When did or when will your business stop selling eligible goods?
 stoppedSellingGoodsDate.heading = When did or when will your business stop selling eligible goods?
@@ -114,10 +118,14 @@ stoppedSellingGoodsDate.error.required.two = The date you stopped selling goods 
 stoppedSellingGoodsDate.error.required = The date you stopped selling goods must include the {0}
 stoppedSellingGoodsDate.error.invalid = Give a correct date
 stoppedSellingGoodsDate.error.invalidDateRage = The date must be between {0} and {1} inclusively
+stoppedSellingGoodsDate.checkYourAnswersLabel = Stopped trading goods date
+stoppedSellingGoodsDate.change.hidden = stopped trading goods date
 
 stopSellingGoods.title = Has your business stopped selling eligible goods to customers in the EU or Northern Ireland?
 stopSellingGoods.heading = Has your business stopped selling eligible goods to customers in the EU or Northern Ireland?
 stopSellingGoods.error.required = Select yes if you want to stop selling goods
+stopSellingGoods.checkYourAnswersLabel = Stopped trading goods
+stopSellingGoods.change.hidden = if you've stopped selling goods
 
 applicationComplete.title = We have received your request to leave
 applicationComplete.heading = We have received your request to leave
@@ -174,9 +182,6 @@ notRegistered.heading = You cannot use this service
 notRegistered.label = To use this service, you must sign in with the same Government Gateway user ID you used when you registered for the VAT Import One Stop Shop.
 notRegistered.subHeading = If you have not registered
 notRegistered.registerLink = You can <a class="govuk-link" href="https://www.gov.uk/guidance/register-for-the-vat-import-one-stop-shop-scheme">register for the VAT Import One Stop Shop scheme</a>.
-
-cannotAccess.title = You cannot access this page
-cannotAccess.heading = You cannot access this page
 
 ivFailedIdentityVerification.title = We could not confirm your identity
 ivFailedIdentityVerification.heading = We could not confirm your identity
