@@ -17,23 +17,28 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
+import date.{Dates, Today}
 import connectors.RegistrationConnector
 import models.audit.{ExclusionAuditModel, ExclusionAuditType, SubmissionResult}
 import models.etmp.EtmpExclusionReason
 import models.responses.UnexpectedResponseStatus
-import models.{CheckMode, RegistrationWrapper}
+import models.{CheckMode, Country, RegistrationWrapper}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, EuVatNumberPage, MoveCountryPage, MoveDatePage, Waypoint, Waypoints}
+import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.AuditService
+import viewmodels.checkAnswers.{EuCountrySummary, EuVatNumberSummary, MoveCountrySummary, MoveDateSummary}
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency with BeforeAndAfterEach {
@@ -42,6 +47,15 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
   private val mockAuditService: AuditService = mock[AuditService]
   private val mockRegistrationConnector = mock[RegistrationConnector]
+  private val today: LocalDate = LocalDate.now
+  private val mockToday: Today = mock[Today]
+  when(mockToday.date).thenReturn(today)
+  private val date: Dates = new Dates(mockToday)
+  private val answers = emptyUserAnswers
+    .set(MoveCountryPage, true).success.value
+    .set(EuCountryPage, Country("DE", "Germany")).success.value
+    .set(MoveDatePage, today).success.value
+    .set(EuVatNumberPage, "DE123456789").success.value
 
   private val registration: RegistrationWrapper = registrationWrapper.copy(registration =
     registrationWrapper.registration
@@ -57,44 +71,32 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
     ".onPageLoad" - {
 
-      "must return OK and the correct view for a GET when user answers Yes to Move Country Page" in {
-
-        val answers = emptyUserAnswers.set(MoveCountryPage, true).success.value
+      "must return OK and the correct view for a GET" in {
 
         val application = applicationBuilder(userAnswers = Some(answers), registration = registration)
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
         running(application) {
+          implicit val msgs: Messages = messages(application)
           val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
 
           val result = route(application, request).value
-
+          val appConfig = application.injector.instanceOf[FrontendAppConfig]
           val view = application.injector.instanceOf[CheckYourAnswersView]
           val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
-          val list = SummaryListViewModel(Seq.empty)
+          val list = SummaryListViewModel(
+            Seq(
+              MoveCountrySummary.row(answers, waypoints, CheckYourAnswersPage),
+              EuCountrySummary.rowNewCountry(answers, waypoints, CheckYourAnswersPage),
+              MoveDateSummary.rowMoveDate(answers, waypoints, CheckYourAnswersPage, date),
+              EuVatNumberSummary.rowEuVatNumber(answers, waypoints, CheckYourAnswersPage)
+            ).flatten
+          )
 
           status(result) mustBe OK
 
-          contentAsString(result) mustBe view(waypoints, list, isValid = false)(request, messages(application)).toString
-        }
-      }
-
-      "must redirect to Cannot Access Controller for a GET when user answers No to Move Country Page" in {
-
-        val answers = emptyUserAnswers.set(MoveCountryPage, false).success.value
-
-        val application = applicationBuilder(userAnswers = Some(answers), registration = registration)
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
-          .build()
-
-        running(application) {
-          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-
-          val result = route(application, request).value
-
-          status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.CannotAccessController.onPageLoad().url)
+          contentAsString(result) mustBe view(waypoints, list, isValid = true, appConfig.iossYourAccountUrl)(request, messages(application)).toString
         }
       }
     }

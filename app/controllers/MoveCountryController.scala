@@ -20,6 +20,7 @@ import controllers.actions._
 import forms.MoveCountryFormProvider
 import models.UserAnswers
 import pages.{MoveCountryPage, Waypoints}
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -41,7 +42,7 @@ class MoveCountryController @Inject()(
                                        view: MoveCountryView
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  val form = formProvider()
+  val form: Form[Boolean] = formProvider()
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (identify andThen getData andThen checkNoExclusion).async {
     implicit request =>

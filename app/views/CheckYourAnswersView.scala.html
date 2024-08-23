@@ -18,15 +18,15 @@
 @import views.html.components.ButtonGroupProcessing
 
 @this(
-  formHelper: FormWithCSRF,
-  layout: templates.Layout,
-  govukSummaryList: GovukSummaryList,
-  button: ButtonGroupProcessing,
-  govukErrorSummary: GovukErrorSummary,
-  govukWarningText: GovukWarningText
+        formHelper: FormWithCSRF,
+        layout: templates.Layout,
+        govukSummaryList: GovukSummaryList,
+        button: ButtonGroupProcessing,
+        govukErrorSummary: GovukErrorSummary,
+        govukWarningText: GovukWarningText
 )
 
-@(waypoints: Waypoints, list: SummaryList, isValid: Boolean)(implicit request: Request[_], messages: Messages)
+@(waypoints: Waypoints, list: SummaryList, isValid: Boolean, cancelLink: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
 
@@ -47,23 +47,14 @@
         </p>
 
         @formHelper(action = routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = false)) {
-            @button("site.submit", CheckYourAnswersPage.route(waypoints).url, waypoints)
+            @button("site.confirm", cancelLink)
         }
     } else {
         <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
         <p class="govuk-body">@messages("error.missing_answers_prompt.general")</p>
 
         @formHelper(action = routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = true)) {
-            @button("error.resolve_missing_answers", CheckYourAnswersPage.route(waypoints).url, waypoints)
+            @button("error.resolve_missing_answers", cancelLink)
         }
     }
-
-    <div id="processing-wheel" hidden>
-        <div id="processing" aria-live="polite" class="govuk-!-margin-bottom-9">
-            <h2 class="govuk-heading-m">
-            @messages("site.processing")
-            </h2>
-            <div class="processing-wheel-loader"></div>
-        </div>
-    </div>
 }

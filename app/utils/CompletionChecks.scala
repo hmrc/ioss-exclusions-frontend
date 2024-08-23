@@ -16,36 +16,13 @@
 
 package utils
 
-import models._
 import models.requests.DataRequest
 import pages._
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, Result}
 
-import scala.concurrent.Future
 
 trait CompletionChecks {
-
-  protected def withCompleteDataModel[A](index: Index, data: Index => Option[A], onFailure: Option[A] => Result)
-                                        (onSuccess: => Result): Result = {
-    val incomplete = data(index)
-    if (incomplete.isEmpty) {
-      onSuccess
-    } else {
-      onFailure(incomplete)
-    }
-  }
-
-  protected def withCompleteDataAsync[A](data: () => Seq[A], onFailure: Seq[A] => Future[Result])
-                                        (onSuccess: => Future[Result]): Future[Result] = {
-
-    val incomplete = data()
-    if (incomplete.isEmpty) {
-      onSuccess
-    } else {
-      onFailure(incomplete)
-    }
-  }
 
   private def isEuCountryValid()(implicit request: DataRequest[AnyContent]): Boolean =
     request.userAnswers.get(EuCountryPage).isDefined
@@ -56,15 +33,57 @@ trait CompletionChecks {
   private def isEuVatNumberValid()(implicit request: DataRequest[AnyContent]): Boolean =
     request.userAnswers.get(EuVatNumberPage).isDefined
 
+  private def hasStoppedSellingGoodsDateValid()(implicit request: DataRequest[AnyContent]): Boolean =
+    request.userAnswers.get(StoppedSellingGoodsDatePage).isDefined
+
+  private def hasStoppedUsingServiceDate()(implicit request: DataRequest[AnyContent]): Boolean =
+    request.userAnswers.get(StoppedUsingServiceDatePage).isDefined
+
+  private def checkHasMovedCountryJourney()(implicit request: DataRequest[AnyContent]): Boolean = {
+    val hasMovedCountry = request.userAnswers.get(MoveCountryPage).contains(true)
+    if (hasMovedCountry) {
+      isEuCountryValid() && isMoveDateValid() && isEuVatNumberValid()
+    } else {
+      false
+    }
+  }
+
+  private def checkHasStoppedSellingGoodsJourney()(implicit request: DataRequest[AnyContent]): Boolean = {
+    val hasStoppedSellingGoods = request.userAnswers.get(StopSellingGoodsPage).contains(true)
+    if (hasStoppedSellingGoods) hasStoppedSellingGoodsDateValid() else false
+  }
+
+  private def checkStoppedUsingServiceJourney()(implicit request: DataRequest[AnyContent]): Boolean = {
+    request.userAnswers.get(LeaveSchemePage).exists {
+      case true =>
+        hasStoppedUsingServiceDate()
+      case false =>
+        false
+    }
+  }
+
   def validate()(implicit request: DataRequest[AnyContent]): Boolean = {
-    isEuCountryValid() && isMoveDateValid() && isEuVatNumberValid()
+    checkHasMovedCountryJourney() ||
+      checkHasStoppedSellingGoodsJourney() ||
+      checkStoppedUsingServiceJourney()
   }
 
   def getFirstValidationErrorRedirect(waypoints: Waypoints)(implicit request: DataRequest[AnyContent]): Option[Result] = {
-    incompleteEuCountryRedirect(waypoints) orElse
-      incompleteMoveDateRedirect(waypoints) orElse
-      incompleteEuVatNumberRedirect(waypoints)
+    checkMoveCountryRedirects(waypoints) orElse
+      incompleteStoppedSellingGoodsDateRedirect(waypoints) orElse
+      incompleteStoppedUsingServiceRedirect(waypoints) orElse
+      noJourneyAnswered()
 
+  }
+
+  private def checkMoveCountryRedirects(waypoints: Waypoints)(implicit request: DataRequest[AnyContent]): Option[Result] = {
+    if (request.userAnswers.get(MoveCountryPage).contains(true)) {
+      incompleteEuCountryRedirect(waypoints) orElse
+        incompleteMoveDateRedirect(waypoints) orElse
+        incompleteEuVatNumberRedirect(waypoints)
+    } else {
+      None
+    }
   }
 
   private def incompleteEuCountryRedirect(waypoints: Waypoints)(implicit request: DataRequest[AnyContent]): Option[Result] = if (!isEuCountryValid()) {
@@ -83,5 +102,45 @@ trait CompletionChecks {
     Some(Redirect(controllers.routes.EuVatNumberController.onPageLoad(waypoints)))
   } else {
     None
+  }
+
+  private def incompleteStoppedSellingGoodsDateRedirect(waypoints: Waypoints)(implicit request: DataRequest[AnyContent]): Option[Result] = {
+    if (request.userAnswers.get(StopSellingGoodsPage).contains(true)) {
+      if (!hasStoppedSellingGoodsDateValid()) {
+        Some(Redirect(controllers.routes.StoppedSellingGoodsDateController.onPageLoad(waypoints)))
+      } else {
+        None
+      }
+    } else {
+      None
+    }
+  }
+
+  private def incompleteStoppedUsingServiceRedirect(waypoints: Waypoints)(implicit request: DataRequest[AnyContent]): Option[Result] = {
+    if (request.userAnswers.get(LeaveSchemePage).contains(true)) {
+      if (!hasStoppedUsingServiceDate()) {
+        Some(Redirect(controllers.routes.StoppedUsingServiceDateController.onPageLoad(waypoints)))
+      } else {
+        None
+      }
+    } else {
+      None
+    }
+  }
+
+  private def noJourneyAnswered()(implicit request: DataRequest[AnyContent]): Option[Result] = {
+    if (request.userAnswers.get(MoveCountryPage).contains(true)) {
+      None
+    } else {
+      if (request.userAnswers.get(StopSellingGoodsPage).contains(true)) {
+        None
+      } else {
+        if (request.userAnswers.get(LeaveSchemePage).contains(true)) {
+          None
+        } else {
+          Some(Redirect(controllers.routes.MoveCountryController.onPageLoad(EmptyWaypoints)))
+        }
+      }
+    }
   }
 }
