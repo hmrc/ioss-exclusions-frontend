@@ -48,6 +48,8 @@ class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthCo
                                               urlBuilderService: UrlBuilderService)
                                              (implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
 
+  private lazy val redirectPolicy = (OnlyRelative | AbsoluteWithHostnameFromAllowlist(config.allowedRedirectUrls: _*))
+
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
@@ -72,7 +74,8 @@ class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthCo
     }
   } recover {
     case _: NoActiveSession =>
-      Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
+      Redirect(config.loginUrl, Map("continue" ->
+        Seq(urlBuilderService.loginContinueUrl(request).get(redirectPolicy).url)))
     case _: InsufficientConfidenceLevel =>
       upliftConfidenceLevel(request)
     case _: AuthorisationException =>
