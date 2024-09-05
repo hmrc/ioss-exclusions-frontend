@@ -89,7 +89,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
             urlBuilder(application)
           )
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result = controller.onPageLoad()(FakeRequest(GET, "/example"))
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value must startWith(appConfig.loginUrl)
@@ -116,7 +116,7 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
             urlBuilder(application)
           )
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result = controller.onPageLoad()(FakeRequest(GET, "/example"))
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value must startWith(appConfig.loginUrl)
