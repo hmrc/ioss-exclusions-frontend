@@ -130,6 +130,7 @@ stopSellingGoods.change.hidden = if your business has stopped selling eligible g
 applicationComplete.title = We have received your request to leave
 applicationComplete.heading = We have received your request to leave
 applicationComplete.stopSellingGoods.text = Your business no longer sells eligible goods to customers in the EU or Northern Ireland.
+applicationComplete.stopSellingGoods.text.future = Your business will no longer sell eligible goods to customers in the EU or Northern Ireland.
 applicationComplete.moving.text = You are moving your business operations to {0}.
 applicationComplete.leave.text = You will leave this service on {0}.
 applicationComplete.next.heading = What happens next

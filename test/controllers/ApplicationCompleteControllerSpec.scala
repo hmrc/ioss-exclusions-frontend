@@ -20,7 +20,7 @@ import base.SpecBase
 import config.FrontendAppConfig
 import date.Today
 import org.mockito.MockitoSugar.when
-import pages.{EuCountryPage, MoveCountryPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage, StopSellingGoodsPage}
+import pages.{EuCountryPage, MoveCountryPage, MoveDatePage, StopSellingGoodsPage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -37,7 +37,9 @@ class ApplicationCompleteControllerSpec extends SpecBase {
   "ApplicationComplete Controller" - {
 
     "when someone moves business" - {
+
       "must return OK with the leave date being the 10th of next month (10th Feb)" in {
+
         val userAnswers = emptyUserAnswers
           .set(MoveCountryPage, true).success.get
           .set(EuCountryPage, country).success.get
@@ -72,6 +74,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
     }
 
     "when someone stops selling goods" - {
+
       "must return OK with the leave date being end of the month (31st Jan) " +
         "when stopping at least 15 days prior to the end of the month (16th Jan)" in {
 
@@ -107,9 +110,46 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           )(request, messages(application)).toString
         }
       }
+
+      "must return OK with the leave date being end of the month (31st Jan) " +
+        "when stopping after today (26th Jan)" in {
+
+        val stoppedSellingGoodsDate = LocalDate.of(2024, 1, 26)
+
+        val userAnswers = emptyUserAnswers
+          .set(MoveCountryPage, false).success.get
+          .set(StopSellingGoodsPage, true).success.get
+          .set(StoppedSellingGoodsDatePage, stoppedSellingGoodsDate).success.get
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[Today].toInstance(mockToday))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ApplicationCompleteView]
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+
+          status(result) mustEqual OK
+          val leaveDate = "1 February 2024"
+          val maxChangeDate = "31 January 2024"
+
+          contentAsString(result) mustEqual view(
+            config.iossYourAccountUrl,
+            leaveDate,
+            maxChangeDate,
+            Some(messages(application)("applicationComplete.stopSellingGoods.text.future"))
+          )(request, messages(application)).toString
+        }
+      }
     }
 
     "when someone stops using the service" - {
+
       "must return OK with the leave date being 1st day of next month (1st Feb) " +
         "when stopping at least 15 days prior to the end of the month (16th Jan)" in {
 
@@ -171,5 +211,5 @@ class ApplicationCompleteControllerSpec extends SpecBase {
       }
     }
   }
-
 }
+
