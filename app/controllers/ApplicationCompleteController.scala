@@ -19,14 +19,15 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions._
-import date.Dates
+import date.{Dates, LocalDateOps}
 import models.requests.DataRequest
-import pages.{EuCountryPage, MoveCountryPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage, StopSellingGoodsPage}
+import pages.{EuCountryPage, MoveCountryPage, MoveDatePage, StopSellingGoodsPage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ApplicationCompleteView
 
+import java.time.LocalDate
 import javax.inject.Inject
 
 class ApplicationCompleteController @Inject()(
@@ -65,13 +66,21 @@ class ApplicationCompleteController @Inject()(
       leaveDate <- request.userAnswers.get(MoveDatePage)
     } yield {
       val maxChangeDate = leaveDate.plusMonths(1).withDayOfMonth(dates.MoveDayOfMonthSplit)
+      val isDateBeforeToday = leaveDate <= LocalDate.now()
+
+      val leaveMessage = if (isDateBeforeToday) {
+        Some(messages("applicationComplete.left.text"))
+      } else {
+        Some(messages("applicationComplete.leave.text", dates.formatter.format(leaveDate)))
+      }
 
       Ok(view(
         config.iossYourAccountUrl,
         dates.formatter.format(leaveDate),
         dates.formatter.format(maxChangeDate),
         Some(messages("applicationComplete.moving.text", country.name)),
-        Some(messages("applicationComplete.next.info.bullet0", country.name, dates.formatter.format(maxChangeDate)))
+        Some(messages("applicationComplete.next.info.bullet0", country.name, dates.formatter.format(maxChangeDate))),
+        leaveMessage
       ))
     }
   }

@@ -132,6 +132,7 @@ applicationComplete.heading = We have received your request to leave
 applicationComplete.stopSellingGoods.text = Your business no longer sells eligible goods to customers in the EU or Northern Ireland.
 applicationComplete.moving.text = You are moving your business operations to {0}.
 applicationComplete.leave.text = You will leave this service on {0}.
+applicationComplete.left.text = You have now left the service.
 applicationComplete.next.heading = What happens next
 applicationComplete.next.info.top = You must:
 applicationComplete.next.info.bullet0 = register for the Import One Stop Shop scheme in {0} by {1} to continue using the scheme without a break
