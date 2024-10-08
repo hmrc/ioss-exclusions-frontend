@@ -20,7 +20,7 @@ import com.google.inject.Inject
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.routes
-import models.requests.{AuthenticatedIdentifierRequest, IdentifierRequest}
+import models.requests.IdentifierRequest
 import play.api.mvc.Results._
 import play.api.mvc._
 import services.{AccountService, UrlBuilderService}
@@ -30,13 +30,12 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
 import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, OnlyRelative}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
-
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
 
 trait IdentifierAction extends ActionBuilder[IdentifierRequest, AnyContent] with ActionFunction[Request, IdentifierRequest]
 

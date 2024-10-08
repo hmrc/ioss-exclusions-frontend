@@ -49,8 +49,8 @@ index.title = ioss-exclusions-frontend
 index.heading = ioss-exclusions-frontend
 index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
 
-checkYourAnswers.title = Check your answers
-checkYourAnswers.heading = Check your answers
+checkYourAnswers.title = Check your answers for leaving the IOSS service
+checkYourAnswers.heading = Check your answers for leaving the IOSS service
 checkYourAnswers.hint = I confirm I want to leave the IOSS service.
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
@@ -123,13 +123,14 @@ stoppedSellingGoodsDate.change.hidden = stopped trading goods date
 
 stopSellingGoods.title = Has your business stopped selling eligible goods to customers in the EU or Northern Ireland?
 stopSellingGoods.heading = Has your business stopped selling eligible goods to customers in the EU or Northern Ireland?
-stopSellingGoods.error.required = Select yes if you want to stop selling goods
+stopSellingGoods.error.required = Select yes if your business has stopped selling eligible goods
 stopSellingGoods.checkYourAnswersLabel = Stopped trading goods
-stopSellingGoods.change.hidden = if you've stopped selling goods
+stopSellingGoods.change.hidden = if your business has stopped selling eligible goods
 
 applicationComplete.title = We have received your request to leave
 applicationComplete.heading = We have received your request to leave
 applicationComplete.stopSellingGoods.text = Your business no longer sells eligible goods to customers in the EU or Northern Ireland.
+applicationComplete.stopSellingGoods.text.future = Your business will no longer sell eligible goods to customers in the EU or Northern Ireland.
 applicationComplete.moving.text = You are moving your business operations to {0}.
 applicationComplete.leave.text = You will leave this service on {0}.
 applicationComplete.left.text = You have now left the service.
@@ -149,9 +150,8 @@ leaveScheme.change.hidden = leave scheme
 
 cancelLeaveScheme.title = Do you want to cancel your request to leave the Import One Stop Shop scheme?
 cancelLeaveScheme.heading = Do you want to cancel your request to leave the Import One Stop Shop scheme?
-cancelLeaveScheme.checkYourAnswersLabel = cancel leave scheme
 cancelLeaveScheme.error.required = Select yes if you want to cancel your request to leave the Import One Stop Shop scheme
-cancelLeaveScheme.change.hidden = cancel leave scheme
+cancelLeaveScheme.change.hidden = if you want to cancel your request to leave the Import One Stop Shop scheme
 
 cancelLeaveSchemeComplete.title = You have cancelled your request to leave
 cancelLeaveSchemeComplete.heading = You have cancelled your request to leave

@@ -89,13 +89,20 @@ class ApplicationCompleteController @Inject()(
   private def onStopSellingGoods()(implicit request: DataRequest[_]): Option[Result] = {
     val messages: Messages = implicitly[Messages]
 
-    request.userAnswers.get(StoppedSellingGoodsDatePage).map { _ =>
+    request.userAnswers.get(StoppedSellingGoodsDatePage).map { date =>
       val leaveDate = dates.getLeaveDateWhenStoppedSellingGoods
+
+      val leaveMessage: String = if (dates.today.date.isAfter(date)) {
+        "applicationComplete.stopSellingGoods.text"
+      } else {
+        "applicationComplete.stopSellingGoods.text.future"
+      }
+
       Ok(view(
         config.iossYourAccountUrl,
         dates.formatter.format(leaveDate),
         dates.formatter.format(leaveDate.minusDays(1)),
-        Some(messages("applicationComplete.stopSellingGoods.text"))
+        Some(messages(leaveMessage))
       ))
     }
   }

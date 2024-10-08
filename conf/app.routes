@@ -23,11 +23,11 @@ GET         /unauthorised                                  controllers.Unauthori
 
 GET         /cannot-use-not-registered                     controllers.NotRegisteredController.onPageLoad()
 
-GET         /move-country                                  controllers.MoveCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /move-country                                  controllers.MoveCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /moving-to-an-eu-country                       controllers.MoveCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /moving-to-an-eu-country                       controllers.MoveCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /eu-country                                    controllers.EuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /eu-country                                    controllers.EuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /which-eu-country                              controllers.EuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /which-eu-country                              controllers.EuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET         /eu-vat-number                                 controllers.EuVatNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /eu-vat-number                                 controllers.EuVatNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
@@ -57,7 +57,7 @@ GET         /cancel-leave-scheme-submission-failure        controllers.reversal.
 
 GET         /already-left-scheme-error                     controllers.AlreadyLeftSchemeErrorController.onPageLoad()
 
-GET         /successful                                    controllers.ApplicationCompleteController.onPageLoad()
+GET         /leave-request-received                        controllers.ApplicationCompleteController.onPageLoad()
 
 GET         /submission-failure                            controllers.SubmissionFailureController.onPageLoad()
 
