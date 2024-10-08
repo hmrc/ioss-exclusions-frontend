@@ -31,7 +31,7 @@ import java.time.LocalDate
 class ApplicationCompleteControllerSpec extends SpecBase {
 
   val today = LocalDate.of(2024, 1, 25)
-  val mockToday = mock[Today]
+  val mockToday: Today = mock[Today]
   when(mockToday.date).thenReturn(today)
 
   "ApplicationComplete Controller" - {
@@ -65,7 +65,8 @@ class ApplicationCompleteControllerSpec extends SpecBase {
             leaveDate,
             maxMoveDate,
             Some(messages(application)("applicationComplete.moving.text", country.name)),
-            Some(messages(application)("applicationComplete.next.info.bullet0", country.name, maxMoveDate))
+            Some(messages(application)("applicationComplete.next.info.bullet0", country.name, maxMoveDate)),
+            Some(messages(application)("applicationComplete.left.text")),
           )(request, messages(application)).toString
         }
       }
