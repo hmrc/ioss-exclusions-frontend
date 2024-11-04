@@ -106,3 +106,29 @@ if (typeof HMRCAccessibleAutocomplete != 'undefined' && document.querySelector('
   }
 }
 
+const submitButton = document.querySelector('#submit');
+
+if(submitButton) {
+  submitButton.addEventListener("click", showTheSpinner);
+}
+
+function showTheSpinner() {
+  const processingWheel = document.getElementById("processing-wheel");
+
+  //make the spinning wheel visible
+    processingWheel.removeAttribute("aria-hidden");
+    processingWheel.hidden = false;
+
+  //make the button hidden
+  document.getElementById("processing-button-group").style.visibility = 'hidden';
+
+  const processing = document.getElementById("processing");
+
+      processing.innerHTML = '';
+      processing.innerHTML = '<h2 class="govuk-heading-m">We are processing your request to leave this service.</h2><div><svg class="processing-wheel-loader" height="100" width="100"><circle cx="50" cy="50" r="40"  fill="none"/></svg></div>';
+
+
+  return false;
+}
+
+

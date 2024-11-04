@@ -13,6 +13,7 @@ site.signIn = Sign in
 site.govuk = GOV.UK
 site.confirm = Confirm
 site.cancel = Cancel
+site.processing = We are processing your request to leave this service.
 
 date.day = Day
 date.month = Month
