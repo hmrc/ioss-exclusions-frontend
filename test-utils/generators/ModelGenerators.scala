@@ -16,9 +16,9 @@
 
 package generators
 
-import models._
+import models.*
 import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
-import models.etmp._
+import models.etmp.*
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Gen.option
@@ -391,4 +391,15 @@ trait ModelGenerators {
       )
     }
   }
+
+  implicit lazy val arbitraryEtmpAmendRegistrationChangeLog: Arbitrary[EtmpAmendRegistrationChangeLog] =
+    Arbitrary {
+      for {
+        tradingNames <- arbitrary[Boolean]
+        fixedEstablishments <- arbitrary[Boolean]
+        contactDetails <- arbitrary[Boolean]
+        bankDetails <- arbitrary[Boolean]
+        reRegistration <- arbitrary[Boolean]
+      } yield EtmpAmendRegistrationChangeLog(tradingNames, fixedEstablishments, contactDetails, bankDetails, reRegistration)
+    }
 }

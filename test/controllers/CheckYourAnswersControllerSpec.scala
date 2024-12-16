@@ -24,8 +24,7 @@ import models.audit.{ExclusionAuditModel, ExclusionAuditType, SubmissionResult}
 import models.etmp.EtmpExclusionReason
 import models.responses.UnexpectedResponseStatus
 import models.{CheckMode, Country, RegistrationWrapper}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, EuVatNumberPage, MoveCountryPage, MoveDatePage, Waypoint, Waypoints}

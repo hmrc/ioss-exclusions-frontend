@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import config.FrontendAppConfig
 import date.Today
-import org.mockito.MockitoSugar.when
+import org.mockito.Mockito.when
 import pages.{EuCountryPage, MoveCountryPage, MoveDatePage, StopSellingGoodsPage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest

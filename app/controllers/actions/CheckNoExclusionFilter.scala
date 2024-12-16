@@ -23,11 +23,10 @@ import models.requests.OptionalDataRequest
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 
-import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CheckNoExclusionFilterImpl @Inject()(clock: Clock)(implicit val executionContext: ExecutionContext)
+class CheckNoExclusionFilterImpl @Inject()()(implicit val executionContext: ExecutionContext)
   extends CheckNoExclusionFilter with Logging {
 
   override protected def filter[A](request: OptionalDataRequest[A]): Future[Option[Result]] = {

@@ -23,8 +23,7 @@ import models.CountryWithValidationDetails
 import models.audit.ExclusionAuditType
 import models.etmp._
 import models.requests.{EtmpExclusionDetails, EtmpNewMemberState}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import pages.{StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
