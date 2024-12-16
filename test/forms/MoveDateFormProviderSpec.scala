@@ -18,7 +18,7 @@ package forms
 
 import date.{Dates, LocalDateOps, Today, TodayImpl}
 import forms.behaviours.DateBehaviours
-import org.mockito.MockitoSugar.when
+import org.mockito.Mockito.when
 import org.scalacheck.Gen
 import play.api.data.FormError
 import play.api.i18n.Messages

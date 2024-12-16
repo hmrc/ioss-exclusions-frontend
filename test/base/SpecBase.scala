@@ -85,7 +85,7 @@ trait SpecBase
   protected def applicationBuilder(userAnswers: Option[UserAnswers] = None,
                                    registration: RegistrationWrapper = registrationWrapper): GuiceApplicationBuilder = {
     val application = new GuiceApplicationBuilder()
-    val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
+    val bodyParsers = application.injector().instanceOf[BodyParsers.Default]
     application
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],

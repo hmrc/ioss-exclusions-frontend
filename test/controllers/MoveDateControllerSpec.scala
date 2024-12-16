@@ -77,7 +77,7 @@ class MoveDateControllerSpec extends SpecBase {
           dates.formatter.format(dates.maxMoveDate),
           dates.dateHint,
           emptyWaypoints
-        )(getRequest, messages(application)).toString
+        )(getRequest(), messages(application)).toString
       }
     }
 
@@ -157,7 +157,7 @@ class MoveDateControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val result = route(application, getRequest).value
+        val result = route(application, getRequest()).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url

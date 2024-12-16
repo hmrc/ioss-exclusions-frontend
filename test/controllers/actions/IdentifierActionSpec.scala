@@ -337,8 +337,6 @@ class IdentifierActionSpec extends SpecBase with BeforeAndAfterEach {
 
       val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
 
-      val config = application.injector.instanceOf[FrontendAppConfig]
-
       running(application) {
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
 

@@ -61,7 +61,7 @@ class RegistrationService @Inject()(
     )
     val failure: ExclusionAuditModel = success.copy(submissionResult = SubmissionResult.Failure)
 
-    amendRegistration(answers, exclusionReason, vrn, iossNumber, registration).andThen {
+    amendRegistration(answers, exclusionReason, iossNumber, registration).andThen {
       case Success(Right(_)) => auditService.audit(success)(hc, request)
       case _ => auditService.audit(failure)(hc, request)
     }
@@ -70,7 +70,6 @@ class RegistrationService @Inject()(
   private def amendRegistration(
                                  answers: UserAnswers,
                                  exclusionReason: Option[EtmpExclusionReason],
-                                 vrn: Vrn,
                                  iossNumber: String,
                                  registration: EtmpDisplayRegistration
                                )(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
@@ -78,7 +77,6 @@ class RegistrationService @Inject()(
       answers,
       exclusionReason,
       registration,
-      vrn,
       iossNumber
     ))
   }
@@ -87,7 +85,6 @@ class RegistrationService @Inject()(
                                                  answers: UserAnswers,
                                                  exclusionReason: Option[EtmpExclusionReason],
                                                  registration: EtmpDisplayRegistration,
-                                                 vrn: Vrn,
                                                  iossNumber: String,
                                                ): EtmpAmendRegistrationRequest = {
 
