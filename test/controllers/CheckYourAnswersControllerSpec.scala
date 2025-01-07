@@ -24,16 +24,17 @@ import models.audit.{ExclusionAuditModel, ExclusionAuditType, SubmissionResult}
 import models.etmp.EtmpExclusionReason
 import models.responses.UnexpectedResponseStatus
 import models.{CheckMode, Country, RegistrationWrapper}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.*
 import org.scalatest.BeforeAndAfterEach
-import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, EuCountryPage, EuVatNumberPage, MoveCountryPage, MoveDatePage, Waypoint, Waypoints}
+import pages._
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import services.AuditService
-import viewmodels.checkAnswers.{EuCountrySummary, EuVatNumberSummary, MoveCountrySummary, MoveDateSummary}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+import viewmodels.checkAnswers.*
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
@@ -89,13 +90,142 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
               MoveCountrySummary.row(answers, waypoints, CheckYourAnswersPage),
               EuCountrySummary.rowNewCountry(answers, waypoints, CheckYourAnswersPage),
               MoveDateSummary.rowMoveDate(answers, waypoints, CheckYourAnswersPage, date),
-              EuVatNumberSummary.rowEuVatNumber(answers, waypoints, CheckYourAnswersPage)
+              EuVatNumberSummary.rowEuVatNumber(answers, waypoints, CheckYourAnswersPage),
+              StopSellingGoodsSummary.row(answers, waypoints, CheckYourAnswersPage),
+              StoppedSellingGoodsDateSummary.row(answers, waypoints, CheckYourAnswersPage, date),
+              StoppedUsingServiceDateSummary.row(answers, waypoints, CheckYourAnswersPage, date),
+
             ).flatten
           )
 
           status(result) mustBe OK
 
           contentAsString(result) mustBe view(waypoints, list, isValid = true, appConfig.iossYourAccountUrl)(request, messages(application)).toString
+        }
+      }
+
+      "must include StopSellingGoodsSummary row in the summary list when data is present" in {
+        val answersWithStopSellingGoods = answers
+          .set(StopSellingGoodsPage, true).success.value
+
+        val application = applicationBuilder(userAnswers = Some(answersWithStopSellingGoods), registration = registration)
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .build()
+
+        running(application) {
+          implicit val msgs: Messages = messages(application)
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+
+          val result = route(application, request).value
+          val view = application.injector.instanceOf[CheckYourAnswersView]
+          val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
+          val list = SummaryListViewModel(
+            Seq(
+              MoveCountrySummary.row(answersWithStopSellingGoods, waypoints, CheckYourAnswersPage),
+              StopSellingGoodsSummary.row(answersWithStopSellingGoods, waypoints, CheckYourAnswersPage),
+              EuCountrySummary.rowNewCountry(answersWithStopSellingGoods, waypoints, CheckYourAnswersPage),
+              MoveDateSummary.rowMoveDate(answersWithStopSellingGoods, waypoints, CheckYourAnswersPage, date),
+              EuVatNumberSummary.rowEuVatNumber(answersWithStopSellingGoods, waypoints, CheckYourAnswersPage),
+              StoppedSellingGoodsDateSummary.row(answersWithStopSellingGoods, waypoints, CheckYourAnswersPage, date),
+              StoppedUsingServiceDateSummary.row(answersWithStopSellingGoods, waypoints, CheckYourAnswersPage, date)
+            ).flatten
+          )
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(waypoints, list, isValid = true, application.injector.instanceOf[FrontendAppConfig].iossYourAccountUrl)(request, msgs).toString
+
+          val stopSellingGoodsRow = StopSellingGoodsSummary.row(answersWithStopSellingGoods, waypoints, CheckYourAnswersPage)
+          stopSellingGoodsRow mustBe defined
+
+          val actualValue = stopSellingGoodsRow.value.value.content.asInstanceOf[Text].value
+
+          val expectedValue = msgs("site.yes")
+
+          actualValue mustBe expectedValue
+        }
+      }
+
+      "must include StoppedSellingGoodsDateSummary row in the summary list when data is present" in {
+        val testDate = LocalDate.of(2023, 12, 31)
+        val answersWithStoppedSellingGoodsDate = answers
+          .set(StoppedSellingGoodsDatePage, testDate).success.value
+
+        val application = applicationBuilder(userAnswers = Some(answersWithStoppedSellingGoodsDate), registration = registration)
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .build()
+
+        running(application) {
+          implicit val msgs: Messages = messages(application)
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+
+          val result = route(application, request).value
+          val view = application.injector.instanceOf[CheckYourAnswersView]
+          val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
+          val dates = application.injector.instanceOf[Dates]
+          val list = SummaryListViewModel(
+            Seq(
+              MoveCountrySummary.row(answersWithStoppedSellingGoodsDate, waypoints, CheckYourAnswersPage),
+              StopSellingGoodsSummary.row(answersWithStoppedSellingGoodsDate, waypoints, CheckYourAnswersPage),
+              EuCountrySummary.rowNewCountry(answersWithStoppedSellingGoodsDate, waypoints, CheckYourAnswersPage),
+              MoveDateSummary.rowMoveDate(answersWithStoppedSellingGoodsDate, waypoints, CheckYourAnswersPage, dates),
+              EuVatNumberSummary.rowEuVatNumber(answersWithStoppedSellingGoodsDate, waypoints, CheckYourAnswersPage),
+              StoppedSellingGoodsDateSummary.row(answersWithStoppedSellingGoodsDate, waypoints, CheckYourAnswersPage, dates),
+              StoppedUsingServiceDateSummary.row(answersWithStoppedSellingGoodsDate, waypoints, CheckYourAnswersPage, dates)
+            ).flatten
+          )
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(waypoints, list, isValid = true, application.injector.instanceOf[FrontendAppConfig].iossYourAccountUrl)(request, msgs).toString
+
+          val stoppedSellingGoodsDateRow = StoppedSellingGoodsDateSummary.row(answersWithStoppedSellingGoodsDate, waypoints, CheckYourAnswersPage, dates)
+          stoppedSellingGoodsDateRow mustBe defined
+
+          val actualValue = stoppedSellingGoodsDateRow.value.value.content.asInstanceOf[Text].value
+          val expectedValue = dates.formatter.format(testDate)
+
+          actualValue mustBe expectedValue
+        }
+      }
+
+      "must include StoppedUsingServiceDateSummary row in the summary list when data is present" in {
+        val testDate = LocalDate.of(2023, 12, 31)
+        val answersWithStoppedUsingServiceDate = answers
+          .set(StoppedUsingServiceDatePage, testDate).success.value
+
+        val application = applicationBuilder(userAnswers = Some(answersWithStoppedUsingServiceDate), registration = registration)
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .build()
+
+        running(application) {
+          implicit val msgs: Messages = messages(application)
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+
+          val result = route(application, request).value
+          val view = application.injector.instanceOf[CheckYourAnswersView]
+          val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
+          val dates = application.injector.instanceOf[Dates]
+          val list = SummaryListViewModel(
+            Seq(
+              MoveCountrySummary.row(answersWithStoppedUsingServiceDate, waypoints, CheckYourAnswersPage),
+              StopSellingGoodsSummary.row(answersWithStoppedUsingServiceDate, waypoints, CheckYourAnswersPage),
+              EuCountrySummary.rowNewCountry(answersWithStoppedUsingServiceDate, waypoints, CheckYourAnswersPage),
+              MoveDateSummary.rowMoveDate(answersWithStoppedUsingServiceDate, waypoints, CheckYourAnswersPage, dates),
+              EuVatNumberSummary.rowEuVatNumber(answersWithStoppedUsingServiceDate, waypoints, CheckYourAnswersPage),
+              StoppedSellingGoodsDateSummary.row(answersWithStoppedUsingServiceDate, waypoints, CheckYourAnswersPage, dates),
+              StoppedUsingServiceDateSummary.row(answersWithStoppedUsingServiceDate, waypoints, CheckYourAnswersPage, dates)
+            ).flatten
+          )
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(waypoints, list, isValid = true, application.injector.instanceOf[FrontendAppConfig].iossYourAccountUrl)(request, msgs).toString
+
+          val stoppedUsingServiceDateRow = StoppedUsingServiceDateSummary.row(answersWithStoppedUsingServiceDate, waypoints, CheckYourAnswersPage, dates)
+          stoppedUsingServiceDateRow mustBe defined
+
+          val actualValue = stoppedUsingServiceDateRow.value.value.content.asInstanceOf[Text].value
+          val expectedValue = dates.formatter.format(testDate)
+
+          actualValue mustBe expectedValue
         }
       }
     }
