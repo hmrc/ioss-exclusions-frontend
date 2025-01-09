@@ -18,25 +18,69 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
-import date.Today
+import date.{Dates, Today}
 import org.mockito.Mockito.when
 import pages.{EuCountryPage, MoveCountryPage, MoveDatePage, StopSellingGoodsPage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import views.html.ApplicationCompleteView
 
 import java.time.LocalDate
 
 class ApplicationCompleteControllerSpec extends SpecBase {
 
-  val today = LocalDate.of(2024, 1, 25)
+  val today: LocalDate = LocalDate.of(2024, 1, 25)
   val mockToday: Today = mock[Today]
   when(mockToday.date).thenReturn(today)
 
   "ApplicationComplete Controller" - {
 
     "when someone moves business" - {
+
+      "must return OK with the leave date in the future and show leave text" in {
+
+        val today = LocalDate.now()
+        val mockToday: Today = mock[Today]
+        when(mockToday.date).thenReturn(today)
+
+        val moveDate = today.plusDays(1)
+
+
+        val userAnswers = emptyUserAnswers
+          .set(MoveCountryPage, true).success.get
+          .set(EuCountryPage, country).success.get
+          .set(MoveDatePage, moveDate).success.get
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[Today].toInstance(mockToday))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ApplicationCompleteView]
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+
+          val dates = application.injector.instanceOf[Dates]
+
+          status(result) mustEqual OK
+          val leaveDate = moveDate.format(dates.formatter)
+          val maxMoveDate = moveDate.plusMonths(1).withDayOfMonth(dates.MoveDayOfMonthSplit).format(dates.formatter)
+
+          contentAsString(result) mustEqual view(
+            config.iossYourAccountUrl,
+            leaveDate,
+            maxMoveDate,
+            Some(messages(application)("applicationComplete.moving.text", country.name)),
+            Some(messages(application)("applicationComplete.next.info.bullet0", country.name, maxMoveDate)),
+            Some(messages(application)("applicationComplete.leave.text", leaveDate)),
+          )(request, messages(application)).toString
+        }
+      }
 
       "must return OK with the leave date being the 10th of next month (10th Feb)" in {
 
@@ -209,6 +253,23 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           val maxChangeDate = "29 February 2024"
           contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate, maxChangeDate)(request, messages(application)).toString
         }
+      }
+    }
+
+    "must redirect to JourneyRecoveryController when data is missing" in {
+
+      val userAnswers = emptyUserAnswers
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

@@ -26,8 +26,8 @@ import models.responses.UnexpectedResponseStatus
 import models.{CheckMode, Country, RegistrationWrapper}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*
-import org.scalatest.BeforeAndAfterEach
-import pages._
+import org.scalatest.{BeforeAndAfterEach, PrivateMethodTester}
+import pages.*
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -41,7 +41,7 @@ import views.html.CheckYourAnswersView
 import java.time.LocalDate
 import scala.concurrent.Future
 
-class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency with BeforeAndAfterEach {
+class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency with BeforeAndAfterEach with PrivateMethodTester {
 
   val waypoints: Waypoints = EmptyWaypoints
 
@@ -140,6 +140,47 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           val actualValue = stopSellingGoodsRow.value.value.content.asInstanceOf[Text].value
 
           val expectedValue = msgs("site.yes")
+
+          actualValue mustBe expectedValue
+        }
+      }
+
+      "must include StopSellingGoodsSummary row with 'site.no' when StopSellingGoodsPage is false" in {
+        val answersWithStopSellingGoodsNo = answers
+          .set(StopSellingGoodsPage, false).success.value
+
+        val application = applicationBuilder(userAnswers = Some(answersWithStopSellingGoodsNo), registration = registration)
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .build()
+
+        running(application) {
+          implicit val msgs: Messages = messages(application)
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+
+          val result = route(application, request).value
+          val view = application.injector.instanceOf[CheckYourAnswersView]
+          val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
+          val list = SummaryListViewModel(
+            Seq(
+              MoveCountrySummary.row(answersWithStopSellingGoodsNo, waypoints, CheckYourAnswersPage),
+              StopSellingGoodsSummary.row(answersWithStopSellingGoodsNo, waypoints, CheckYourAnswersPage),
+              EuCountrySummary.rowNewCountry(answersWithStopSellingGoodsNo, waypoints, CheckYourAnswersPage),
+              MoveDateSummary.rowMoveDate(answersWithStopSellingGoodsNo, waypoints, CheckYourAnswersPage, date),
+              EuVatNumberSummary.rowEuVatNumber(answersWithStopSellingGoodsNo, waypoints, CheckYourAnswersPage),
+              StoppedSellingGoodsDateSummary.row(answersWithStopSellingGoodsNo, waypoints, CheckYourAnswersPage, date),
+              StoppedUsingServiceDateSummary.row(answersWithStopSellingGoodsNo, waypoints, CheckYourAnswersPage, date)
+            ).flatten
+          )
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(waypoints, list, isValid = true, application.injector.instanceOf[FrontendAppConfig].iossYourAccountUrl)(request, msgs).toString
+
+          val stopSellingGoodsRow = StopSellingGoodsSummary.row(answersWithStopSellingGoodsNo, waypoints, CheckYourAnswersPage)
+          stopSellingGoodsRow mustBe defined
+
+          val actualValue = stopSellingGoodsRow.value.value.content.asInstanceOf[Text].value
+
+          val expectedValue = msgs("site.no")
 
           actualValue mustBe expectedValue
         }
