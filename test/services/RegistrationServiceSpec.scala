@@ -21,12 +21,12 @@ import connectors.RegistrationConnector
 import data.RegistrationData
 import models.CountryWithValidationDetails
 import models.audit.ExclusionAuditType
-import models.etmp._
+import models.etmp.*
 import models.requests.{EtmpExclusionDetails, EtmpNewMemberState}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
-import org.scalatest.BeforeAndAfterEach
+import org.scalatest.{BeforeAndAfterEach, PrivateMethodTester}
+import org.scalatest.PrivateMethodTester.PrivateMethod
 import pages.{StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.running
@@ -36,7 +36,7 @@ import utils.FutureSyntax.FutureOps
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with RegistrationData {
+class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with RegistrationData with PrivateMethodTester {
 
   implicit private lazy val hc: HeaderCarrier = HeaderCarrier()
 
@@ -260,6 +260,32 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
           ).futureValue mustBe amendRegistrationResponse
           verify(mockRegistrationConnector, times(1)).amend(eqTo(exceptedAmendRegistrationRequest))(any())
         }
+      }
+    }
+
+    ".buildTraderId" - {
+
+      "must return TaxRefTraderID when maybeVatNumber is None and maybeTaxIdentificationNumber is Some" in {
+        val maybeVatNumber = None
+        val maybeTaxIdentificationNumber = Some("TAX123")
+
+        val privateMethod = PrivateMethod[TraderId](Symbol("buildTraderId"))
+        val result = registrationService invokePrivate privateMethod(maybeVatNumber, maybeTaxIdentificationNumber)
+
+        result mustBe TaxRefTraderID("TAX123")
+      }
+
+      "must throw IllegalStateException when both maybeVatNumber and maybeTaxIdentificationNumber are None" in {
+        val maybeVatNumber = None
+        val maybeTaxIdentificationNumber = None
+
+        val privateMethod = PrivateMethod[TraderId](Symbol("buildTraderId"))
+
+        val exception = intercept[IllegalStateException] {
+          registrationService invokePrivate privateMethod(maybeVatNumber, maybeTaxIdentificationNumber)
+        }
+
+        exception.getMessage mustBe "Neither vat number nor tax id were provided"
       }
     }
   }

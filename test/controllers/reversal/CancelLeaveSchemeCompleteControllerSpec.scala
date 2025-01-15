@@ -19,12 +19,12 @@ package controllers.reversal
 import base.SpecBase
 import config.FrontendAppConfig
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, times, verify, when}
+import org.mockito.Mockito.{never, reset, times, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.CancelLeaveSchemeCompleteView
 
@@ -63,6 +63,27 @@ class CancelLeaveSchemeCompleteControllerSpec extends SpecBase with MockitoSugar
         contentAsString(result) mustEqual view(config.iossYourAccountUrl)(request, messages(application)).toString
 
         verify(mockSessionRepository, times(1)).clear(any())
+      }
+    }
+
+    "must return OK and the correct view for a GET when no userAnswers are present" in {
+
+      val application = applicationBuilder(
+        userAnswers = None
+      ).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.CancelLeaveSchemeCompleteController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        val config = application.injector.instanceOf[FrontendAppConfig]
+        val view = application.injector.instanceOf[CancelLeaveSchemeCompleteView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(config.iossYourAccountUrl)(request, messages(application)).toString
+        
+        verify(mockSessionRepository, never()).clear(any())
       }
     }
   }

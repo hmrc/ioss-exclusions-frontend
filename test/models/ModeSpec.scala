@@ -14,15 +14,37 @@
  * limitations under the License.
  */
 
-package utils
+package models
 
-import pages.Waypoints
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 
-object AmendWaypoints {
+class ModeSpec extends AnyFreeSpec with Matchers {
 
-  implicit class AmendWaypointsOps(waypoints: Waypoints) {
-    def inAmend: Boolean = false
-    
-    def inCheck: Boolean = false
+  "NormalMode" - {
+
+    val mode: Mode = NormalMode
+
+    "convert to string" in {
+      mode.toString mustEqual "NormalMode"
+    }
+
+    "return correct jsLiteral" in {
+      Mode.jsLiteral.to(mode) mustEqual "NormalMode"
+    }
   }
+
+  "CheckMode" - {
+    val mode: Mode = CheckMode
+
+    "convert to string" in {
+      mode.toString mustEqual "CheckMode"
+    }
+
+
+    "return correct jsLiteral" in {
+      Mode.jsLiteral.to(mode) mustEqual "CheckMode"
+    }
+  }
+
 }

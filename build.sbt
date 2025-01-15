@@ -1,6 +1,5 @@
 import play.sbt.routes.RoutesKeys
 import sbt.Def
-import scoverage.ScoverageKeys
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 lazy val appName: String = "ioss-exclusions-frontend"
@@ -13,8 +12,10 @@ lazy val root = (project in file("."))
   .settings(inConfig(IntegrationTest)(itSettings): _*)
   .settings(majorVersion := 0)
   .settings(ThisBuild / useSuperShell := false)
+  .settings(CodeCoverageSettings.settings *)
+  .settings(scalacOptions += "-Wconf:msg=Flag.*repeatedly:s")
   .settings(
-    scalaVersion := "2.13.14",
+    scalaVersion := "3.3.4",
     name := appName,
     RoutesKeys.routesImport ++= Seq(
       "models._",
@@ -37,16 +38,11 @@ lazy val root = (project in file("."))
       "utils.AmendWaypoints._"
     ),
     PlayKeys.playDefaultPort := 10189,
-    ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;" +
-      ".*Routes.*;.*viewmodels.govuk.*;",
-    ScoverageKeys.coverageMinimumStmtTotal := 78,
-    ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true,
     scalacOptions ++= Seq(
       "-feature",
       "-rootdir",
       baseDirectory.value.getCanonicalPath,
-      "-Wconf:cat=deprecation:ws,cat=feature:ws,cat=optimizer:ws,src=target/.*:s"
+      "-Wconf:msg=deprecation:w,msg=feature:w,msg=optimizer:w,src=target/.*:s"
     ),
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,

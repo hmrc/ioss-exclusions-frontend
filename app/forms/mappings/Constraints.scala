@@ -80,7 +80,7 @@ trait Constraints {
                             errorKey: String,
                             dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")): Constraint[LocalDate] =
     Constraint {
-      input: LocalDate =>
+      (input: LocalDate) =>
         if (minimum <= input && input <= maximum) {
           Valid
         } else {
