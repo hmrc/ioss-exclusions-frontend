@@ -25,7 +25,7 @@ import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import views.html.MoveDateView
 
 import java.time.LocalDate
@@ -164,12 +164,40 @@ class MoveDateControllerSpec extends SpecBase {
       }
     }
 
+    "must redirect to Journey Recovery for a GET if EuCountryPage data is missing" in {
+
+      val userAnswers = UserAnswers(userAnswersId)
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val result = route(application, getRequest()).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
     "must redirect to Journey Recovery for a POST if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
         val result = route(application, postRequest()).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a POST if EuCountryPage is missing" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      val invalidRequest = FakeRequest(POST, moveDateRoute).withFormUrlEncodedBody(("value", "invalid value"))
+
+      running(application) {
+        val result = route(application, invalidRequest).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url

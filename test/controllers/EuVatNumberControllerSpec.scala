@@ -18,9 +18,10 @@ package controllers
 
 import base.SpecBase
 import forms.EuVatNumberFormProvider
+import models.UserAnswers
 import pages.{EuCountryPage, EuVatNumberPage}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import views.html.EuVatNumberView
 
 class EuVatNumberControllerSpec extends SpecBase {
@@ -114,12 +115,43 @@ class EuVatNumberControllerSpec extends SpecBase {
       }
     }
 
+    "must redirect to Journey Recovery for a GET if No country is found" in {
+
+      val userAnswers = UserAnswers(userAnswersId)
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, euVatNumberRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
     "must redirect to Journey Recovery for a POST if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
         val request = FakeRequest(POST, euVatNumberRoute).withFormUrlEncodedBody(("value", "answer"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a POST if no country is found in user answers" in {
+
+      val userAnswersWithoutCountry = emptyUserAnswers
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithoutCountry)).build()
+
+      running(application) {
+        val request = FakeRequest(POST, euVatNumberRoute).withFormUrlEncodedBody(("value", "validAnswer"))
 
         val result = route(application, request).value
 
