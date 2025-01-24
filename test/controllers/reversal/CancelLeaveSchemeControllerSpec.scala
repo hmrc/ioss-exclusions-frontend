@@ -24,14 +24,15 @@ import models.{RegistrationWrapper, UserAnswers}
 import models.audit.{ExclusionAuditModel, ExclusionAuditType, SubmissionResult}
 import models.etmp.{EtmpExclusion, EtmpExclusionReason}
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import models.responses.UnexpectedResponseStatus
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{CancelLeaveSchemeCompletePage, CancelLeaveSchemePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import services.{AuditService, RegistrationService}
 import views.html.CancelLeaveSchemeView
@@ -246,6 +247,29 @@ class CancelLeaveSchemeControllerSpec extends SpecBase with MockitoSugar with Be
 
         status(result) mustEqual OK
         verify(mockSessionRepository, times(1)).clear(any())
+      }
+    }
+
+    "must redirect to CancelLeaveSchemeSubmissionFailureController" in {
+
+      when(mockRegistrationConnector.amend(any())(any())) thenReturn Future.successful(Left(UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "error")))
+
+      val userAnswers = emptyUserAnswers
+      val application = applicationBuilder(
+        userAnswers = Some(userAnswers),
+        registration = registrationNoLongerSuppliesExclusion
+      ).overrides(
+        bind[RegistrationConnector].toInstance(mockRegistrationConnector),
+        bind[AuditService].toInstance(mockAuditService)
+      ).build()
+
+      running(application) {
+        val request = FakeRequest(POST, cancelLeaveSchemeRoute).withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CancelLeaveSchemeSubmissionFailureController.onPageLoad().url
       }
     }
   }
