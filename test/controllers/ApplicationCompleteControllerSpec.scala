@@ -53,6 +53,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           .set(MoveDatePage, moveDate).success.get
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("urls.userResearch" -> "https://test-url.com")
           .overrides(bind[Today].toInstance(mockToday))
           .build()
 
@@ -78,6 +79,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
             Some(messages(application)("applicationComplete.moving.text", country.name)),
             Some(messages(application)("applicationComplete.next.info.bullet0", country.name, maxMoveDate)),
             Some(messages(application)("applicationComplete.leave.text", leaveDate)),
+            "https://test-url.com"
           )(request, messages(application)).toString
         }
       }
@@ -90,6 +92,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           .set(MoveDatePage, today).success.get
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("urls.userResearch" -> "https://test-url.com")
           .overrides(bind[Today].toInstance(mockToday))
           .build()
 
@@ -113,6 +116,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
             Some(messages(application)("applicationComplete.moving.text", country.name)),
             Some(messages(application)("applicationComplete.next.info.bullet0", country.name, maxMoveDate)),
             Some(messages(application)("applicationComplete.left.text")),
+            "https://test-url.com"
           )(request, messages(application)).toString
         }
       }
@@ -131,6 +135,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           .set(StoppedSellingGoodsDatePage, stoppedSellingGoodsDate).success.get
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("urls.userResearch" -> "https://test-url.com")
           .overrides(bind[Today].toInstance(mockToday))
           .build()
 
@@ -151,7 +156,10 @@ class ApplicationCompleteControllerSpec extends SpecBase {
             config.iossYourAccountUrl,
             leaveDate,
             maxChangeDate,
-            Some(messages(application)("applicationComplete.stopSellingGoods.text"))
+            Some(messages(application)("applicationComplete.stopSellingGoods.text")),
+            None,
+            None,
+            "https://test-url.com"
           )(request, messages(application)).toString
         }
       }
@@ -167,6 +175,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           .set(StoppedSellingGoodsDatePage, stoppedSellingGoodsDate).success.get
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("urls.userResearch" -> "https://test-url.com")
           .overrides(bind[Today].toInstance(mockToday))
           .build()
 
@@ -187,7 +196,10 @@ class ApplicationCompleteControllerSpec extends SpecBase {
             config.iossYourAccountUrl,
             leaveDate,
             maxChangeDate,
-            Some(messages(application)("applicationComplete.stopSellingGoods.text.future"))
+            Some(messages(application)("applicationComplete.stopSellingGoods.text.future")),
+            None,
+            None,
+            "https://test-url.com"
           )(request, messages(application)).toString
         }
       }
@@ -206,6 +218,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           .set(StoppedUsingServiceDatePage, stoppedUsingServiceDate).success.get
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("urls.userResearch" -> "https://test-url.com")
           .overrides(bind[Today].toInstance(mockToday))
           .build()
 
@@ -221,7 +234,14 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           status(result) mustEqual OK
           val leaveDate = "1 February 2024"
           val maxChangeDate = "31 January 2024"
-          contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate, maxChangeDate)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(
+            config.iossYourAccountUrl, 
+            leaveDate, 
+            maxChangeDate, 
+            None, 
+            None,
+            None,
+            "https://test-url.com")(request, messages(application)).toString
         }
       }
 
@@ -236,6 +256,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           .set(StoppedUsingServiceDatePage, stoppedUsingServiceDate).success.get
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("urls.userResearch" -> "https://test-url.com")
           .overrides(bind[Today].toInstance(mockToday))
           .build()
 
@@ -251,7 +272,14 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           status(result) mustEqual OK
           val leaveDate = "1 March 2024"
           val maxChangeDate = "29 February 2024"
-          contentAsString(result) mustEqual view(config.iossYourAccountUrl, leaveDate, maxChangeDate)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(
+            config.iossYourAccountUrl, 
+            leaveDate, 
+            maxChangeDate,
+            None,
+            None,
+            None,
+            "https://test-url.com")(request, messages(application)).toString
         }
       }
     }

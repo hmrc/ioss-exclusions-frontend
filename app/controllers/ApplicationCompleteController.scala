@@ -80,7 +80,8 @@ class ApplicationCompleteController @Inject()(
         dates.formatter.format(maxChangeDate),
         Some(messages("applicationComplete.moving.text", country.name)),
         Some(messages("applicationComplete.next.info.bullet0", country.name, dates.formatter.format(maxChangeDate))),
-        leaveMessage
+        leaveMessage,
+        config.userResearchUrl
       ))
     }
   }
@@ -102,7 +103,10 @@ class ApplicationCompleteController @Inject()(
         config.iossYourAccountUrl,
         dates.formatter.format(leaveDate),
         dates.formatter.format(leaveDate.minusDays(1)),
-        Some(messages(leaveMessage))
+        Some(messages(leaveMessage)),
+        None,
+        None,
+        config.userResearchUrl
       ))
     }
   }
@@ -113,7 +117,11 @@ class ApplicationCompleteController @Inject()(
       Ok(view(
         config.iossYourAccountUrl,
         dates.formatter.format(leaveDate),
-        dates.formatter.format(leaveDate.minusDays(1))
+        dates.formatter.format(leaveDate.minusDays(1)),
+        None,
+        None,
+        None,
+        config.userResearchUrl
       ))
     }
   }
