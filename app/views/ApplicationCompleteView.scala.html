@@ -25,7 +25,8 @@
     maxChangeDate: String,
     recap: Option[String] = None,
     bullet0: Option[String] = None,
-    isBeforeToday: Option[String] = None
+    isBeforeToday: Option[String] = None,
+    userResearchUrl: String
 )(implicit request: Request[_], messages: Messages)
 
     @layout(pageTitle = titleNoForm(messages("applicationComplete.title"))) {
@@ -58,6 +59,11 @@
             <a href="@yourAccountUrl" class="govuk-link govuk-link--no-visited-state">
             @messages("applicationComplete.next.info.returnToAccount")
             </a>
+        </p>
+
+        <h2 class="govuk-heading-m">@messages("userResearch.heading")</h2>
+        <p class="govuk-body">
+            <a href="@userResearchUrl" class="govuk-link" target="_blank">@messages("userResearch.link.text")</a>
         </p>
 
     }
