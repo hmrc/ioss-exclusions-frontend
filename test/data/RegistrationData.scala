@@ -84,7 +84,7 @@ trait RegistrationData {
 
   val etmpAmendRegistrationRequest: EtmpAmendRegistrationRequest = EtmpAmendRegistrationRequest(
     administration = EtmpAdministration(EtmpMessageType.IOSSSubscriptionAmend),
-    changeLog = EtmpAmendRegistrationChangeLog(
+    changeLog = EtmpAmendRegistrationChangeLogLegacy(
       tradingNames = true,
       fixedEstablishments = true,
       contactDetails = true,

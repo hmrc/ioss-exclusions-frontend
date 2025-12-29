@@ -17,6 +17,7 @@
 package services
 
 import base.SpecBase
+import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import data.RegistrationData
 import models.CountryWithValidationDetails
@@ -42,7 +43,8 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
 
   private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
   private val mockAuditService: AuditService = mock[AuditService]
-  private val registrationService = new RegistrationService(stubClock, mockRegistrationConnector, mockAuditService)
+  private val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
+  private val registrationService = new RegistrationService(stubClock, mockRegistrationConnector, mockAuditService, mockAppConfig)
 
   override def beforeEach(): Unit = {
     reset(mockRegistrationConnector)
@@ -104,7 +106,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
         val amendRegistrationResponse =
           Right(())
 
-        val expectedChangeLog = EtmpAmendRegistrationChangeLog(
+        val expectedChangeLog = EtmpAmendRegistrationChangeLogLegacy(
           tradingNames = false,
           fixedEstablishments = false,
           contactDetails = false,
@@ -162,7 +164,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
         val amendRegistrationResponse =
           Right(())
 
-        val expectedChangeLog = EtmpAmendRegistrationChangeLog(
+        val expectedChangeLog = EtmpAmendRegistrationChangeLogLegacy(
           tradingNames = false,
           fixedEstablishments = false,
           contactDetails = false,
@@ -216,7 +218,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
         val amendRegistrationResponse =
           Right(())
 
-        val expectedChangeLog = EtmpAmendRegistrationChangeLog(
+        val expectedChangeLog = EtmpAmendRegistrationChangeLogLegacy(
           tradingNames = false,
           fixedEstablishments = false,
           contactDetails = false,

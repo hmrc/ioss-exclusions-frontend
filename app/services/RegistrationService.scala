@@ -16,11 +16,12 @@
 
 package services
 
+import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import connectors.RegistrationHttpParser.AmendRegistrationResultResponse
 import models.{CountryWithValidationDetails, UserAnswers}
 import models.audit.{ExclusionAuditModel, ExclusionAuditType, SubmissionResult}
-import models.etmp._
+import models.etmp.*
 import models.requests.{EtmpAmendRegistrationRequest, EtmpExclusionDetails, EtmpNewMemberState}
 import pages.{EuCountryPage, EuVatNumberPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
 import play.api.mvc.Request
@@ -35,7 +36,8 @@ import scala.util.Success
 class RegistrationService @Inject()(
                                      clock: Clock,
                                      registrationConnector: RegistrationConnector,
-                                     auditService: AuditService
+                                     auditService: AuditService,
+                                     appConfig: FrontendAppConfig
                                    )(implicit ec: ExecutionContext) {
 
   def amendRegistrationAndAudit(
@@ -85,24 +87,42 @@ class RegistrationService @Inject()(
                                                  answers: UserAnswers,
                                                  exclusionReason: Option[EtmpExclusionReason],
                                                  registration: EtmpDisplayRegistration,
-                                                 iossNumber: String,
+                                                 iossNumber: String
                                                ): EtmpAmendRegistrationRequest = {
 
     EtmpAmendRegistrationRequest(
       administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionAmend),
-      changeLog = EtmpAmendRegistrationChangeLog(
-        tradingNames = false,
-        fixedEstablishments = false,
-        contactDetails = false,
-        bankDetails = false,
-        reRegistration = exclusionReason.isEmpty
-      ),
+      changeLog = buildAmendRegistrationChangeLog(rejoin = exclusionReason.isEmpty),
       exclusionDetails = exclusionReason.map(getExclusionDetailsForType(_, answers)),
       customerIdentification = EtmpAmendCustomerIdentification(iossNumber),
       tradingNames = registration.tradingNames,
       schemeDetails = buildSchemeDetailsFromDisplay(registration.schemeDetails),
       bankDetails = registration.bankDetails
     )
+  }
+
+  private def buildAmendRegistrationChangeLog(
+                                               rejoin: Boolean
+                                             ): EtmpAmendRegistrationChangeLog = {
+
+    if (appConfig.release9Enabled) {
+      EtmpAmendRegistrationChangeLogNew(
+        tradingNames = false,
+        fixedEstablishments = false,
+        contactDetails = false,
+        bankDetails = false,
+        reRegistration = rejoin,
+        otherAddress = false
+      )
+    } else {
+      EtmpAmendRegistrationChangeLogLegacy(
+        tradingNames = false,
+        fixedEstablishments = false,
+        contactDetails = false,
+        bankDetails = false,
+        reRegistration = rejoin
+      )
+    }
   }
 
   private def buildSchemeDetailsFromDisplay(etmpDisplaySchemeDetails: EtmpDisplaySchemeDetails): EtmpSchemeDetails = {

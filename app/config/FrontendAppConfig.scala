@@ -73,4 +73,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val cacheTtl: Long = configuration.get[Long]("mongodb.timeToLiveInSeconds")
 
   lazy val userResearchUrl: String = configuration.get[String]("urls.userResearch")
+  
+  val release9Enabled: Boolean = configuration.get[Boolean]("features.release9")
 }

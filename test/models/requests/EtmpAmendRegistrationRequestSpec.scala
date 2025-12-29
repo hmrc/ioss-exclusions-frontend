@@ -19,7 +19,7 @@ package models.requests
 import base.SpecBase
 import play.api.libs.json.*
 import data.RegistrationData
-import models.etmp.EtmpAmendRegistrationChangeLog
+import models.etmp.{EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationChangeLogLegacy}
 import org.scalacheck.Arbitrary.arbitrary
 
 import java.time.LocalDate
@@ -31,7 +31,7 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase with RegistrationData {
   private val tradingNames = etmpAmendRegistrationRequest.tradingNames
   private val schemeDetails = etmpAmendRegistrationRequest.schemeDetails
   private val bankDetails = etmpAmendRegistrationRequest.bankDetails
-  private val changeLog = arbitrary[EtmpAmendRegistrationChangeLog].sample.value
+  private val changeLog = arbitrary[EtmpAmendRegistrationChangeLogLegacy].sample.value
   private val exclusionDetails = Some(EtmpExclusionDetails(
     revertExclusion = true,
     noLongerSupplyGoods = false,

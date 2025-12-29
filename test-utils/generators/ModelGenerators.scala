@@ -398,7 +398,7 @@ trait ModelGenerators {
     }
   }
 
-  implicit lazy val arbitraryEtmpAmendRegistrationChangeLog: Arbitrary[EtmpAmendRegistrationChangeLog] =
+  implicit lazy val arbitraryEtmpAmendRegistrationChangeLog: Arbitrary[EtmpAmendRegistrationChangeLogLegacy] =
     Arbitrary {
       for {
         tradingNames <- arbitrary[Boolean]
@@ -406,6 +406,6 @@ trait ModelGenerators {
         contactDetails <- arbitrary[Boolean]
         bankDetails <- arbitrary[Boolean]
         reRegistration <- arbitrary[Boolean]
-      } yield EtmpAmendRegistrationChangeLog(tradingNames, fixedEstablishments, contactDetails, bankDetails, reRegistration)
+      } yield EtmpAmendRegistrationChangeLogLegacy(tradingNames, fixedEstablishments, contactDetails, bankDetails, reRegistration)
     }
 }
