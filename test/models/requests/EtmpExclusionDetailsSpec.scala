@@ -27,7 +27,7 @@ class EtmpExclusionDetailsSpec extends SpecBase {
 
     "serialize and deserialize correctly when all fields are provided" in {
 
-      val exclusionDetails = EtmpExclusionDetails(
+      val exclusionDetails = EtmpExclusionDetailsLegacy(
         revertExclusion = true,
         noLongerSupplyGoods = false,
         exclusionRequestDate = Some(LocalDate.of(2024, 12, 16)),
@@ -71,7 +71,7 @@ class EtmpExclusionDetailsSpec extends SpecBase {
 
     "serialize and deserialize correctly with optional fields missing" in {
 
-      val exclusionDetails = EtmpExclusionDetails(
+      val exclusionDetails = EtmpExclusionDetailsLegacy(
         revertExclusion = true,
         noLongerSupplyGoods = false,
         exclusionRequestDate = None,

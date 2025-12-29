@@ -32,7 +32,7 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase with RegistrationData {
   private val schemeDetails = etmpAmendRegistrationRequest.schemeDetails
   private val bankDetails = etmpAmendRegistrationRequest.bankDetails
   private val changeLog = arbitrary[EtmpAmendRegistrationChangeLogLegacy].sample.value
-  private val exclusionDetails = Some(EtmpExclusionDetails(
+  private val exclusionDetails = Some(EtmpExclusionDetailsLegacy(
     revertExclusion = true,
     noLongerSupplyGoods = false,
     exclusionRequestDate = Some(LocalDate.of(2024, 12, 16)),
