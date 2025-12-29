@@ -17,12 +17,13 @@
 package services
 
 import base.SpecBase
+import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import data.RegistrationData
 import models.CountryWithValidationDetails
 import models.audit.ExclusionAuditType
 import models.etmp.*
-import models.requests.{EtmpExclusionDetails, EtmpNewMemberState}
+import models.requests.{EtmpExclusionDetails, EtmpExclusionDetailsLegacy, EtmpNewMemberState}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.{BeforeAndAfterEach, PrivateMethodTester}
@@ -42,7 +43,8 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
 
   private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
   private val mockAuditService: AuditService = mock[AuditService]
-  private val registrationService = new RegistrationService(stubClock, mockRegistrationConnector, mockAuditService)
+  private val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
+  private val registrationService = new RegistrationService(stubClock, mockRegistrationConnector, mockAuditService, mockAppConfig)
 
   override def beforeEach(): Unit = {
     reset(mockRegistrationConnector)
@@ -104,7 +106,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
         val amendRegistrationResponse =
           Right(())
 
-        val expectedChangeLog = EtmpAmendRegistrationChangeLog(
+        val expectedChangeLog = EtmpAmendRegistrationChangeLogLegacy(
           tradingNames = false,
           fixedEstablishments = false,
           contactDetails = false,
@@ -114,7 +116,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
 
         val convertedVatNumber = CountryWithValidationDetails.convertTaxIdentifierForTransfer(euVatNumber, country.code)
 
-        val expectedExclusionDetails = EtmpExclusionDetails(
+        val expectedExclusionDetails = EtmpExclusionDetailsLegacy(
           revertExclusion = false,
           noLongerSupplyGoods = false,
           exclusionRequestDate = Some(LocalDate.now),
@@ -162,7 +164,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
         val amendRegistrationResponse =
           Right(())
 
-        val expectedChangeLog = EtmpAmendRegistrationChangeLog(
+        val expectedChangeLog = EtmpAmendRegistrationChangeLogLegacy(
           tradingNames = false,
           fixedEstablishments = false,
           contactDetails = false,
@@ -172,7 +174,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
 
         val stoppedSellingGoodsDate = LocalDate.of(2023, 10, 5)
 
-        val expectedExclusionDetails = EtmpExclusionDetails(
+        val expectedExclusionDetails = EtmpExclusionDetailsLegacy(
           revertExclusion = false,
           noLongerSupplyGoods = true,
           exclusionRequestDate = Some(stoppedSellingGoodsDate),
@@ -216,7 +218,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
         val amendRegistrationResponse =
           Right(())
 
-        val expectedChangeLog = EtmpAmendRegistrationChangeLog(
+        val expectedChangeLog = EtmpAmendRegistrationChangeLogLegacy(
           tradingNames = false,
           fixedEstablishments = false,
           contactDetails = false,
@@ -226,7 +228,7 @@ class RegistrationServiceSpec extends SpecBase with BeforeAndAfterEach with Regi
 
         val stoppedUsingServiceDate = LocalDate.of(2023, 10, 4)
 
-        val expectedExclusionDetails = EtmpExclusionDetails(
+        val expectedExclusionDetails = EtmpExclusionDetailsLegacy(
           revertExclusion = false,
           noLongerSupplyGoods = false,
           exclusionRequestDate = Some(stoppedUsingServiceDate),

@@ -16,12 +16,13 @@
 
 package services
 
+import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import connectors.RegistrationHttpParser.AmendRegistrationResultResponse
 import models.{CountryWithValidationDetails, UserAnswers}
 import models.audit.{ExclusionAuditModel, ExclusionAuditType, SubmissionResult}
-import models.etmp._
-import models.requests.{EtmpAmendRegistrationRequest, EtmpExclusionDetails, EtmpNewMemberState}
+import models.etmp.*
+import models.requests.{EtmpAmendRegistrationRequest, EtmpExclusionDetails, EtmpExclusionDetailsLegacy, EtmpExclusionDetailsNew, EtmpNewMemberState}
 import pages.{EuCountryPage, EuVatNumberPage, MoveDatePage, StoppedSellingGoodsDatePage, StoppedUsingServiceDatePage}
 import play.api.mvc.Request
 import uk.gov.hmrc.domain.Vrn
@@ -35,7 +36,8 @@ import scala.util.Success
 class RegistrationService @Inject()(
                                      clock: Clock,
                                      registrationConnector: RegistrationConnector,
-                                     auditService: AuditService
+                                     auditService: AuditService,
+                                     appConfig: FrontendAppConfig
                                    )(implicit ec: ExecutionContext) {
 
   def amendRegistrationAndAudit(
@@ -85,24 +87,42 @@ class RegistrationService @Inject()(
                                                  answers: UserAnswers,
                                                  exclusionReason: Option[EtmpExclusionReason],
                                                  registration: EtmpDisplayRegistration,
-                                                 iossNumber: String,
+                                                 iossNumber: String
                                                ): EtmpAmendRegistrationRequest = {
 
     EtmpAmendRegistrationRequest(
       administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionAmend),
-      changeLog = EtmpAmendRegistrationChangeLog(
-        tradingNames = false,
-        fixedEstablishments = false,
-        contactDetails = false,
-        bankDetails = false,
-        reRegistration = exclusionReason.isEmpty
-      ),
+      changeLog = buildAmendRegistrationChangeLog(rejoin = exclusionReason.isEmpty),
       exclusionDetails = exclusionReason.map(getExclusionDetailsForType(_, answers)),
       customerIdentification = EtmpAmendCustomerIdentification(iossNumber),
       tradingNames = registration.tradingNames,
       schemeDetails = buildSchemeDetailsFromDisplay(registration.schemeDetails),
       bankDetails = registration.bankDetails
     )
+  }
+
+  private def buildAmendRegistrationChangeLog(
+                                               rejoin: Boolean
+                                             ): EtmpAmendRegistrationChangeLog = {
+
+    if (appConfig.release9Enabled) {
+      EtmpAmendRegistrationChangeLogNew(
+        tradingNames = false,
+        fixedEstablishments = false,
+        contactDetails = false,
+        bankDetails = false,
+        reRegistration = rejoin,
+        otherAddress = false
+      )
+    } else {
+      EtmpAmendRegistrationChangeLogLegacy(
+        tradingNames = false,
+        fixedEstablishments = false,
+        contactDetails = false,
+        bankDetails = false,
+        reRegistration = rejoin
+      )
+    }
   }
 
   private def buildSchemeDetailsFromDisplay(etmpDisplaySchemeDetails: EtmpDisplaySchemeDetails): EtmpSchemeDetails = {
@@ -155,57 +175,114 @@ class RegistrationService @Inject()(
     val moveDate = answers.get(MoveDatePage).getOrElse(throw new Exception("No move date provided"))
     val euVatNumber = answers.get(EuVatNumberPage).getOrElse(throw new Exception("No VAT number provided"))
     val convertedVatNumber = CountryWithValidationDetails.convertTaxIdentifierForTransfer(euVatNumber, country.code)
-
-    EtmpExclusionDetails(
-      revertExclusion = false,
-      noLongerSupplyGoods = false,
-      exclusionRequestDate = Some(LocalDate.now(clock)),
-      identificationValidityDate = None,
-      intExclusionRequestDate = None,
-      newMemberState = Some(EtmpNewMemberState(
-        newMemberState = true,
-        ceaseSpecialSchemeDate = None,
-        ceaseFixedEstDate = None,
-        movePOBDate = moveDate,
-        issuedBy = country.code,
-        vatNumber = convertedVatNumber
-      ))
-    )
+    
+    if(appConfig.release9Enabled) {
+      EtmpExclusionDetailsNew(
+        revertExclusion = false,
+        noLongerSupplyGoods = false,
+        noLongerEligible = false,
+        exclusionRequestDate = Some(LocalDate.now(clock)),
+        identificationValidityDate = None,
+        intExclusionRequestDate = None,
+        newMemberState = Some(EtmpNewMemberState(
+          newMemberState = true,
+          ceaseSpecialSchemeDate = None,
+          ceaseFixedEstDate = None,
+          movePOBDate = moveDate,
+          issuedBy = country.code,
+          vatNumber = convertedVatNumber
+        ))
+      )
+    } else {
+      EtmpExclusionDetailsLegacy(
+        revertExclusion = false,
+        noLongerSupplyGoods = false,
+        exclusionRequestDate = Some(LocalDate.now(clock)),
+        identificationValidityDate = None,
+        intExclusionRequestDate = None,
+        newMemberState = Some(EtmpNewMemberState(
+          newMemberState = true,
+          ceaseSpecialSchemeDate = None,
+          ceaseFixedEstDate = None,
+          movePOBDate = moveDate,
+          issuedBy = country.code,
+          vatNumber = convertedVatNumber
+        ))
+      )
+    }
   }
 
   private def getExclusionDetailsForNoLongerSupplies(answers: UserAnswers): EtmpExclusionDetails = {
     val stoppedSellingGoodsDate = answers.get(StoppedSellingGoodsDatePage).getOrElse(throw new Exception("No stopped selling goods date provided"))
-    EtmpExclusionDetails(
-      revertExclusion = false,
-      noLongerSupplyGoods = true,
-      exclusionRequestDate = Some(stoppedSellingGoodsDate),
-      identificationValidityDate = None,
-      intExclusionRequestDate = None,
-      newMemberState = None
-    )
+
+    if(appConfig.release9Enabled) {
+      EtmpExclusionDetailsNew(
+        revertExclusion = false,
+        noLongerSupplyGoods = true,
+        noLongerEligible = false,
+        exclusionRequestDate = Some(stoppedSellingGoodsDate),
+        identificationValidityDate = None,
+        intExclusionRequestDate = None,
+        newMemberState = None
+      )
+    } else {
+      EtmpExclusionDetailsLegacy(
+        revertExclusion = false,
+        noLongerSupplyGoods = true,
+        exclusionRequestDate = Some(stoppedSellingGoodsDate),
+        identificationValidityDate = None,
+        intExclusionRequestDate = None,
+        newMemberState = None
+      )
+    }
   }
 
   private def getExclusionDetailsForVoluntarilyLeaves(answers: UserAnswers): EtmpExclusionDetails = {
     val stoppedUsingServiceDate = answers.get(StoppedUsingServiceDatePage).getOrElse(throw new Exception("No stopped using service date provided"))
-    EtmpExclusionDetails(
-      revertExclusion = false,
-      noLongerSupplyGoods = false,
-      exclusionRequestDate = Some(stoppedUsingServiceDate),
-      identificationValidityDate = None,
-      intExclusionRequestDate = None,
-      newMemberState = None
-    )
+
+    if(appConfig.release9Enabled) {
+      EtmpExclusionDetailsNew(
+        revertExclusion = false,
+        noLongerSupplyGoods = false,
+        noLongerEligible = false,
+        exclusionRequestDate = Some(stoppedUsingServiceDate),
+        identificationValidityDate = None,
+        intExclusionRequestDate = None,
+        newMemberState = None
+      )
+    } else {
+      EtmpExclusionDetailsLegacy(
+        revertExclusion = false,
+        noLongerSupplyGoods = false,
+        exclusionRequestDate = Some(stoppedUsingServiceDate),
+        identificationValidityDate = None,
+        intExclusionRequestDate = None,
+        newMemberState = None
+      )
+    }
   }
 
   private def getExclusionDetailsForReversal(): EtmpExclusionDetails = {
-    EtmpExclusionDetails(
-      revertExclusion = true,
-      noLongerSupplyGoods = false,
-      exclusionRequestDate = Some(LocalDate.now(clock)),
-      identificationValidityDate = None,
-      intExclusionRequestDate = None,
-      newMemberState = None
-    )
+    if(appConfig.release9Enabled) {
+      EtmpExclusionDetailsNew(
+        revertExclusion = true,
+        noLongerSupplyGoods = false,
+        noLongerEligible = false,
+        exclusionRequestDate = Some(LocalDate.now(clock)),
+        identificationValidityDate = None,
+        intExclusionRequestDate = None,
+        newMemberState = None
+      )
+    } else {
+      EtmpExclusionDetailsLegacy(
+        revertExclusion = true,
+        noLongerSupplyGoods = false,
+        exclusionRequestDate = Some(LocalDate.now(clock)),
+        identificationValidityDate = None,
+        intExclusionRequestDate = None,
+        newMemberState = None
+      )
+    }
   }
 
 }
