@@ -15,7 +15,7 @@ lazy val root = (project in file("."))
   .settings(CodeCoverageSettings.settings *)
   .settings(scalacOptions += "-Wconf:msg=Flag.*repeatedly:s")
   .settings(
-    scalaVersion := "3.3.4",
+    scalaVersion := "3.3.6",
     name := appName,
     RoutesKeys.routesImport ++= Seq(
       "models._",

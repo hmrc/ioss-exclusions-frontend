@@ -62,7 +62,7 @@ trait SpecBase
   val countryWithValidationDetails: CountryWithValidationDetails =
     euCountriesWithVRNValidationRules.find(_.country == country).value
 
-  val vrn: Vrn = Vrn(countryWithValidationDetails.exampleVrn)
+  val vrn: Vrn = Vrn("123456789")
 
   val moveDate: LocalDate = LocalDate.now(Dates.clock)
   val euVatNumber: String = getEuVatNumber(country.code)
